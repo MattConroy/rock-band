@@ -52,17 +52,24 @@ export default {
 
       const url = new URL(request.url);
       if (url.searchParams.get("debug") === "1") {
-        // Returns a readable summary for tuning the filters: total count, every
-        // extracted name, and a couple of full raw entries to show the structure.
-        return json(
-          {
-            count: entitlements.length,
-            names: [...new Set(entitlements.map(entitlementName).filter(Boolean))].sort(),
-            sample: entitlements.slice(0, 3),
-          },
-          200,
-          cors,
-        );
+        // Entitlements carry no names — only product codes like
+        // EP0001-BLES00669_00-AC2UPLAYTHEME001. Group by the title code (middle
+        // segment) so the Rock Band block (hundreds of song DLCs) stands out,
+        // and show sample content segments to judge if names are recoverable.
+        const info = {};
+        for (const e of entitlements) {
+          const pid = e.productId || e.id || "";
+          const parts = pid.split("-");
+          const code = (parts[1] || "?").split("_")[0];
+          const content = parts.slice(2).join("-");
+          (info[code] ??= { n: 0, sample: [] }).n++;
+          if (info[code].sample.length < 4) info[code].sample.push(content);
+        }
+        const byTitle = Object.entries(info)
+          .map(([code, v]) => ({ code, n: v.n, sample: v.sample }))
+          .sort((a, b) => b.n - a.n)
+          .slice(0, 40);
+        return json({ count: entitlements.length, byTitle }, 200, cors);
       }
 
       const include = new RegExp(env.RB_INCLUDE_REGEX || DEFAULT_INCLUDE, "i");
