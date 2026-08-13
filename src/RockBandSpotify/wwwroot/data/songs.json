@@ -1,0 +1,11 @@
+{
+  "generatedAt": "sample data — replace by running the Refresh PSN songs workflow",
+  "source": "sample",
+  "songs": [
+    { "title": "Seven Nation Army", "artist": "The White Stripes" },
+    { "title": "Uprising", "artist": "Muse" },
+    { "title": "Are You Gonna Be My Girl", "artist": "Jet" },
+    { "title": "Mr. Brightside", "artist": "The Killers" },
+    { "title": "Everlong", "artist": "Foo Fighters" }
+  ]
+}

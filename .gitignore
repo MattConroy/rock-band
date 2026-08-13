@@ -1,0 +1,19 @@
+# .NET
+bin/
+obj/
+# Publish output at the repo root (anchored so vendored */dist/* assets are kept)
+/dist/
+*.user
+*.suo
+
+# Node
+node_modules/
+
+# Build / debug artifacts
+psn-raw.json
+entitlements-raw.json
+
+# OS / editor
+.DS_Store
+.vs/
+.idea/
