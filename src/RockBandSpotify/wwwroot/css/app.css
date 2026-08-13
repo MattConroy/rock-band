@@ -113,7 +113,9 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
-/* ---- Rock Band → Spotify app styles ---- */
+/* ---- Rock Band → Spotify: design tokens + shared primitives ----
+   Component-specific layout lives in each component's scoped .razor.css.
+   This file holds only the cross-cutting design system reused everywhere. */
 :root {
     --rb-green: #1db954;
     --rb-green-dark: #169c46;
@@ -130,64 +132,42 @@ body {
     margin: 0;
 }
 
-.app-shell { min-height: 100vh; display: flex; flex-direction: column; }
-
-.app-header {
-    background: #121417;
-    color: #fff;
-    padding: 0.8rem 1rem;
-}
-.app-header-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 0.6rem; }
-.app-logo { font-size: 1.5rem; }
-.app-title { font-weight: 700; font-size: 1.15rem; letter-spacing: 0.2px; }
-
-.app-main { max-width: 1100px; width: 100%; margin: 0 auto; padding: 1.25rem 1rem 3rem; box-sizing: border-box; }
-
+/* Cards */
 .rb-card {
     background: var(--rb-card);
     border: 1px solid var(--rb-border);
     border-radius: 12px;
     padding: 1.1rem 1.25rem;
     margin-bottom: 1rem;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 .rb-card h2 { font-size: 1.05rem; margin: 0 0 0.35rem; }
-.rb-step { display: flex; align-items: baseline; gap: 0.5rem; }
-.rb-step-num {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 1.6rem; height: 1.6rem; border-radius: 50%;
-    background: var(--rb-green); color: #fff; font-weight: 700; font-size: 0.85rem; flex: 0 0 auto;
-}
-.rb-muted { color: #6b7280; font-size: 0.9rem; }
 
+/* Buttons */
 .rb-btn {
     background: var(--rb-green); color: #fff; border: none;
     padding: 0.5rem 1.1rem; border-radius: 999px; font-weight: 600; cursor: pointer;
 }
 .rb-btn:hover:not(:disabled) { background: var(--rb-green-dark); }
 .rb-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.rb-btn-secondary { background: #e9ecef; color: #1a1d21; }
+.rb-btn-secondary { background: #e9ecef; color: var(--rb-text); }
 .rb-btn-secondary:hover:not(:disabled) { background: #dde1e6; }
 
+/* Pills */
 .rb-pill { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
 .rb-pill-ok { background: #e5f7ec; color: #157a3a; }
 .rb-pill-warn { background: #fef3cd; color: #8a6d0b; }
 .rb-pill-bad { background: #fde2e1; color: #a12722; }
 
-.rb-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-.rb-table th, .rb-table td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--rb-border); vertical-align: middle; }
-.rb-table th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.4px; color: #6b7280; }
-.rb-table-wrap { overflow-x: auto; }
-.rb-sub { color: #6b7280; font-size: 0.8rem; }
-
-.rb-progress { height: 8px; background: #e9ecef; border-radius: 999px; overflow: hidden; }
-.rb-progress-bar { height: 100%; background: var(--rb-green); transition: width 0.15s ease; }
-
+/* Alerts */
 .rb-alert { padding: 0.7rem 0.9rem; border-radius: 8px; margin: 0.5rem 0; }
 .rb-alert-info { background: #e7f1ff; color: #0b4a8f; }
 .rb-alert-warn { background: #fff6e0; color: #8a6d0b; }
 .rb-alert-ok { background: #e5f7ec; color: #157a3a; }
 .rb-alert-bad { background: #fde2e1; color: #a12722; }
 
+/* Text + layout helpers */
+.rb-muted { color: var(--rb-muted); font-size: 0.9rem; }
+.rb-sub { color: var(--rb-muted); font-size: 0.8rem; }
 .rb-row-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
-select.rb-select { padding: 0.3rem 0.4rem; border-radius: 6px; border: 1px solid var(--rb-border); max-width: 320px; }
+.rb-select { padding: 0.3rem 0.4rem; border-radius: 6px; border: 1px solid var(--rb-border); max-width: 320px; }

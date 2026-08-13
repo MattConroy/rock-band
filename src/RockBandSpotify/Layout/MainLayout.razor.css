@@ -1,0 +1,26 @@
+.app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+
+.app-header {
+    background: #121417;
+    color: #fff;
+    padding: 0.8rem 1rem;
+}
+
+.app-header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.app-logo { font-size: 1.5rem; }
+.app-title { font-weight: 700; font-size: 1.15rem; letter-spacing: 0.2px; }
+
+.app-main {
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1.25rem 1rem 3rem;
+    box-sizing: border-box;
+}

@@ -1,0 +1,8 @@
+.steps {
+    margin: 0 0 0.6rem 1.1rem;
+    padding: 0;
+}
+
+.token-input { max-width: 420px; }
+
+.error { margin-top: 0.6rem; }

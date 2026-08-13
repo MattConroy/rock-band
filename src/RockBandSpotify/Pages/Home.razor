@@ -1,397 +1,42 @@
 ﻿@page "/"
-@using RockBandSpotify.Models
-@using RockBandSpotify.Services
-@inject SpotifyAuthService Auth
-@inject SpotifyApiService Api
-@inject PsnService Psn
-@inject MatchingService Matcher
-@inject PlaylistSyncService Sync
-@inject PlaylistConfig PlaylistCfg
-@inject NavigationManager Nav
 
 <PageTitle>Rock Band → Spotify</PageTitle>
 
-@if (!Auth.IsConfigured || !Psn.IsGatewayConfigured)
-{
-    <div class="rb-card">
-        <div class="rb-alert rb-alert-warn">
-            <strong>Setup needed.</strong>
-            @if (!Auth.IsConfigured)
-            {
-                <div>• Add your Spotify <code>ClientId</code> and register redirect URI <code>@Auth.RedirectUri</code> (Spotify dashboard).</div>
-            }
-            @if (!Psn.IsGatewayConfigured)
-            {
-                <div>• Deploy the gateway Worker and set <code>Psn.GatewayUrl</code> in <code>appsettings.json</code>.</div>
-            }
-            See the README.
-        </div>
-    </div>
-}
+<SetupBanner SpotifyConfigured="Auth.IsConfigured"
+             GatewayConfigured="Psn.IsGatewayConfigured"
+             RedirectUri="@Auth.RedirectUri" />
 
-<!-- Step 1: Spotify connection -->
-<div class="rb-card">
-    <div class="rb-step">
-        <span class="rb-step-num">1</span>
-        <div style="flex:1">
-            <h2>Connect Spotify</h2>
-            @if (_signedIn)
-            {
-                <p class="rb-muted">Signed in@(_spotifyUser is null ? "" : $" as {_spotifyUser.DisplayName ?? _spotifyUser.Id}").</p>
-                <button class="rb-btn rb-btn-secondary" @onclick="LogoutSpotifyAsync">Sign out</button>
-            }
-            else
-            {
-                <p class="rb-muted">Log in with your own Spotify account. Uses PKCE — no password or secret leaves your browser.</p>
-                <button class="rb-btn" @onclick="LoginSpotifyAsync" disabled="@(!Auth.IsConfigured)">Connect Spotify</button>
-            }
-        </div>
-    </div>
-</div>
+<SpotifyConnectCard SignedIn="_signedIn"
+                    UserName="@SpotifyUserName"
+                    Configured="Auth.IsConfigured"
+                    OnLogin="LoginSpotifyAsync"
+                    OnLogout="LogoutSpotifyAsync" />
 
-<!-- Step 2: Connect PlayStation -->
-<div class="rb-card">
-    <div class="rb-step">
-        <span class="rb-step-num">2</span>
-        <div style="flex:1">
-            <h2>Connect PlayStation</h2>
-            @if (_psnConnected)
-            {
-                <p class="rb-muted">
-                    Connected.
-                    @if (_library is { Songs.Count: > 0 })
-                    {
-                        <span><strong>@_library.Songs.Count</strong> songs@(string.IsNullOrEmpty(_library.GeneratedAt) ? "" : $" · fetched {FormatWhen(_library.GeneratedAt)}").</span>
-                    }
-                </p>
-                <div class="rb-row-actions">
-                    <button class="rb-btn" @onclick="FetchSongsAsync" disabled="@_fetching">
-                        @(_fetching ? "Fetching…" : (_library is null ? "Fetch my songs" : "Refresh from PSN"))
-                    </button>
-                    <button class="rb-btn rb-btn-secondary" @onclick="DisconnectPsnAsync" disabled="@_fetching">Disconnect</button>
-                </div>
-            }
-            else
-            {
-                <p class="rb-muted">
-                    The browser can't read PlayStation directly, so this uses your stateless gateway.
-                    Log in below, copy the token it shows, and paste it here — it's cached in your
-                    browser and lasts about two months.
-                </p>
-                <ol class="rb-muted" style="margin:0 0 0.6rem 1.1rem; padding:0">
-                    <li>
-                        <a href="@Psn.SsoCookieUrl" target="_blank" rel="noopener">Open PlayStation login ↗</a>
-                        — sign in; the page then shows <code>{"npsso":"…"}</code>.
-                    </li>
-                    <li>Copy the <code>npsso</code> value and paste it here:</li>
-                </ol>
-                <div class="rb-row-actions">
-                    <input class="rb-select" style="max-width:420px" type="password"
-                           placeholder="paste npsso token" @bind="_tokenInput" @bind:event="oninput" />
-                    <button class="rb-btn" @onclick="ConnectPsnAsync"
-                            disabled="@(_fetching || string.IsNullOrWhiteSpace(_tokenInput) || !Psn.IsGatewayConfigured)">
-                        @(_fetching ? "Connecting…" : "Connect & fetch")
-                    </button>
-                </div>
-            }
-            @if (_psnError is not null)
-            {
-                <div class="rb-alert rb-alert-bad" style="margin-top:0.6rem">@_psnError</div>
-            }
-        </div>
-    </div>
-</div>
+<PsnConnectCard Connected="_psnConnected"
+                Library="_library"
+                Fetching="_fetching"
+                Error="_psnError"
+                GatewayConfigured="Psn.IsGatewayConfigured"
+                SsoUrl="@Psn.SsoCookieUrl"
+                OnConnect="ConnectPsnAsync"
+                OnFetch="FetchSongsAsync"
+                OnDisconnect="DisconnectPsnAsync" />
 
-<!-- Step 3: Match to Spotify -->
-<div class="rb-card">
-    <div class="rb-step">
-        <span class="rb-step-num">3</span>
-        <div style="flex:1">
-            <h2>Match to Spotify tracks</h2>
-            <p class="rb-muted">Searches Spotify for each song. Low-confidence matches are unchecked by default — review them before syncing.</p>
-            <button class="rb-btn" @onclick="MatchAsync"
-                    disabled="@(!_signedIn || _library is null || _library.Songs.Count == 0 || _matching)">
-                @(_matching ? "Matching…" : "Match songs")
-            </button>
-
-            @if (_matching || _matches.Count > 0)
-            {
-                <div style="margin-top:0.8rem">
-                    <div class="rb-progress">
-                        <div class="rb-progress-bar" style="width:@(_progressPct)%"></div>
-                    </div>
-                    <p class="rb-sub" style="margin-top:0.3rem">
-                        @_progressDone / @_progressTotal searched
-                        @if (_matches.Count > 0)
-                        {
-                            <span>· @MatchedCount matched · @NeedsReviewCount need review · @NoResultCount no result</span>
-                        }
-                    </p>
-                </div>
-            }
-        </div>
-    </div>
-</div>
+<MatchCard CanMatch="CanMatch"
+           Matching="_matching"
+           ProgressDone="_progressDone"
+           ProgressTotal="_progressTotal"
+           Matches="_matches"
+           OnMatch="MatchAsync" />
 
 @if (_matches.Count > 0)
 {
-    <!-- Review table -->
-    <div class="rb-card">
-        <h2>Review matches</h2>
-        <div class="rb-row-actions" style="margin-bottom:0.6rem">
-            <label><input type="checkbox" checked="@_showOnlyReview" @onchange="ToggleShowOnlyReview" /> Show only items needing review</label>
-        </div>
-        <div class="rb-table-wrap">
-            <table class="rb-table">
-                <thead>
-                    <tr>
-                        <th style="width:2.5rem">Add</th>
-                        <th>Owned song</th>
-                        <th>Spotify match</th>
-                        <th style="width:6rem">Confidence</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var m in VisibleMatches)
-                    {
-                        <tr>
-                            <td>
-                                <input type="checkbox" checked="@m.Include"
-                                       disabled="@(m.Status != MatchStatus.Matched)"
-                                       @onchange="e => ToggleInclude(m, e)" />
-                            </td>
-                            <td>
-                                <div>@m.Song.Title</div>
-                                <div class="rb-sub">@m.Song.Artist</div>
-                            </td>
-                            <td>
-                                @if (m.Status == MatchStatus.Matched && m.Candidates.Count > 0)
-                                {
-                                    <select class="rb-select" @onchange="e => SelectCandidate(m, e)">
-                                        @foreach (var c in m.Candidates)
-                                        {
-                                            <option value="@c.Uri" selected="@(c.Uri == m.Selected?.Uri)">
-                                                @c.Name — @c.ArtistNames
-                                            </option>
-                                        }
-                                    </select>
-                                }
-                                else if (m.Status == MatchStatus.NoResults)
-                                {
-                                    <span class="rb-pill rb-pill-bad">No results</span>
-                                }
-                                else if (m.Status == MatchStatus.Error)
-                                {
-                                    <span class="rb-pill rb-pill-bad" title="@m.Error">Error</span>
-                                }
-                            </td>
-                            <td>@ConfidenceLabel(m)</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <MatchReviewCard Matches="_matches" OnChanged="StateHasChanged" />
 
-    <!-- Step 4: Sync -->
-    <div class="rb-card">
-        <div class="rb-step">
-            <span class="rb-step-num">4</span>
-            <div style="flex:1">
-                <h2>Sync playlist "@PlaylistCfg.Name"</h2>
-                <p class="rb-muted">Adds the @SelectedCount checked tracks. Re-running only adds what's missing — no duplicates.</p>
-                <button class="rb-btn" @onclick="SyncAsync" disabled="@(_syncing || SelectedCount == 0)">
-                    @(_syncing ? "Syncing…" : $"Sync {SelectedCount} tracks")
-                </button>
-
-                @if (_syncResult is not null)
-                {
-                    <div class="rb-alert rb-alert-ok" style="margin-top:0.7rem">
-                        @(_syncResult.Created ? "Created" : "Updated") playlist —
-                        added <strong>@_syncResult.Added</strong>,
-                        @_syncResult.AlreadyPresent already present.
-                        @if (_syncResult.Playlist.WebUrl is { } url)
-                        {
-                            <a href="@url" target="_blank" rel="noopener">Open in Spotify ↗</a>
-                        }
-                    </div>
-                }
-                @if (_error is not null)
-                {
-                    <div class="rb-alert rb-alert-bad" style="margin-top:0.7rem">@_error</div>
-                }
-            </div>
-        </div>
-    </div>
-}
-
-@code {
-    private bool _signedIn;
-    private SpotifyUser? _spotifyUser;
-
-    private bool _psnConnected;
-    private string _tokenInput = "";
-    private bool _fetching;
-    private string? _psnError;
-
-    private SongLibrary? _library;
-
-    private bool _matching;
-    private int _progressDone;
-    private int _progressTotal;
-    private List<SongMatch> _matches = new();
-    private bool _showOnlyReview;
-
-    private bool _syncing;
-    private SyncResult? _syncResult;
-    private string? _error;
-
-    private int _progressPct => _progressTotal == 0 ? 0 : (int)(100.0 * _progressDone / _progressTotal);
-    private int MatchedCount => _matches.Count(m => m.Status == MatchStatus.Matched);
-    private int NoResultCount => _matches.Count(m => m.Status == MatchStatus.NoResults);
-    private int NeedsReviewCount => _matches.Count(m => m.Status == MatchStatus.Matched && m.Confidence < 0.5);
-    private int SelectedCount => _matches.Count(m => m.IsSyncable);
-
-    private IEnumerable<SongMatch> VisibleMatches => _showOnlyReview
-        ? _matches.Where(m => m.Status != MatchStatus.Matched || m.Confidence < 0.5)
-        : _matches;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await Auth.TryCompleteLoginAsync(Nav.Uri);
-        _signedIn = await Auth.IsAuthenticatedAsync();
-        if (_signedIn)
-        {
-            try { _spotifyUser = await Api.GetCurrentUserAsync(); }
-            catch { /* token may have been revoked; ignore */ }
-        }
-
-        _psnConnected = await Psn.HasTokenAsync();
-        if (_psnConnected)
-            _library = await Psn.GetCachedSongsAsync();
-    }
-
-    private async Task LoginSpotifyAsync() => await Auth.BeginLoginAsync();
-
-    private async Task LogoutSpotifyAsync()
-    {
-        await Auth.LogoutAsync();
-        _signedIn = false;
-        _spotifyUser = null;
-    }
-
-    private async Task ConnectPsnAsync()
-    {
-        await Psn.SaveTokenAsync(_tokenInput);
-        _tokenInput = "";
-        _psnConnected = true;
-        await FetchSongsAsync();
-    }
-
-    private async Task FetchSongsAsync()
-    {
-        _fetching = true;
-        _psnError = null;
-        try
-        {
-            _library = await Psn.FetchSongsAsync();
-            if (_library.Songs.Count == 0)
-                _psnError = "Connected, but no Rock Band songs were found. You may need to tune the gateway's filter (see gateway README).";
-        }
-        catch (Exception ex)
-        {
-            _psnError = ex.Message;
-        }
-        finally
-        {
-            _fetching = false;
-        }
-    }
-
-    private async Task DisconnectPsnAsync()
-    {
-        await Psn.DisconnectAsync();
-        _psnConnected = false;
-        _library = null;
-        _matches = new();
-    }
-
-    private async Task MatchAsync()
-    {
-        if (_library is null) return;
-        _matching = true;
-        _matches = new();
-        _syncResult = null;
-        _error = null;
-        _progressDone = 0;
-        _progressTotal = _library.Songs.Count;
-
-        try
-        {
-            _matches = await Matcher.MatchAllAsync(_library.Songs, async (done, total) =>
-            {
-                _progressDone = done;
-                _progressTotal = total;
-                StateHasChanged();
-                await Task.Yield();
-            });
-        }
-        catch (Exception ex)
-        {
-            _error = $"Matching failed: {ex.Message}";
-        }
-        finally
-        {
-            _matching = false;
-        }
-    }
-
-    private void ToggleInclude(SongMatch m, ChangeEventArgs e) => m.Include = (bool)(e.Value ?? false);
-
-    private void SelectCandidate(SongMatch m, ChangeEventArgs e)
-    {
-        var uri = e.Value?.ToString();
-        m.Selected = m.Candidates.FirstOrDefault(c => c.Uri == uri) ?? m.Selected;
-    }
-
-    private void ToggleShowOnlyReview(ChangeEventArgs e) => _showOnlyReview = (bool)(e.Value ?? false);
-
-    private async Task SyncAsync()
-    {
-        _syncing = true;
-        _error = null;
-        _syncResult = null;
-        try
-        {
-            _syncResult = await Sync.SyncAsync(_matches);
-        }
-        catch (Exception ex)
-        {
-            _error = $"Sync failed: {ex.Message}";
-        }
-        finally
-        {
-            _syncing = false;
-        }
-    }
-
-    private static string FormatWhen(string iso)
-        => DateTimeOffset.TryParse(iso, out var dt) ? dt.LocalDateTime.ToString("g") : iso;
-
-    private static RenderFragment ConfidenceLabel(SongMatch m) => builder =>
-    {
-        if (m.Status != MatchStatus.Matched)
-            return;
-        var (cls, text) = m.Confidence switch
-        {
-            >= 0.75 => ("rb-pill rb-pill-ok", "High"),
-            >= 0.5 => ("rb-pill rb-pill-ok", "Good"),
-            >= 0.3 => ("rb-pill rb-pill-warn", "Low"),
-            _ => ("rb-pill rb-pill-bad", "Very low")
-        };
-        builder.OpenElement(0, "span");
-        builder.AddAttribute(1, "class", cls);
-        builder.AddContent(2, text);
-        builder.CloseElement();
-    };
+    <SyncCard PlaylistName="@PlaylistCfg.Name"
+              SelectedCount="SelectedCount"
+              Syncing="_syncing"
+              Result="_syncResult"
+              Error="_error"
+              OnSync="SyncAsync" />
 }

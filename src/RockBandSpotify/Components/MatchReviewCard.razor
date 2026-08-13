@@ -1,0 +1,90 @@
+@* Review table: pick/deselect matches and choose alternative candidates.
+   Owns its own view state (filter); mutates the shared matches and notifies the parent. *@
+
+<div class="rb-card">
+    <h2>Review matches</h2>
+    <div class="rb-row-actions filter">
+        <label>
+            <input type="checkbox" checked="@_showOnlyReview" @onchange="ToggleFilter" />
+            Show only items needing review
+        </label>
+    </div>
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="col-add">Add</th>
+                    <th>Owned song</th>
+                    <th>Spotify match</th>
+                    <th class="col-conf">Confidence</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in VisibleMatches)
+                {
+                    <tr>
+                        <td>
+                            <input type="checkbox" checked="@m.Include"
+                                   disabled="@(m.Status != MatchStatus.Matched)"
+                                   @onchange="e => SetInclude(m, e)" />
+                        </td>
+                        <td>
+                            <div>@m.Song.Title</div>
+                            <div class="rb-sub">@m.Song.Artist</div>
+                        </td>
+                        <td>
+                            @if (m.Status == MatchStatus.Matched && m.Candidates.Count > 0)
+                            {
+                                <select class="rb-select" @onchange="e => SelectCandidate(m, e)">
+                                    @foreach (var c in m.Candidates)
+                                    {
+                                        <option value="@c.Uri" selected="@(c.Uri == m.Selected?.Uri)">
+                                            @c.Name — @c.ArtistNames
+                                        </option>
+                                    }
+                                </select>
+                            }
+                            else if (m.Status == MatchStatus.NoResults)
+                            {
+                                <span class="rb-pill rb-pill-bad">No results</span>
+                            }
+                            else if (m.Status == MatchStatus.Error)
+                            {
+                                <span class="rb-pill rb-pill-bad" title="@m.Error">Error</span>
+                            }
+                        </td>
+                        <td><ConfidenceBadge Match="m" /></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<SongMatch> Matches { get; set; } = Array.Empty<SongMatch>();
+
+    /// <summary>Raised after the user changes a selection, so the parent can refresh dependent UI.</summary>
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    private bool _showOnlyReview;
+
+    private IEnumerable<SongMatch> VisibleMatches => _showOnlyReview
+        ? Matches.Where(m => m.Status != MatchStatus.Matched || m.Confidence < 0.5)
+        : Matches;
+
+    private void ToggleFilter(ChangeEventArgs e) => _showOnlyReview = (bool)(e.Value ?? false);
+
+    private async Task SetInclude(SongMatch m, ChangeEventArgs e)
+    {
+        m.Include = (bool)(e.Value ?? false);
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task SelectCandidate(SongMatch m, ChangeEventArgs e)
+    {
+        var uri = e.Value?.ToString();
+        m.Selected = m.Candidates.FirstOrDefault(c => c.Uri == uri) ?? m.Selected;
+        await OnChanged.InvokeAsync();
+    }
+}

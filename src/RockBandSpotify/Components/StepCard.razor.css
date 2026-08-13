@@ -1,0 +1,21 @@
+.step {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+}
+
+.step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: var(--rb-green);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex: 0 0 auto;
+}
+
+.step-body { flex: 1; }
