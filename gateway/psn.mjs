@@ -66,21 +66,21 @@ export async function fetchEntitlements(accessToken) {
   // The endpoint reports a large totalResults but historically ignored a `start`
   // offset, returning the same page repeatedly. Dedupe by id and stop as soon as
   // a page adds nothing new, so we never blow up into 41x duplicates.
+  // Pagination is offset/limit (start/size is ignored by the endpoint).
   const byId = new Map();
-  const pageSize = 500;
-  let start = 0;
-  for (let page = 0; page < 80; page++) {
-    const res = await fetch(`${ENTITLEMENT_URL}?start=${start}&size=${pageSize}`, {
+  const limit = 500;
+  let offset = 0;
+  for (let page = 0; page < 40; page++) {
+    const res = await fetch(`${ENTITLEMENT_URL}?offset=${offset}&limit=${limit}`, {
       headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" },
     });
     if (!res.ok) throw new Error(`Entitlement request failed (${res.status}).`);
     const data = await res.json();
     const items = data.entitlements || data.entitlementList || [];
-    const before = byId.size;
+    const total = data.totalResults ?? data.total ?? Infinity;
     for (const e of items) byId.set(e.id ?? e.productId ?? JSON.stringify(e), e);
-    // Advance by however many we actually got, not a fixed stride.
-    start += items.length || pageSize;
-    if (items.length === 0 || byId.size === before) break;
+    offset += items.length;
+    if (items.length === 0 || offset >= total) break;
   }
   return [...byId.values()];
 }
