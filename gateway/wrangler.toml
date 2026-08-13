@@ -1,6 +1,9 @@
 name = "rockband-psn-gateway"
 main = "worker.js"
 compatibility_date = "2024-11-01"
+# Account ID (not secret — it's in your dashboard URL). Setting it lets wrangler
+# skip the /memberships lookup, which account-owned API tokens can't call.
+account_id = "515a077710adeb1a5759590e65fc4c35"
 
 # Lock CORS to your GitHub Pages origin (recommended). Override with your own:
 #   wrangler deploy --var ALLOWED_ORIGIN:https://<you>.github.io
