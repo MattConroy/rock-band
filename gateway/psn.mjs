@@ -63,22 +63,26 @@ export async function getAccessToken(npsso) {
 }
 
 export async function fetchEntitlements(accessToken) {
-  const all = [];
+  // The endpoint reports a large totalResults but historically ignored a `start`
+  // offset, returning the same page repeatedly. Dedupe by id and stop as soon as
+  // a page adds nothing new, so we never blow up into 41x duplicates.
+  const byId = new Map();
   const pageSize = 500;
   let start = 0;
-  for (;;) {
+  for (let page = 0; page < 80; page++) {
     const res = await fetch(`${ENTITLEMENT_URL}?start=${start}&size=${pageSize}`, {
       headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" },
     });
     if (!res.ok) throw new Error(`Entitlement request failed (${res.status}).`);
     const data = await res.json();
     const items = data.entitlements || data.entitlementList || [];
-    all.push(...items);
-    const total = data.totalResults || data.total || all.length;
-    start += pageSize;
-    if (items.length === 0 || all.length >= total || start > 20000) break;
+    const before = byId.size;
+    for (const e of items) byId.set(e.id ?? e.productId ?? JSON.stringify(e), e);
+    // Advance by however many we actually got, not a fixed stride.
+    start += items.length || pageSize;
+    if (items.length === 0 || byId.size === before) break;
   }
-  return all;
+  return [...byId.values()];
 }
 
 // Probe the several field names PSN has used for a human-readable entitlement name.

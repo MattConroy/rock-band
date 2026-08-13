@@ -16,6 +16,7 @@ import {
   fetchEntitlements,
   entitlementName,
   toSongs,
+  ENTITLEMENT_URL,
   DEFAULT_INCLUDE,
   DEFAULT_EXCLUDE,
 } from "./psn.mjs";
@@ -69,7 +70,36 @@ export default {
           .map(([code, v]) => ({ code, n: v.n, sample: v.sample }))
           .sort((a, b) => b.n - a.n)
           .slice(0, 40);
-        return json({ count: entitlements.length, byTitle }, 200, cors);
+
+        // Probe how the endpoint really paginates: if page@500 returns a
+        // different firstId than page@0, `start` works and we can walk pages.
+        const probe = async (qs) => {
+          const r = await fetch(`${ENTITLEMENT_URL}?${qs}`, {
+            headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" },
+          });
+          const d = await r.json().catch(() => ({}));
+          const items = d.entitlements || d.entitlementList || [];
+          return {
+            qs,
+            status: r.status,
+            returned: items.length,
+            total: d.totalResults ?? d.total ?? null,
+            firstId: items[0]?.id ?? null,
+            lastId: items[items.length - 1]?.id ?? null,
+          };
+        };
+        const probes = [
+          await probe("start=0&size=500"),
+          await probe("start=500&size=500"),
+          await probe("start=0&size=5000"),
+          await probe("offset=500&limit=500"),
+        ];
+
+        return json(
+          { uniqueCount: entitlements.length, byTitle, probes },
+          200,
+          cors,
+        );
       }
 
       const include = new RegExp(env.RB_INCLUDE_REGEX || DEFAULT_INCLUDE, "i");
