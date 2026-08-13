@@ -1,0 +1,72 @@
+@* Step 2: connect PlayStation by pasting an npsso once. Owns its own input state. *@
+
+<StepCard Number="2" Title="Connect PlayStation">
+    @if (Connected)
+    {
+        <p class="rb-muted">
+            Connected.
+            @if (Library is { Songs.Count: > 0 })
+            {
+                <span><strong>@Library.Songs.Count</strong> songs@(string.IsNullOrEmpty(Library.GeneratedAt) ? "" : $" · fetched {FormatWhen(Library.GeneratedAt)}").</span>
+            }
+        </p>
+        <div class="rb-row-actions">
+            <button class="rb-btn" @onclick="OnFetch" disabled="@Fetching">
+                @(Fetching ? "Fetching…" : (Library is null ? "Fetch my songs" : "Refresh from PSN"))
+            </button>
+            <button class="rb-btn rb-btn-secondary" @onclick="OnDisconnect" disabled="@Fetching">Disconnect</button>
+        </div>
+    }
+    else
+    {
+        <p class="rb-muted">
+            The browser can't read PlayStation directly, so this uses your stateless gateway.
+            Log in below, copy the token it shows, and paste it here — it's cached in your
+            browser and lasts about two months.
+        </p>
+        <ol class="steps rb-muted">
+            <li>
+                <a href="@SsoUrl" target="_blank" rel="noopener">Open PlayStation login ↗</a>
+                — sign in; the page then shows <code>{"npsso":"…"}</code>.
+            </li>
+            <li>Copy the <code>npsso</code> value and paste it here:</li>
+        </ol>
+        <div class="rb-row-actions">
+            <input class="rb-select token-input" type="password"
+                   placeholder="paste npsso token" @bind="_token" @bind:event="oninput" />
+            <button class="rb-btn" @onclick="ConnectAsync"
+                    disabled="@(Fetching || string.IsNullOrWhiteSpace(_token) || !GatewayConfigured)">
+                @(Fetching ? "Connecting…" : "Connect & fetch")
+            </button>
+        </div>
+    }
+
+    @if (Error is not null)
+    {
+        <div class="rb-alert rb-alert-bad error">@Error</div>
+    }
+</StepCard>
+
+@code {
+    [Parameter, EditorRequired] public bool Connected { get; set; }
+    [Parameter] public SongLibrary? Library { get; set; }
+    [Parameter, EditorRequired] public bool Fetching { get; set; }
+    [Parameter] public string? Error { get; set; }
+    [Parameter, EditorRequired] public bool GatewayConfigured { get; set; }
+    [Parameter, EditorRequired] public string SsoUrl { get; set; } = "";
+    [Parameter] public EventCallback<string> OnConnect { get; set; }
+    [Parameter] public EventCallback OnFetch { get; set; }
+    [Parameter] public EventCallback OnDisconnect { get; set; }
+
+    private string _token = "";
+
+    private async Task ConnectAsync()
+    {
+        var token = _token;
+        _token = "";
+        await OnConnect.InvokeAsync(token);
+    }
+
+    private static string FormatWhen(string iso)
+        => DateTimeOffset.TryParse(iso, out var dt) ? dt.LocalDateTime.ToString("g") : iso;
+}

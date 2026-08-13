@@ -15,8 +15,10 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseAddr
 
 // Bind configuration sections from wwwroot/appsettings.json.
 var spotifyConfig = builder.Configuration.GetSection("Spotify").Get<SpotifyConfig>() ?? new SpotifyConfig();
+var psnConfig = builder.Configuration.GetSection("Psn").Get<PsnConfig>() ?? new PsnConfig();
 var playlistConfig = builder.Configuration.GetSection("Playlist").Get<PlaylistConfig>() ?? new PlaylistConfig();
 builder.Services.AddSingleton(spotifyConfig);
+builder.Services.AddSingleton(psnConfig);
 builder.Services.AddSingleton(playlistConfig);
 
 builder.Services.AddScoped(sp => new SpotifyAuthService(
@@ -26,7 +28,7 @@ builder.Services.AddScoped(sp => new SpotifyAuthService(
     baseAddress));
 
 builder.Services.AddScoped<SpotifyApiService>();
-builder.Services.AddScoped<SongLibraryService>();
+builder.Services.AddScoped<PsnService>();
 builder.Services.AddScoped<MatchingService>();
 builder.Services.AddScoped<PlaylistSyncService>();
 

@@ -1,0 +1,13 @@
+name = "rockband-psn-gateway"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# Lock CORS to your GitHub Pages origin (recommended). Override with your own:
+#   wrangler deploy --var ALLOWED_ORIGIN:https://<you>.github.io
+# Or set it here. Leave unset to allow any origin (fine while testing).
+[vars]
+ALLOWED_ORIGIN = "https://mattconroy.github.io"
+
+# Optional: override the Rock Band include/exclude filters without editing code.
+# RB_INCLUDE_REGEX = "rock ?band"
+# RB_EXCLUDE_REGEX = "rock band 4|rivals|season pass|bundle|track pack"

@@ -1,0 +1,22 @@
+@* Step 1: Spotify per-user login (PKCE). Presentational; raises callbacks. *@
+
+<StepCard Number="1" Title="Connect Spotify">
+    @if (SignedIn)
+    {
+        <p class="rb-muted">Signed in@(string.IsNullOrEmpty(UserName) ? "" : $" as {UserName}").</p>
+        <button class="rb-btn rb-btn-secondary" @onclick="OnLogout">Sign out</button>
+    }
+    else
+    {
+        <p class="rb-muted">Log in with your own Spotify account. Uses PKCE — no password or secret leaves your browser.</p>
+        <button class="rb-btn" @onclick="OnLogin" disabled="@(!Configured)">Connect Spotify</button>
+    }
+</StepCard>
+
+@code {
+    [Parameter, EditorRequired] public bool SignedIn { get; set; }
+    [Parameter] public string? UserName { get; set; }
+    [Parameter, EditorRequired] public bool Configured { get; set; }
+    [Parameter] public EventCallback OnLogin { get; set; }
+    [Parameter] public EventCallback OnLogout { get; set; }
+}

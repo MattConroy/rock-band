@@ -1,0 +1,134 @@
+using System.Net.Http.Json;
+using System.Text.Json;
+using Microsoft.JSInterop;
+using RockBandSpotify.Models;
+
+namespace RockBandSpotify.Services;
+
+/// <summary>
+/// Owns the PlayStation side: holds the pasted npsso token (cached in the
+/// browser's localStorage), and fetches the owned-song list through the
+/// stateless gateway Worker (the browser can't call PSN directly — no CORS).
+/// The token is your own and never leaves your machine except to your Worker.
+/// </summary>
+public class PsnService
+{
+    private const string TokenKey = "rb_psn_npsso";
+    private const string SongsKey = "rb_psn_songs";
+
+    private readonly HttpClient _http;
+    private readonly IJSRuntime _js;
+    private readonly PsnConfig _config;
+
+    public PsnService(HttpClient http, IJSRuntime js, PsnConfig config)
+    {
+        _http = http;
+        _js = js;
+        _config = config;
+    }
+
+    public bool IsGatewayConfigured => _config.IsConfigured;
+
+    /// <summary>Link that opens Sony's login and lands on the page showing the npsso.</summary>
+    public string SsoCookieUrl => "https://ca.account.sony.com/api/v1/ssocookie";
+
+    public async Task<bool> HasTokenAsync()
+        => !string.IsNullOrEmpty(await GetItemAsync(TokenKey));
+
+    public async Task SaveTokenAsync(string npsso)
+        => await SetItemAsync(TokenKey, npsso.Trim());
+
+    public async Task DisconnectAsync()
+    {
+        await RemoveItemAsync(TokenKey);
+        await RemoveItemAsync(SongsKey);
+    }
+
+    /// <summary>Returns the last successfully-fetched song list from localStorage, if any.</summary>
+    public async Task<SongLibrary?> GetCachedSongsAsync()
+    {
+        var raw = await GetItemAsync(SongsKey);
+        if (string.IsNullOrEmpty(raw))
+            return null;
+        try
+        {
+            return Deduplicate(JsonSerializer.Deserialize<SongLibrary>(raw));
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Calls the gateway with the stored npsso, caches the result, and returns it.
+    /// Throws with a friendly message if not connected or the gateway rejects the token.
+    /// </summary>
+    public async Task<SongLibrary> FetchSongsAsync()
+    {
+        if (!IsGatewayConfigured)
+            throw new InvalidOperationException("No PSN gateway URL is configured (see appsettings.json).");
+
+        var npsso = await GetItemAsync(TokenKey);
+        if (string.IsNullOrEmpty(npsso))
+            throw new InvalidOperationException("Not connected to PlayStation — paste your token first.");
+
+        HttpResponseMessage response;
+        try
+        {
+            response = await _http.PostAsJsonAsync(_config.GatewayUrl, new { npsso });
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Couldn't reach the PSN gateway: {ex.Message}");
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var reason = await TryReadErrorAsync(response);
+            throw new InvalidOperationException(reason
+                ?? $"Gateway returned {(int)response.StatusCode}.");
+        }
+
+        var library = await response.Content.ReadFromJsonAsync<SongLibrary>()
+                      ?? new SongLibrary();
+        library = Deduplicate(library)!;
+
+        await SetItemAsync(SongsKey, JsonSerializer.Serialize(library));
+        return library;
+    }
+
+    private static async Task<string?> TryReadErrorAsync(HttpResponseMessage response)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            if (doc.RootElement.TryGetProperty("error", out var err))
+                return err.GetString();
+        }
+        catch { /* non-JSON body */ }
+        return null;
+    }
+
+    private static SongLibrary? Deduplicate(SongLibrary? library)
+    {
+        if (library is null)
+            return null;
+        var seen = new HashSet<string>();
+        library.Songs = library.Songs
+            .Where(s => !string.IsNullOrWhiteSpace(s.Title) && seen.Add(s.Key))
+            .OrderBy(s => s.Artist)
+            .ThenBy(s => s.Title)
+            .ToList();
+        return library;
+    }
+
+    private async Task<string?> GetItemAsync(string key)
+        => await _js.InvokeAsync<string?>("rbSpotify.getItem", key);
+
+    private async Task SetItemAsync(string key, string value)
+        => await _js.InvokeVoidAsync("rbSpotify.setItem", key, value);
+
+    private async Task RemoveItemAsync(string key)
+        => await _js.InvokeVoidAsync("rbSpotify.removeItem", key);
+}
