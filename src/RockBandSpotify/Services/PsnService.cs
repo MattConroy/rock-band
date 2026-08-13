@@ -98,6 +98,30 @@ public class PsnService
         return library;
     }
 
+    /// <summary>Calls the gateway's debug endpoint and returns the raw JSON text
+    /// (entitlement count, extracted names, and a few sample entries) for tuning.</summary>
+    public async Task<string> FetchRawDebugAsync()
+    {
+        var npsso = await GetItemAsync(TokenKey);
+        if (string.IsNullOrEmpty(npsso))
+            throw new InvalidOperationException("Not connected to PlayStation.");
+
+        var url = _config.GatewayUrl.TrimEnd('/') + "/?debug=1";
+        var response = await _http.PostAsJsonAsync(url, new { npsso });
+        var body = await response.Content.ReadAsStringAsync();
+
+        // Pretty-print if it's JSON, so it's readable on screen.
+        try
+        {
+            using var doc = JsonDocument.Parse(body);
+            return JsonSerializer.Serialize(doc, new JsonSerializerOptions { WriteIndented = true });
+        }
+        catch
+        {
+            return body;
+        }
+    }
+
     private static async Task<string?> TryReadErrorAsync(HttpResponseMessage response)
     {
         try

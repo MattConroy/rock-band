@@ -29,6 +29,8 @@ public partial class Home
     private bool _fetching;
     private string? _psnError;
     private SongLibrary? _library;
+    private string? _rawDebug;
+    private bool _loadingRaw;
 
     // Matching
     private bool _matching;
@@ -102,6 +104,25 @@ public partial class Home
         _psnConnected = false;
         _library = null;
         _matches = new();
+        _rawDebug = null;
+    }
+
+    private async Task LoadRawDebugAsync()
+    {
+        _loadingRaw = true;
+        _rawDebug = null;
+        try
+        {
+            _rawDebug = await Psn.FetchRawDebugAsync();
+        }
+        catch (Exception ex)
+        {
+            _rawDebug = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _loadingRaw = false;
+        }
     }
 
     private async Task MatchAsync()

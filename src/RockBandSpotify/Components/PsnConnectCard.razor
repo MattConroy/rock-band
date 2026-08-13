@@ -32,6 +32,18 @@
                 </ul>
             </details>
         }
+
+        <details class="debug-box">
+            <summary>Debug: raw entitlements</summary>
+            <p class="rb-sub">If songs are missing, this shows how PlayStation names your content, so the filter can be tuned.</p>
+            <button class="rb-btn rb-btn-secondary" @onclick="OnLoadRaw" disabled="@LoadingRaw">
+                @(LoadingRaw ? "Loading…" : "Load raw entitlements")
+            </button>
+            @if (RawDebug is not null)
+            {
+                <pre class="debug-pre">@RawDebug</pre>
+            }
+        </details>
     }
     else
     {
@@ -76,9 +88,12 @@
     [Parameter] public string? Error { get; set; }
     [Parameter, EditorRequired] public bool GatewayConfigured { get; set; }
     [Parameter, EditorRequired] public string SsoUrl { get; set; } = "";
+    [Parameter] public string? RawDebug { get; set; }
+    [Parameter] public bool LoadingRaw { get; set; }
     [Parameter] public EventCallback<string> OnConnect { get; set; }
     [Parameter] public EventCallback OnFetch { get; set; }
     [Parameter] public EventCallback OnDisconnect { get; set; }
+    [Parameter] public EventCallback OnLoadRaw { get; set; }
 
     private string _token = "";
 
