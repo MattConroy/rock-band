@@ -1,6 +1,18 @@
-.steps {
-    margin: 0 0 0.6rem 1.1rem;
-    padding: 0;
+.flow-step {
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--rb-border);
+}
+
+.flow-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.login-link {
+    display: inline-block;
+    text-decoration: none;
 }
 
 .token-input { max-width: 420px; }

@@ -37,23 +37,29 @@
     {
         <p class="rb-muted">
             The browser can't read PlayStation directly, so this uses your stateless gateway.
-            Log in below, copy the token it shows, and paste it here — it's cached in your
-            browser and lasts about two months.
+            Your token is cached in this browser and lasts about two months.
         </p>
-        <ol class="steps rb-muted">
-            <li>
-                <a href="@SsoUrl" target="_blank" rel="noopener">Open PlayStation login ↗</a>
-                — sign in; the page then shows <code>{"npsso":"…"}</code>.
-            </li>
-            <li>Copy the <code>npsso</code> value and paste it here:</li>
-        </ol>
-        <div class="rb-row-actions">
-            <input class="rb-select token-input" type="password"
-                   placeholder="paste npsso token" @bind="_token" @bind:event="oninput" />
-            <button class="rb-btn" @onclick="ConnectAsync"
-                    disabled="@(Fetching || string.IsNullOrWhiteSpace(_token) || !GatewayConfigured)">
-                @(Fetching ? "Connecting…" : "Connect & fetch")
-            </button>
+
+        <div class="flow-step">
+            <div class="flow-label">1 · Log in to PlayStation</div>
+            <a class="rb-btn login-link" href="@SsoUrl" target="_blank" rel="noopener">Open PlayStation login ↗</a>
+            <p class="rb-sub">Sign in — the page then shows <code>{"npsso":"…"}</code>.</p>
+        </div>
+
+        <div class="flow-step">
+            <div class="flow-label">2 · Paste the token</div>
+            <div class="rb-row-actions">
+                <input class="rb-select token-input" type="password"
+                       placeholder="paste npsso value" @bind="_token" @bind:event="oninput" />
+                <button class="rb-btn" @onclick="ConnectAsync"
+                        disabled="@(Fetching || string.IsNullOrWhiteSpace(_token) || !GatewayConfigured)">
+                    @(Fetching ? "Connecting…" : "Connect & fetch")
+                </button>
+            </div>
+            <p class="rb-sub">
+                Copy <strong>only</strong> the value between the quotes after <code>"npsso":</code>
+                — not the braces or quotes.
+            </p>
         </div>
     }
 
