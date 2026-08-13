@@ -14,6 +14,7 @@
 import {
   getAccessToken,
   fetchEntitlements,
+  entitlementName,
   toSongs,
   DEFAULT_INCLUDE,
   DEFAULT_EXCLUDE,
@@ -51,8 +52,17 @@ export default {
 
       const url = new URL(request.url);
       if (url.searchParams.get("debug") === "1") {
-        // Returns raw entitlements so you can tune the include/exclude filters.
-        return json({ count: entitlements.length, entitlements }, 200, cors);
+        // Returns a readable summary for tuning the filters: total count, every
+        // extracted name, and a couple of full raw entries to show the structure.
+        return json(
+          {
+            count: entitlements.length,
+            names: [...new Set(entitlements.map(entitlementName).filter(Boolean))].sort(),
+            sample: entitlements.slice(0, 3),
+          },
+          200,
+          cors,
+        );
       }
 
       const include = new RegExp(env.RB_INCLUDE_REGEX || DEFAULT_INCLUDE, "i");

@@ -29,3 +29,18 @@
     font-size: 0.9rem;
 }
 .songs-list li { margin: 0.15rem 0; }
+
+.debug-box { margin-top: 0.9rem; }
+.debug-box summary { cursor: pointer; font-size: 0.85rem; color: var(--rb-muted); }
+.debug-box p { margin: 0.4rem 0; }
+.debug-pre {
+    margin-top: 0.5rem;
+    max-height: 360px;
+    overflow: auto;
+    background: #1e2126;
+    color: #e6e6e6;
+    padding: 0.7rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    white-space: pre;
+}
