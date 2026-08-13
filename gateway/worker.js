@@ -53,59 +53,34 @@ export default {
 
       const url = new URL(request.url);
       if (url.searchParams.get("debug") === "1") {
-        // Rock Band = Harmonix publisher EP0006, content code starting "RB".
-        // List every match's content code so we can see how names are encoded.
-        const rb = entitlements.filter((e) =>
-          /EP0006-.+_00-RB/.test(e.productId || e.id || ""),
-        );
-        // Group by title code (which Rock Band game) to see the spread.
-        const games = {};
-        const uniqueSongs = new Set();
-        for (const e of rb) {
+        // Wide scan to find ALL music DLC: don't assume publisher or "RB" prefix.
+        // Break down by publisher, by title code, and by content prefix.
+        const pub = {};
+        const byTitle = {};
+        const contentPrefix = {};
+        for (const e of entitlements) {
           const pid = e.productId || e.id || "";
           const parts = pid.split("-");
+          const publisher = parts[0] || "?";
           const title = (parts[1] || "?").split("_")[0];
           const content = parts.slice(2).join("-");
-          (games[title] ??= { n: 0, sample: [] }).n++;
-          if (games[title].sample.length < 6) games[title].sample.push(content);
-          uniqueSongs.add(content);
+          pub[publisher] = (pub[publisher] || 0) + 1;
+          (byTitle[`${publisher}-${title}`] ??= { n: 0, sample: [] }).n++;
+          const box = byTitle[`${publisher}-${title}`];
+          if (box.sample.length < 5) box.sample.push(content);
+          contentPrefix[content.slice(0, 4)] = (contentPrefix[content.slice(0, 4)] || 0) + 1;
         }
-        const rbByTitle = Object.entries(games)
-          .map(([title, v]) => ({ title, n: v.n, sample: v.sample }))
-          .sort((a, b) => b.n - a.n);
-
-        // Store-lookup viability probe: try to resolve a sample of product IDs to
-        // real names via the PSN store product page, and report the hit rate.
-        const seenC = new Set();
-        const probeIds = [];
-        for (const e of rb) {
-          const pid = e.productId || e.id || "";
-          const content = pid.split("-").slice(2).join("-");
-          if (seenC.has(content)) continue;
-          seenC.add(content);
-          probeIds.push(pid);
-          if (probeIds.length >= 12) break;
-        }
-        const nameProbe = [];
-        for (const pid of probeIds) {
-          try {
-            const r = await fetch(`https://store.playstation.com/en-gb/product/${pid}`, {
-              headers: { "User-Agent": "Mozilla/5.0", "Accept-Language": "en-GB" },
-            });
-            const html = await r.text();
-            const og = html.match(/<meta property="og:title" content="([^"]*)"/i)?.[1] ?? null;
-            nameProbe.push({ pid, status: r.status, name: og });
-          } catch (e) {
-            nameProbe.push({ pid, status: "err", name: null });
-          }
-        }
-
+        const top = (obj, n = 30) =>
+          Object.entries(obj)
+            .map(([k, v]) => (typeof v === "number" ? { k, n: v } : { k, ...v }))
+            .sort((a, b) => b.n - a.n)
+            .slice(0, n);
         return json(
           {
-            rbCount: rb.length,
-            uniqueContentCodes: uniqueSongs.size,
-            rbByTitle,
-            nameProbe,
+            total: entitlements.length,
+            publishers: top(pub, 20),
+            byTitle: top(byTitle, 40),
+            contentPrefixes: top(contentPrefix, 40),
           },
           200,
           cors,
