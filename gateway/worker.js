@@ -58,11 +58,27 @@ export default {
         const rb = entitlements.filter((e) =>
           /EP0006-.+_00-RB/.test(e.productId || e.id || ""),
         );
-        const rbCodes = rb
-          .map((e) => (e.productId || e.id || "").split("-").slice(2).join("-"))
-          .sort();
+        // Group by title code (which Rock Band game) to see the spread.
+        const games = {};
+        const uniqueSongs = new Set();
+        for (const e of rb) {
+          const pid = e.productId || e.id || "";
+          const parts = pid.split("-");
+          const title = (parts[1] || "?").split("_")[0];
+          const content = parts.slice(2).join("-");
+          (games[title] ??= { n: 0, sample: [] }).n++;
+          if (games[title].sample.length < 6) games[title].sample.push(content);
+          uniqueSongs.add(content);
+        }
+        const rbByTitle = Object.entries(games)
+          .map(([title, v]) => ({ title, n: v.n, sample: v.sample }))
+          .sort((a, b) => b.n - a.n);
         return json(
-          { uniqueCount: entitlements.length, rbCount: rb.length, rbCodes },
+          {
+            rbCount: rb.length,
+            uniqueContentCodes: uniqueSongs.size,
+            rbByTitle,
+          },
           200,
           cors,
         );
