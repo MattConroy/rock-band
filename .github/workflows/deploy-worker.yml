@@ -1,0 +1,38 @@
+name: Deploy PSN gateway (Cloudflare)
+
+# Deploys the stateless gateway Worker to Cloudflare from an Actions runner
+# (which, unlike a local sandbox, can reach Cloudflare's API). Run it from the
+# Actions tab → "Run workflow".
+#
+# Required repo secret:
+#   CLOUDFLARE_API_TOKEN   a token with the "Edit Cloudflare Workers" permission
+# Optional repo secret (only if deploy complains it can't pick an account):
+#   CLOUDFLARE_ACCOUNT_ID
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Worker
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: gateway
+          command: deploy
+
+      - name: Show deployed URL
+        run: |
+          echo "### Gateway deployed" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "URL: \`${{ steps.deploy.outputs.deployment-url }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Save it as the repo variable **PSN_GATEWAY_URL** (used by the Test PSN fetch workflow and the app)." >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,68 @@
+name: Test PSN fetch
+
+# Tests the PSN side against your DEPLOYED gateway Worker (or, if no URL is
+# given, directly via the shared logic). Prints your entitlement names and what
+# the filter keeps, so we can tune the Rock Band include/exclude filters.
+#
+# Required repo secret:
+#   PSN_NPSSO              your npsso token (masked in logs)
+# The gateway URL comes from the workflow input, else the PSN_GATEWAY_URL var.
+#
+# NOTE: on a PUBLIC repo, run logs are public — the printed song names would be
+# visible to anyone. Make the repo private first if that matters to you.
+on:
+  workflow_dispatch:
+    inputs:
+      gateway_url:
+        description: "Deployed Worker URL (leave blank to use the PSN_GATEWAY_URL variable, or 'direct' to bypass the Worker)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch entitlements
+        env:
+          NPSSO: ${{ secrets.PSN_NPSSO }}
+          URL: ${{ github.event.inputs.gateway_url || vars.PSN_GATEWAY_URL }}
+        run: |
+          if [ -z "$NPSSO" ]; then
+            echo "::error::Set the PSN_NPSSO repo secret first."
+            exit 1
+          fi
+
+          if [ "$URL" = "direct" ] || [ -z "$URL" ]; then
+            echo "Fetching directly via shared logic (bypassing the Worker)…"
+            RB_INCLUDE_REGEX="" RB_EXCLUDE_REGEX="" \
+              node gateway/direct-fetch.mjs > entitlements.json
+          else
+            echo "Fetching via deployed Worker: ${URL}"
+            # Build the JSON body from env so the token never appears in argv/logs.
+            node -e 'process.stdout.write(JSON.stringify({npsso:process.env.NPSSO}))' > body.json
+            code=$(curl -sS -X POST "${URL%/}/?debug=1" \
+              -H 'content-type: application/json' \
+              --data @body.json -o entitlements.json -w '%{http_code}')
+            rm -f body.json
+            echo "Worker responded HTTP ${code}"
+          fi
+
+      - name: Summarize
+        run: node gateway/summarize.mjs entitlements.json
+
+      - name: Upload raw entitlements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psn-entitlements-raw
+          path: entitlements.json
+          if-no-files-found: ignore
