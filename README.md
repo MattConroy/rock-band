@@ -55,23 +55,19 @@ See [`gateway/README.md`](gateway/README.md) for details and filter tuning.
    (and `https://localhost:5001/` for local dev).
 3. Copy the **Client ID** (no secret needed — PKCE).
 
-### 3. Configure the app (repo settings, not source)
+### 3. Configure the app
 
-Set two values under **Settings → Secrets and variables → Actions**. Either
-Repository **variables** or **secrets** work (the deploy workflow reads a secret
-first, then falls back to a variable):
+Edit [`src/RockBandSpotify/wwwroot/appsettings.json`](src/RockBandSpotify/wwwroot/appsettings.json):
 
-| Name | Value |
-|------|-------|
-| `SPOTIFY_CLIENT_ID` | your Spotify Client ID |
-| `PSN_GATEWAY_URL` | your Worker URL, e.g. `https://rockband-psn-gateway.you.workers.dev` |
+```json
+{
+  "Spotify": { "ClientId": "your-spotify-client-id" },
+  "Psn":     { "GatewayUrl": "https://rockband-psn-gateway.you.workers.dev" }
+}
+```
 
-The deploy workflow injects these into `appsettings.json` at build time, so
-nothing app-specific is committed to source. Neither value is actually sensitive
-(a static SPA exposes whatever it uses — the Client ID is public by design, PKCE
-needs no secret), so a **variable** is the honest choice; a secret works too.
-For local `dotnet run`, edit the placeholders in
-[`wwwroot/appsettings.json`](src/RockBandSpotify/wwwroot/appsettings.json) directly.
+Both values are safe to commit — neither is sensitive (the Client ID is public by
+design; PKCE uses no client secret).
 
 ### 4. Enable GitHub Pages
 
