@@ -15,7 +15,7 @@
 <PsnConnectCard Connected="_psnConnected"
                 Library="_library"
                 Fetching="_fetching"
-                Error="_psnError"
+                Error="@_psnError"
                 GatewayConfigured="Psn.IsGatewayConfigured"
                 SsoUrl="@Psn.SsoCookieUrl"
                 OnConnect="ConnectPsnAsync"
@@ -37,6 +37,6 @@
               SelectedCount="SelectedCount"
               Syncing="_syncing"
               Result="_syncResult"
-              Error="_error"
+              Error="@_error"
               OnSync="SyncAsync" />
 }
