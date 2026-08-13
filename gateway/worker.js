@@ -73,11 +73,39 @@ export default {
         const rbByTitle = Object.entries(games)
           .map(([title, v]) => ({ title, n: v.n, sample: v.sample }))
           .sort((a, b) => b.n - a.n);
+
+        // Store-lookup viability probe: try to resolve a sample of product IDs to
+        // real names via the PSN store product page, and report the hit rate.
+        const seenC = new Set();
+        const probeIds = [];
+        for (const e of rb) {
+          const pid = e.productId || e.id || "";
+          const content = pid.split("-").slice(2).join("-");
+          if (seenC.has(content)) continue;
+          seenC.add(content);
+          probeIds.push(pid);
+          if (probeIds.length >= 12) break;
+        }
+        const nameProbe = [];
+        for (const pid of probeIds) {
+          try {
+            const r = await fetch(`https://store.playstation.com/en-gb/product/${pid}`, {
+              headers: { "User-Agent": "Mozilla/5.0", "Accept-Language": "en-GB" },
+            });
+            const html = await r.text();
+            const og = html.match(/<meta property="og:title" content="([^"]*)"/i)?.[1] ?? null;
+            nameProbe.push({ pid, status: r.status, name: og });
+          } catch (e) {
+            nameProbe.push({ pid, status: "err", name: null });
+          }
+        }
+
         return json(
           {
             rbCount: rb.length,
             uniqueContentCodes: uniqueSongs.size,
             rbByTitle,
+            nameProbe,
           },
           200,
           cors,
