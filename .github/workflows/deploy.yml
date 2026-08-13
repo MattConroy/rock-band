@@ -32,6 +32,34 @@ jobs:
       - name: Publish Blazor WASM
         run: dotnet publish src/RockBandSpotify/RockBandSpotify.csproj -c Release -o dist
 
+      - name: Inject runtime config
+        # The published appsettings.json ships with placeholders; overwrite it here
+        # with values from repo settings so the Client ID / gateway URL aren't
+        # committed to source. Accepts either a secret or a variable (secret wins).
+        # Note: these values are NOT sensitive — a static SPA exposes whatever it
+        # uses — this just keeps them out of the repo. Unset values leave the app
+        # showing its "setup needed" banner, which is harmless.
+        env:
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID || vars.SPOTIFY_CLIENT_ID }}
+          PSN_GATEWAY_URL: ${{ secrets.PSN_GATEWAY_URL || vars.PSN_GATEWAY_URL }}
+        run: |
+          cat > dist/wwwroot/appsettings.json <<EOF
+          {
+            "Spotify": {
+              "ClientId": "${SPOTIFY_CLIENT_ID}",
+              "Scopes": "playlist-modify-public playlist-modify-private"
+            },
+            "Psn": {
+              "GatewayUrl": "${PSN_GATEWAY_URL}"
+            },
+            "Playlist": {
+              "Name": "Rock Band DLC",
+              "Description": "Synced from my owned Rock Band songs via rock-band-spotify.",
+              "Public": false
+            }
+          }
+          EOF
+
       - name: Rewrite base href for project pages
         # Project pages are served under /<repo>/, so the SPA needs a matching base href.
         run: |
