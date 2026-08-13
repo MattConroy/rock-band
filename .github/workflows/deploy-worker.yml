@@ -4,11 +4,19 @@ name: Deploy PSN gateway (Cloudflare)
 # (which, unlike a local sandbox, can reach Cloudflare's API). Run it from the
 # Actions tab → "Run workflow".
 #
+# Runs automatically when gateway files change on the default branch (same idea
+# as the Pages deploy), and on demand.
+#
 # Required repo secret:
 #   CLOUDFLARE_API_TOKEN   a token with the "Edit Cloudflare Workers" permission
 # Optional repo secret (only if deploy complains it can't pick an account):
 #   CLOUDFLARE_ACCOUNT_ID
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'gateway/**'
+      - '.github/workflows/deploy-worker.yml'
   workflow_dispatch:
 
 permissions:

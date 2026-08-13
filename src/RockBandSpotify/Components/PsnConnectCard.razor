@@ -16,6 +16,22 @@
             </button>
             <button class="rb-btn rb-btn-secondary" @onclick="OnDisconnect" disabled="@Fetching">Disconnect</button>
         </div>
+
+        @if (Library is { Songs.Count: > 0 })
+        {
+            <details class="songs-list">
+                <summary>Show @Library.Songs.Count fetched songs</summary>
+                <ul>
+                    @foreach (var s in Library.Songs)
+                    {
+                        <li>
+                            @s.Title
+                            <span class="rb-sub">— @(string.IsNullOrWhiteSpace(s.Artist) ? "(artist unparsed)" : s.Artist)</span>
+                        </li>
+                    }
+                </ul>
+            </details>
+        }
     }
     else
     {
