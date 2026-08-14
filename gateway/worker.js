@@ -53,34 +53,28 @@ export default {
 
       const url = new URL(request.url);
       if (url.searchParams.get("debug") === "1") {
-        // Wide scan to find ALL music DLC: don't assume publisher or "RB" prefix.
-        // Break down by publisher, by title code, and by content prefix.
-        const pub = {};
+        // Rock Band DLC: Harmonix publishers, content code starting RB or XRB.
+        const HARMONIX = new Set(["EP0006", "EP8802"]);
+        const codes = new Set();
         const byTitle = {};
-        const contentPrefix = {};
+        let n = 0;
         for (const e of entitlements) {
           const pid = e.productId || e.id || "";
           const parts = pid.split("-");
-          const publisher = parts[0] || "?";
-          const title = (parts[1] || "?").split("_")[0];
+          if (!HARMONIX.has(parts[0])) continue;
           const content = parts.slice(2).join("-");
-          pub[publisher] = (pub[publisher] || 0) + 1;
-          (byTitle[`${publisher}-${title}`] ??= { n: 0, sample: [] }).n++;
-          const box = byTitle[`${publisher}-${title}`];
-          if (box.sample.length < 5) box.sample.push(content);
-          contentPrefix[content.slice(0, 4)] = (contentPrefix[content.slice(0, 4)] || 0) + 1;
+          if (!/^X?RB/.test(content)) continue;
+          n++;
+          codes.add(content);
+          const t = `${parts[0]}-${(parts[1] || "").split("_")[0]}`;
+          byTitle[t] = (byTitle[t] || 0) + 1;
         }
-        const top = (obj, n = 30) =>
-          Object.entries(obj)
-            .map(([k, v]) => (typeof v === "number" ? { k, n: v } : { k, ...v }))
-            .sort((a, b) => b.n - a.n)
-            .slice(0, n);
         return json(
           {
-            total: entitlements.length,
-            publishers: top(pub, 20),
-            byTitle: top(byTitle, 40),
-            contentPrefixes: top(contentPrefix, 40),
+            rbEntitlements: n,
+            uniqueCodes: codes.size,
+            byTitle,
+            codes: [...codes].sort(),
           },
           200,
           cors,
