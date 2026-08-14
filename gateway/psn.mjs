@@ -118,6 +118,47 @@ export function parseSongName(raw) {
   return { title, artist };
 }
 
+// The 7 confirmed Rock Band game title codes (publisher-title). A song is owned
+// if either the entitlement id OR its productId sits under one of these.
+export const RB_TITLES = new Set([
+  "EP0006-BLES00228", // Rock Band 1
+  "EP0006-BLES00986", // Rock Band 2
+  "EP0006-CUSA03384", // Rock Band 4
+  "EP8802-CUSA02901", // Rock Band 4 / Rivals DLC
+  "EP8802-BLES01611", // PS3 Rock Band disc
+  "EP8802-NPEB00988", // Rock Band Blitz
+  "EP0006-NPEH90013", // Rock Band Unplugged
+]);
+
+const titleOf = (s) => {
+  const p = (s || "").split("-");
+  return (p[0] || "") + "-" + ((p[1] || "").split("_")[0]);
+};
+const contentOf = (s) => (s || "").split("-").slice(2).join("-");
+
+const BUNDLE_RE =
+  /DISCEXP|EXPO|TRACKP|BONUS|BLITZ0|EXPANSION|LRBX|ANNPACK|ANNSONG|RLPBONUS|WEEK\d|S\d+PASS|ROCKBAND1|HMXBAND|UNPLUGG|FAILURE|GUITARGS|SHIRTBGR|000000000|ROCKBAND4PS4/;
+
+// Returns unique owned Rock Band items: { code, id, type } where type is
+// "song" (individual), "disc" (on-disc PROCKBAND) or "bundle" (export/pack).
+export function ownedRockBandSongs(entitlements) {
+  const byCode = new Map();
+  for (const e of entitlements) {
+    const it = titleOf(e.id);
+    const pt = titleOf(e.productId || e.id);
+    if (!(RB_TITLES.has(it) || RB_TITLES.has(pt))) continue;
+    const code = contentOf(e.id) || contentOf(e.productId);
+    if (!code || byCode.has(code)) continue;
+    let type;
+    if (/^PROC/.test(code)) type = "disc";
+    else if (BUNDLE_RE.test(code)) type = "bundle";
+    else if (/^X?RB/.test(code)) type = "song";
+    else continue; // non-RB false positive
+    byCode.set(code, { code, id: e.id, type });
+  }
+  return [...byCode.values()];
+}
+
 export function toSongs(entitlements, include, exclude) {
   const songs = [];
   const seen = new Set();
