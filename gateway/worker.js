@@ -34,38 +34,14 @@ export default {
       return new Response(null, { status: 204, headers: cors });
     }
 
-    // Public store-name probe: GET /?store=<productId>&region=en-gb
-    // Fetches the PSN store product page and reports what names it can extract.
+    // Store name resolver: GET /?store=<id1,id2,...>&region=en-gb
+    // Fetches each PSN store product page and parses its <title> into title/artist.
     const url = new URL(request.url);
     if (request.method === "GET" && url.searchParams.has("store")) {
-      const pid = url.searchParams.get("store");
+      const ids = url.searchParams.get("store").split(",").filter(Boolean).slice(0, 45);
       const region = url.searchParams.get("region") || "en-gb";
-      try {
-        const r = await fetch(`https://store.playstation.com/${region}/product/${pid}`, {
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-            Accept: "text/html,application/xhtml+xml",
-            "Accept-Language": region,
-          },
-        });
-        const html = await r.text();
-        const pick = (re) => html.match(re)?.[1] ?? null;
-        return json(
-          {
-            pid,
-            status: r.status,
-            ogTitle: pick(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']*)["']/i),
-            pageTitle: pick(/<title>([^<]*)<\/title>/i),
-            jsonName: pick(/"name"\s*:\s*"([^"]{2,140})"/),
-            bytes: html.length,
-          },
-          200,
-          cors,
-        );
-      } catch (e) {
-        return json({ pid, error: String(e.message || e).slice(0, 200) }, 200, cors);
-      }
+      const results = await Promise.all(ids.map((pid) => resolveStoreName(pid, region)));
+      return json({ region, results }, 200, cors);
     }
 
     if (request.method !== "POST") {
@@ -136,4 +112,42 @@ function json(body, status, cors) {
     status,
     headers: { "Content-Type": "application/json", ...cors },
   });
+}
+
+const STORE_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+
+// Fetch one product page and parse its <title> ("'Song' - Artist") into fields.
+async function resolveStoreName(pid, region) {
+  try {
+    const r = await fetch(`https://store.playstation.com/${region}/product/${pid}`, {
+      headers: { "User-Agent": STORE_UA, Accept: "text/html", "Accept-Language": region },
+    });
+    if (r.status === 404) return { pid, status: 404 };
+    const html = await r.text();
+    const raw = html.match(/<title>([^<]*)<\/title>/i)?.[1] ?? "";
+    const { title, artist } = parseStoreTitle(raw);
+    return { pid, status: r.status, title, artist };
+  } catch (e) {
+    return { pid, status: "err", error: String(e.message || e).slice(0, 120) };
+  }
+}
+
+function decodeEntities(s) {
+  return (s || "")
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
+// "'Believer' - Imagine Dragons"  ->  { title: "Believer", artist: "Imagine Dragons" }
+function parseStoreTitle(raw) {
+  let t = decodeEntities(raw).trim().replace(/\s*\|\s*PlayStation.*$/i, "").trim();
+  const m = t.match(/^[’'"‘“](.+?)[’'"‘”]\s*[-–—]\s*(.+)$/);
+  if (m) return { title: m[1].trim(), artist: m[2].trim() };
+  return { title: t, artist: "" };
 }
