@@ -33,6 +33,41 @@ export default {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: cors });
     }
+
+    // Public store-name probe: GET /?store=<productId>&region=en-gb
+    // Fetches the PSN store product page and reports what names it can extract.
+    const url = new URL(request.url);
+    if (request.method === "GET" && url.searchParams.has("store")) {
+      const pid = url.searchParams.get("store");
+      const region = url.searchParams.get("region") || "en-gb";
+      try {
+        const r = await fetch(`https://store.playstation.com/${region}/product/${pid}`, {
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            Accept: "text/html,application/xhtml+xml",
+            "Accept-Language": region,
+          },
+        });
+        const html = await r.text();
+        const pick = (re) => html.match(re)?.[1] ?? null;
+        return json(
+          {
+            pid,
+            status: r.status,
+            ogTitle: pick(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']*)["']/i),
+            pageTitle: pick(/<title>([^<]*)<\/title>/i),
+            jsonName: pick(/"name"\s*:\s*"([^"]{2,140})"/),
+            bytes: html.length,
+          },
+          200,
+          cors,
+        );
+      } catch (e) {
+        return json({ pid, error: String(e.message || e).slice(0, 200) }, 200, cors);
+      }
+    }
+
     if (request.method !== "POST") {
       return json({ error: "Use POST with { npsso }." }, 405, cors);
     }
@@ -51,7 +86,6 @@ export default {
       const accessToken = await getAccessToken(npsso);
       const entitlements = await fetchEntitlements(accessToken);
 
-      const url = new URL(request.url);
       if (url.searchParams.get("debug") === "1") {
         // Rock Band DLC: Harmonix publishers, content code starting RB or XRB.
         const HARMONIX = new Set(["EP0006", "EP8802"]);
