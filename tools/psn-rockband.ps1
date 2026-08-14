@@ -74,8 +74,8 @@ Write-Host "   $($entitlements.Count) entitlements  ->  entitlements-raw.json"
 # 4) Rock Band filter: Harmonix publisher + content code starting RB or XRB; dedupe by code.
 $songs = [ordered]@{}
 foreach ($e in $entitlements) {
-  $pid = if ($e.productId) { $e.productId } else { $e.id }
-  $parts = $pid -split "-"
+  $prodId = if ($e.productId) { $e.productId } else { $e.id }
+  $parts = $prodId -split "-"
   if ($HARMONIX -notcontains $parts[0]) { continue }
   $content = ($parts[2..($parts.Count - 1)] -join "-")
   if ($content -notmatch "^X?RB") { continue }
