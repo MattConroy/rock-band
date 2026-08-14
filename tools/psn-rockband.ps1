@@ -35,9 +35,14 @@ Write-Host "-> Authenticating..."
 $scope   = [uri]::EscapeDataString("psn:mobile.v2.core psn:clientapp")
 $redir   = [uri]::EscapeDataString($REDIRECT_URI)
 $authUrl = "$AUTH_BASE/authorize?access_type=offline&client_id=$CLIENT_ID&response_type=code&scope=$scope&redirect_uri=$redir"
-$authResp = Invoke-WebRequest -Uri $authUrl -Headers @{ Cookie = "npsso=$Npsso" } `
-  -MaximumRedirection 0 -SkipHttpErrorCheck
-$location = [string]$authResp.Headers.Location
+# Use HttpClient so the 302 is returned (not followed) and we can read Location.
+$handler = [System.Net.Http.HttpClientHandler]::new()
+$handler.AllowAutoRedirect = $false
+$client = [System.Net.Http.HttpClient]::new($handler)
+$authReq = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Get, $authUrl)
+[void]$authReq.Headers.TryAddWithoutValidation("Cookie", "npsso=$Npsso")
+$authResp = $client.SendAsync($authReq).GetAwaiter().GetResult()
+$location = if ($authResp.Headers.Location) { $authResp.Headers.Location.OriginalString } else { "" }
 if ($location -notmatch "code=([^&]+)") { throw "Login failed - npsso is invalid or expired. Grab a fresh one." }
 $code = $Matches[1]
 
