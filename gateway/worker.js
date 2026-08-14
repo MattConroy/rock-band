@@ -14,11 +14,7 @@
 import {
   getAccessToken,
   fetchEntitlements,
-  entitlementName,
-  toSongs,
-  ENTITLEMENT_URL,
-  DEFAULT_INCLUDE,
-  DEFAULT_EXCLUDE,
+  ownedRockBandSongs,
 } from "./psn.mjs";
 
 export default {
@@ -91,12 +87,18 @@ export default {
         );
       }
 
-      const include = new RegExp(env.RB_INCLUDE_REGEX || DEFAULT_INCLUDE, "i");
-      const exclude = new RegExp(env.RB_EXCLUDE_REGEX || DEFAULT_EXCLUDE, "i");
-      const songs = toSongs(entitlements, include, exclude);
-
+      const items = ownedRockBandSongs(entitlements);
       return json(
-        { generatedAt: new Date().toISOString(), source: "psn-entitlements", songs },
+        {
+          generatedAt: new Date().toISOString(),
+          source: "psn-entitlements",
+          counts: {
+            song: items.filter((i) => i.type === "song").length,
+            disc: items.filter((i) => i.type === "disc").length,
+            bundle: items.filter((i) => i.type === "bundle").length,
+          },
+          items,
+        },
         200,
         cors,
       );
@@ -127,7 +129,9 @@ async function resolveStoreName(pid, region) {
     const html = await r.text();
     const raw = html.match(/<title>([^<]*)<\/title>/i)?.[1] ?? "";
     const { title, artist } = parseStoreTitle(raw);
-    return { pid, status: r.status, title, artist };
+    // r.url is the FINAL url after any redirects; r.redirected flags a redirect.
+    const finalId = r.url.match(/\/product\/([^/?#]+)/)?.[1] ?? null;
+    return { pid, status: r.status, title, artist, redirected: r.redirected, finalId };
   } catch (e) {
     return { pid, status: "err", error: String(e.message || e).slice(0, 120) };
   }
