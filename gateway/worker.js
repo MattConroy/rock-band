@@ -36,7 +36,7 @@ export default {
     if (request.method === "GET" && url.searchParams.has("store")) {
       const ids = url.searchParams.get("store").split(",").filter(Boolean).slice(0, 45);
       const region = url.searchParams.get("region") || "en-gb";
-      const results = await Promise.all(ids.map((pid) => resolveStoreName(pid, region)));
+      const results = await Promise.all(ids.map((productId) => resolveStoreName(productId, region)));
       return json({ region, results }, 200, cors);
     }
 
@@ -65,8 +65,8 @@ export default {
         const byTitle = {};
         let n = 0;
         for (const e of entitlements) {
-          const pid = e.productId || e.id || "";
-          const parts = pid.split("-");
+          const productId = e.productId || e.id || "";
+          const parts = productId.split("-");
           if (!HARMONIX.has(parts[0])) continue;
           const content = parts.slice(2).join("-");
           if (!/^X?RB/.test(content)) continue;
@@ -120,20 +120,20 @@ const STORE_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
 // Fetch one product page and parse its <title> ("'Song' - Artist") into fields.
-async function resolveStoreName(pid, region) {
+async function resolveStoreName(productId, region) {
   try {
-    const r = await fetch(`https://store.playstation.com/${region}/product/${pid}`, {
+    const r = await fetch(`https://store.playstation.com/${region}/product/${productId}`, {
       headers: { "User-Agent": STORE_UA, Accept: "text/html", "Accept-Language": region },
     });
-    if (r.status === 404) return { pid, status: 404 };
+    if (r.status === 404) return { productId, status: 404 };
     const html = await r.text();
     const raw = html.match(/<title>([^<]*)<\/title>/i)?.[1] ?? "";
     const { title, artist } = parseStoreTitle(raw);
     // r.url is the FINAL url after any redirects; r.redirected flags a redirect.
     const finalId = r.url.match(/\/product\/([^/?#]+)/)?.[1] ?? null;
-    return { pid, status: r.status, title, artist, redirected: r.redirected, finalId };
+    return { productId, status: r.status, title, artist, redirected: r.redirected, finalId };
   } catch (e) {
-    return { pid, status: "err", error: String(e.message || e).slice(0, 120) };
+    return { productId, status: "err", error: String(e.message || e).slice(0, 120) };
   }
 }
 
