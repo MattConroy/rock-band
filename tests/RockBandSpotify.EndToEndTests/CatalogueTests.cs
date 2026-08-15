@@ -112,6 +112,23 @@ public class CatalogueTests : AppPageTest
     }
 
     [Test]
+    public async Task Clear_button_on_the_search_field_resets_just_the_search()
+    {
+        var search = Page.GetByPlaceholder("Search song or artist…");
+        var clearSearch = Page.GetByTitle("Clear search");
+
+        await Expect(clearSearch).Not.ToBeVisibleAsync();
+
+        await search.FillAsync("believer");
+        await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
+        await Expect(clearSearch).ToBeVisibleAsync();
+
+        await clearSearch.ClickAsync();
+        await Expect(search).ToHaveValueAsync("");
+        await Expect(Page.GetByText("4960 shown")).ToBeVisibleAsync();
+    }
+
+    [Test]
     public async Task Only_the_grid_scrolls_not_the_page()
     {
         var pageScrollable = await Page.EvaluateAsync<bool>(
