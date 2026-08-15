@@ -12,10 +12,13 @@ two hosts, and CORS is locked to your app's origin.
 
 ```
 POST /              body: { "npsso": "<64-char token>" }
-POST /?debug=1      returns the raw entitlement list (for tuning the filters)
 ```
 
-Response: `{ "generatedAt", "source", "songs": [ { title, artist, source } ] }`
+Response: `{ "generatedAt", "source", "counts", "items": [ { code, id, type } ] }`
+
+`code` is the PSN content code (e.g. `RBBELIEVERXX2775`), `type` is
+`"song"`, `"disc"`, or `"bundle"`. The app matches these codes against its
+own static song catalogue — this Worker never resolves or returns names.
 
 ## Deploy (free, no credit card)
 
@@ -35,12 +38,6 @@ wrangler deploy --var ALLOWED_ORIGIN:https://<your-username>.github.io
 `wrangler deploy` prints the Worker URL (e.g.
 `https://rockband-psn-gateway.<you>.workers.dev`). Put that URL in the app's
 `wwwroot/appsettings.json` under `Psn.GatewayUrl`.
-
-## Tuning the song filter
-
-If songs are missing or misparsed, POST with `?debug=1` to see the raw entitlement
-names, then set `RB_INCLUDE_REGEX` / `RB_EXCLUDE_REGEX` (in `wrangler.toml` or via
-`--var`) to match your data. No redeploy of the app is needed — only the Worker.
 
 ## Local dev
 
