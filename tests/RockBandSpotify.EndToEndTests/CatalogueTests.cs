@@ -170,6 +170,35 @@ public class CatalogueTests : AppPageTest
     }
 
     [Test]
+    public async Task Rows_stay_a_uniform_height_even_when_text_wraps()
+    {
+        // Virtualize positions rows assuming every one is ItemSize tall. A
+        // wrapped 2-line row that's taller than that throws off its offset
+        // math, which showed up as row content rendering behind the sticky
+        // header. Every row must clip to the same height regardless of
+        // whether its text wraps.
+        var rows = await Page.Locator("tbody tr").AllAsync();
+        var heights = new List<float>();
+        foreach (var row in rows.Take(20))
+            heights.Add((await row.BoundingBoxAsync())!.Height);
+
+        Assert.That(heights.Distinct().Count(), Is.EqualTo(1), "every row should be the same height");
+    }
+
+    [Test]
+    public async Task Table_uses_separate_borders_not_collapsed()
+    {
+        // A border shared between the sticky thead and the first tbody row
+        // (border-collapse: collapse) breaks once that row scrolls out from
+        // under the header: the divider vanishes and row content can paint
+        // above the sticky header. Separate borders render independently of
+        // scroll position.
+        var borderCollapse = await Page.EvalOnSelectorAsync<string>(
+            ".catalogue-table", "el => getComputedStyle(el).borderCollapse");
+        Assert.That(borderCollapse, Is.EqualTo("separate"));
+    }
+
+    [Test]
     public async Task No_console_errors_while_browsing()
     {
         var errors = new List<string>();
