@@ -116,19 +116,19 @@ code {
 /* ---- Rock Band → Spotify: design tokens + shared primitives ----
    Component-specific layout lives in each component's scoped .razor.css.
    This file holds only the cross-cutting design system reused everywhere.
-   Palette is an original dark/amber treatment evoking a rhythm-game menu
-   (dark stage-lit panels, a bold amber accent, condensed uppercase
+   Palette is an original dark navy/blue treatment evoking a rhythm-game
+   menu (dark stage-lit panels, a bright blue accent, condensed uppercase
    headings) — no art, fonts, or assets from any Rock Band game. */
 :root {
     --rb-green: #1db954;
     --rb-green-dark: #169c46;
-    --rb-accent: #ff9d2e;
-    --rb-accent-dark: #e6851a;
-    --rb-bg: #121317;
-    --rb-card: #1c1e24;
-    --rb-border: #34363f;
-    --rb-text: #f2f1ec;
-    --rb-muted: #9b9ba5;
+    --rb-accent: #2f8fe0;
+    --rb-accent-dark: #1f6bb0;
+    --rb-bg: #0a0e16;
+    --rb-card: #131a26;
+    --rb-border: #223349;
+    --rb-text: #eef2f8;
+    --rb-muted: #8291a8;
 }
 
 body {
@@ -164,11 +164,11 @@ body {
 .rb-btn:hover:not(:disabled) { background: var(--rb-green-dark); }
 .rb-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .rb-btn-secondary {
-    background: #2a2c33;
+    background: #1a2231;
     color: var(--rb-text);
     border-radius: 6px;
 }
-.rb-btn-secondary:hover:not(:disabled) { background: #34363f; color: var(--rb-accent); }
+.rb-btn-secondary:hover:not(:disabled) { background: #223349; color: var(--rb-accent); }
 
 /* Pills */
 .rb-pill { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
@@ -191,7 +191,7 @@ body {
     padding: 0.3rem 0.4rem;
     border-radius: 6px;
     border: 1px solid var(--rb-border);
-    background: #23252c;
+    background: #131a26;
     color: var(--rb-text);
     max-width: 320px;
 }

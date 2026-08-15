@@ -54,9 +54,14 @@
     max-width: 160px;
 }
 
+/* Echoes a rhythm-game menu's "sorted by / X of Y" info strip. */
 .result-row {
     justify-content: space-between;
     margin-bottom: 0.5rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 4px;
+    background: linear-gradient(90deg, rgba(47, 143, 224, 0.28), rgba(47, 143, 224, 0.05));
+    border-left: 3px solid var(--rb-accent);
     font-size: 0.85rem;
     flex-shrink: 0;
 }
@@ -72,14 +77,14 @@
     width: 26px;
     height: 26px;
     padding: 0;
-    background: #2a2c33;
+    background: #1a2231;
     color: var(--rb-text);
     border: none;
     border-radius: 6px;
     cursor: pointer;
 }
 
-.icon-btn:hover { background: #34363f; color: var(--rb-accent); }
+.icon-btn:hover { background: #223349; color: var(--rb-accent); }
 
 .column-picker-menu {
     position: absolute;
@@ -143,4 +148,7 @@
     z-index: 1;
 }
 
-.catalogue-table tbody tr:hover { background: rgba(255, 157, 46, 0.08); }
+.catalogue-table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(47, 143, 224, 0.22), rgba(47, 143, 224, 0.04));
+    box-shadow: inset 3px 0 0 var(--rb-accent);
+}
