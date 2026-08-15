@@ -69,7 +69,7 @@ public class MatchingService
     }
 
     /// <summary>Cheap 0..1 similarity from normalized title + artist overlap.</summary>
-    private static double Score(RockBandSong song, SpotifyTrack track)
+    internal static double Score(RockBandSong song, SpotifyTrack track)
     {
         var titleScore = Similarity(Normalize(song.Title), Normalize(track.Name));
         var artistScore = track.Artists
@@ -79,7 +79,7 @@ public class MatchingService
         return (titleScore * 0.6) + (artistScore * 0.4);
     }
 
-    private static string Normalize(string value)
+    internal static string Normalize(string value)
     {
         var chars = value.ToLowerInvariant()
             .Where(c => char.IsLetterOrDigit(c) || c == ' ')
@@ -91,7 +91,7 @@ public class MatchingService
         return cleaned.Trim();
     }
 
-    private static double Similarity(string a, string b)
+    internal static double Similarity(string a, string b)
     {
         if (a.Length == 0 || b.Length == 0)
             return 0;

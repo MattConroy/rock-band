@@ -25,7 +25,7 @@
             <option value="">All eras</option>
             @foreach (var o in _origins)
             {
-                <option value="@o" selected="@(o == _origin)">@EraName(o)</option>
+                <option value="@o" selected="@(o == _origin)">@EraCatalog.Name(o)</option>
             }
         </select>
 
@@ -68,7 +68,7 @@
                         <td>@s.Artist</td>
                         <td>@s.Year</td>
                         <td>@s.Genre</td>
-                        <td title="@EraDescription(s.Origin)">@EraName(s.Origin)</td>
+                        <td title="@EraCatalog.Description(s.Origin)">@EraCatalog.Name(s.Origin)</td>
                     </tr>
                 </Virtualize>
             </tbody>
