@@ -26,6 +26,13 @@ public class CatalogueTests : AppPageTest
     }
 
     [Test]
+    public async Task Root_path_also_shows_the_catalogue()
+    {
+        await Page.GotoAsync("/");
+        await Expect(Page.GetByText("4960 shown")).ToBeVisibleAsync();
+    }
+
+    [Test]
     public async Task Standard_viewport_defaults_to_song_artist_year_genre_era()
     {
         // Default Playwright viewport (1280x720) is well above the narrow
