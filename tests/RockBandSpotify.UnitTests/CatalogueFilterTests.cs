@@ -7,14 +7,14 @@ public class CatalogueFilterTests
 {
     private static readonly List<CatalogueSong> Songs = new()
     {
-        new() { Id = 1, Song = "Believer", Artist = "Imagine Dragons", Genre = "Alternative", Origin = "DLC4" },
-        new() { Id = 2, Song = "Africa", Artist = "Toto", Genre = "Pop-Rock", Origin = "DLC4" },
-        new() { Id = 3, Song = "Africa", Artist = "Weezer", Genre = "Alternative", Origin = "DLC4" },
-        new() { Id = 4, Song = "Paranoid", Artist = "Black Sabbath", Genre = "Metal", Origin = "RB1" },
+        new() { Id = 1, Song = "Believer", Artist = "Imagine Dragons", Genre = "Alternative", Source = "RB4_DLC" },
+        new() { Id = 2, Song = "Africa", Artist = "Toto", Genre = "Pop-Rock", Source = "RB4_DLC" },
+        new() { Id = 3, Song = "Africa", Artist = "Weezer", Genre = "Alternative", Source = "RB4_DLC" },
+        new() { Id = 4, Song = "Paranoid", Artist = "Black Sabbath", Genre = "Metal", Source = "RB1" },
     };
 
-    private static List<CatalogueSong> Apply(string search = "", string genre = "", string origin = "")
-        => CatalogueFilter.Apply(Songs, search, genre, origin);
+    private static List<CatalogueSong> Apply(string search = "", string genre = "", string source = "")
+        => CatalogueFilter.Apply(Songs, search, genre, source);
 
     [Fact]
     public void No_filters_returns_everything()
@@ -37,8 +37,8 @@ public class CatalogueFilterTests
         => Assert.Equal(new[] { 1, 3 }, Apply(genre: "Alternative").Select(s => s.Id));
 
     [Fact]
-    public void Origin_filter_is_exact_match()
-        => Assert.Equal(new[] { 4 }, Apply(origin: "RB1").Select(s => s.Id));
+    public void Source_filter_is_exact_match()
+        => Assert.Equal(new[] { 4 }, Apply(source: "RB1").Select(s => s.Id));
 
     [Fact]
     public void Filters_combine_with_AND()

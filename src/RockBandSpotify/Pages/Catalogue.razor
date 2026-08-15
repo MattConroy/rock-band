@@ -23,11 +23,11 @@
                 }
             </select>
 
-            <select class="rb-select" @onchange="OnOriginChanged">
-                <option value="">All eras</option>
-                @foreach (var o in _origins)
+            <select class="rb-select" @onchange="OnSourceChanged">
+                <option value="">All sources</option>
+                @foreach (var src in _sources)
                 {
-                    <option value="@o" selected="@(o == _origin)">@EraCatalog.Name(o)</option>
+                    <option value="@src" selected="@(src == _source)">@SourceCatalog.Name(src)</option>
                 }
             </select>
         </div>

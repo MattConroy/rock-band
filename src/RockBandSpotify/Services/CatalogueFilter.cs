@@ -12,7 +12,7 @@ public static class CatalogueFilter
         IEnumerable<CatalogueSong> songs,
         string search,
         string genre,
-        string origin)
+        string source)
     {
         IEnumerable<CatalogueSong> q = songs;
 
@@ -23,8 +23,8 @@ public static class CatalogueFilter
         if (genre.Length > 0)
             q = q.Where(s => s.Genre == genre);
 
-        if (origin.Length > 0)
-            q = q.Where(s => s.Origin == origin);
+        if (source.Length > 0)
+            q = q.Where(s => s.Source == source);
 
         return q.ToList();
     }

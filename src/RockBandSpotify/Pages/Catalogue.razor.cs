@@ -31,23 +31,23 @@ public partial class Catalogue
     {
         new("Year", "Year", s => s.Year?.ToString()),
         new("Genre", "Genre", s => s.Genre),
-        new("Era", "Era", s => EraCatalog.Name(s.Origin), s => EraCatalog.Description(s.Origin)),
+        new("Source", "Source", s => SourceCatalog.Name(s.Source), s => SourceCatalog.Description(s.Source)),
     };
 
     private List<CatalogueSong> _all = new();
     private List<CatalogueSong> _filtered = new();
 
     private List<string> _genres = new();
-    private List<string> _origins = new();
+    private List<string> _sources = new();
 
     private string _search = "";
     private string _genre = "";
-    private string _origin = "";
+    private string _source = "";
 
     private readonly HashSet<string> _visibleColumns = new();
     private bool _showColumnPicker;
 
-    private bool HasFilters => _search.Length > 0 || _genre.Length > 0 || _origin.Length > 0;
+    private bool HasFilters => _search.Length > 0 || _genre.Length > 0 || _source.Length > 0;
 
     protected override void OnInitialized()
     {
@@ -58,11 +58,11 @@ public partial class Catalogue
     {
         _all = (await Catalog.GetSongsAsync()).ToList();
         _genres = _all.Where(s => !string.IsNullOrEmpty(s.Genre)).Select(s => s.Genre!).Distinct().OrderBy(g => g).ToList();
-        _origins = _all.Where(s => !string.IsNullOrEmpty(s.Origin)).Select(s => s.Origin!).Distinct().OrderBy(EraCatalog.Name).ToList();
+        _sources = _all.Where(s => !string.IsNullOrEmpty(s.Source)).Select(s => s.Source!).Distinct().OrderBy(SourceCatalog.Name).ToList();
         ApplyFilters();
     }
 
-    // Narrow: just Song/Artist. Everything else: + Year/Genre/Era.
+    // Narrow: just Song/Artist. Everything else: + Year/Genre/Source.
     private HashSet<string> DefaultColumnsForViewport()
     {
         int width;
@@ -75,7 +75,7 @@ public partial class Catalogue
             width = 1024; // pre-rendering or non-WASM host: assume desktop
         }
 
-        return width < 640 ? new HashSet<string>() : new HashSet<string> { "Year", "Genre", "Era" };
+        return width < 640 ? new HashSet<string>() : new HashSet<string> { "Year", "Genre", "Source" };
     }
 
     private HashSet<string>? LoadColumnPreference()
@@ -123,15 +123,15 @@ public partial class Catalogue
         ApplyFilters();
     }
 
-    private void OnOriginChanged(ChangeEventArgs e)
+    private void OnSourceChanged(ChangeEventArgs e)
     {
-        _origin = e.Value?.ToString() ?? "";
+        _source = e.Value?.ToString() ?? "";
         ApplyFilters();
     }
 
     private void ClearFilters()
     {
-        _search = ""; _genre = ""; _origin = "";
+        _search = ""; _genre = ""; _source = "";
         ApplyFilters();
     }
 
@@ -142,5 +142,5 @@ public partial class Catalogue
     }
 
     private void ApplyFilters()
-        => _filtered = CatalogueFilter.Apply(_all, _search, _genre, _origin);
+        => _filtered = CatalogueFilter.Apply(_all, _search, _genre, _source);
 }

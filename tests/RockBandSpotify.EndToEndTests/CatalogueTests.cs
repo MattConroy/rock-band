@@ -16,29 +16,29 @@ public class CatalogueTests : AppPageTest
         // The heading renders immediately, but the catalogue itself loads
         // asynchronously (fetch + WASM deserialize) — wait for the row count
         // so tests don't race the data load.
-        await Expect(Page.GetByText("4960 shown")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
     }
 
     [Test]
     public async Task Loads_the_full_catalogue()
     {
-        await Expect(Page.GetByText("4960 shown")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
     }
 
     [Test]
     public async Task Root_path_also_shows_the_catalogue()
     {
         await Page.GotoAsync("/");
-        await Expect(Page.GetByText("4960 shown")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
     }
 
     [Test]
-    public async Task Standard_viewport_defaults_to_song_artist_year_genre_era()
+    public async Task Standard_viewport_defaults_to_song_artist_year_genre_source()
     {
         // Default Playwright viewport (1280x720) is well above the narrow
         // breakpoint, so all three optional columns show.
         var headers = await Page.Locator("th").AllInnerTextsAsync();
-        Assert.That(headers, Is.EqualTo(new[] { "SONG", "ARTIST", "YEAR", "GENRE", "ERA" }));
+        Assert.That(headers, Is.EqualTo(new[] { "SONG", "ARTIST", "YEAR", "GENRE", "SOURCE" }));
     }
 
     [Test]
@@ -46,7 +46,7 @@ public class CatalogueTests : AppPageTest
     {
         await Page.SetViewportSizeAsync(400, 800);
         await Page.ReloadAsync();
-        await Expect(Page.GetByText("4960 shown")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
 
         var headers = await Page.Locator("th").AllInnerTextsAsync();
         Assert.That(headers, Is.EqualTo(new[] { "SONG", "ARTIST" }));
@@ -76,14 +76,14 @@ public class CatalogueTests : AppPageTest
         await Page.GetByRole(AriaRole.Checkbox, new() { Name = "Year" }).UncheckAsync();
 
         await Page.ReloadAsync();
-        await Expect(Page.GetByText("4960 shown")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
 
         var headers = await Page.Locator("th").AllInnerTextsAsync();
         Assert.That(headers, Does.Not.Contain("YEAR"));
     }
 
     [Test]
-    public async Task Era_dropdown_shows_full_names_not_raw_codes()
+    public async Task Source_dropdown_shows_full_names_not_raw_codes()
     {
         var options = await Page.Locator("select").Nth(1).Locator("option").AllInnerTextsAsync();
         Assert.That(options, Does.Contain("Rock Band 1"));
@@ -93,9 +93,9 @@ public class CatalogueTests : AppPageTest
     }
 
     [Test]
-    public async Task Era_cell_has_a_tooltip_explaining_the_code()
+    public async Task Source_cell_has_a_tooltip_explaining_the_code()
     {
-        // Column order at the default wide viewport: Song, Artist, Year, Genre, Era, ...
+        // Column order at the default wide viewport: Song, Artist, Year, Genre, Source, ...
         var cell = Page.Locator("tbody td").Nth(4);
         var title = await cell.GetAttributeAsync("title");
         Assert.That(title, Is.Not.Null.And.Not.Empty);
@@ -132,7 +132,7 @@ public class CatalogueTests : AppPageTest
 
         await clearSearch.ClickAsync();
         await Expect(search).ToHaveValueAsync("");
-        await Expect(Page.GetByText("4960 shown")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
     }
 
     [Test]

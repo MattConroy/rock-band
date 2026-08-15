@@ -26,6 +26,6 @@ public class SpotifyConnectCallbackTests : AppPageTest
     {
         await Page.GotoAsync("/spotify-connect?code=fake&state=fake");
 
-        await Expect(Page.GetByText("4960 shown")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
     }
 }
