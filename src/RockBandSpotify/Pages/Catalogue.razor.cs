@@ -16,6 +16,7 @@ public partial class Catalogue
 {
     [Inject] private CatalogueService Catalog { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
+    [Inject] private NavigationManager Nav { get; set; } = default!;
 
     private const string ColumnsStorageKey = "rb_catalogue_columns";
 
@@ -49,13 +50,29 @@ public partial class Catalogue
 
     private bool HasFilters => _search.Length > 0 || _genre.Length > 0 || _origin.Length > 0;
 
+    // Spotify's OAuth redirect always returns to the app's base address, which
+    // is this page now that the catalogue is the homepage. If we're completing
+    // a login, hand off to the connect page (preserving the query string)
+    // instead of loading the catalogue.
+    private bool _redirectingToConnect;
+
     protected override void OnInitialized()
     {
+        var query = new Uri(Nav.Uri).Query;
+        if (query.Contains("code=") && query.Contains("state="))
+        {
+            _redirectingToConnect = true;
+            Nav.NavigateTo("/connect" + query);
+            return;
+        }
+
         _visibleColumns.UnionWith(LoadColumnPreference() ?? DefaultColumnsForViewport());
     }
 
     protected override async Task OnInitializedAsync()
     {
+        if (_redirectingToConnect) return;
+
         _all = (await Catalog.GetSongsAsync()).ToList();
         _genres = _all.Where(s => !string.IsNullOrEmpty(s.Genre)).Select(s => s.Genre!).Distinct().OrderBy(g => g).ToList();
         _origins = _all.Where(s => !string.IsNullOrEmpty(s.Origin)).Select(s => s.Origin!).Distinct().OrderBy(EraCatalog.Name).ToList();
