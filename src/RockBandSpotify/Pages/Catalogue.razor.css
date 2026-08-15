@@ -193,7 +193,6 @@
 .catalogue-table th:nth-child(2),
 .catalogue-table td:nth-child(2) { width: 22%; }
 
-.catalogue-table th,
 .catalogue-table td {
     text-align: left;
     padding: 0.4rem 0.55rem;
@@ -203,13 +202,41 @@
     line-height: 1.3;
 }
 
+/* Padding lives on .th-sort-btn, not the th itself, so the whole header
+   cell is one tap target instead of just the text inside it. */
 .catalogue-table th {
+    padding: 0;
+    border-bottom: 2px solid var(--rb-accent);
+    vertical-align: middle;
+}
+
+.th-sort-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.4rem 0.55rem;
+    background: none;
+    border: none;
+    font-family: inherit;
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.6px;
     font-weight: 800;
     color: var(--rb-accent);
-    border-bottom: 2px solid var(--rb-accent);
+    text-align: left;
+    line-height: 1.3;
+    cursor: pointer;
+}
+
+.th-sort-btn:hover,
+.th-sort-btn:focus-visible {
+    color: var(--rb-text);
+}
+
+.sort-indicator {
+    font-size: 0.6rem;
 }
 
 .catalogue-table tbody tr:hover {
