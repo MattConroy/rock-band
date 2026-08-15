@@ -3,13 +3,13 @@
    instead of growing to fit all their content. Pages that don't opt into
    that (Home) still overflow this box and scroll the page normally, since
    only .app-shell itself is height-bound, not made to hide overflow.
-   100dvh (not 100vh) because mobile Safari/Chrome calculate 100vh as if the
-   address bar were hidden, so a shell sized to exactly 100vh runs taller
-   than what's actually visible and the whole page scrolls to reach the
-   overflow. 100vh stays as the fallback for browsers without dvh support. */
+   --app-vh (set in js/interop.js from window.innerHeight, kept live on
+   resize) rather than 100vh/100dvh, which both proved unreliable against
+   real mobile browser chrome. 100vh is the fallback for the brief window
+   before that script runs. */
 .app-shell {
     height: 100vh;
-    height: 100dvh;
+    height: var(--app-vh, 100vh);
     display: flex;
     flex-direction: column;
 }
