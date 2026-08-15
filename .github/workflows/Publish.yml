@@ -1,0 +1,94 @@
+name: Publish
+
+# Deploys both halves of the app on every push to main: the Blazor WASM app to
+# GitHub Pages, and the PSN gateway to Cloudflare. The two are independent —
+# deploying the (usually unchanged) Worker alongside the app is cheap and
+# keeps this workflow to a single trigger instead of two.
+#
+# Pages requires: repo Settings → Pages → Build and deployment → Source =
+# "GitHub Actions".
+#
+# Gateway requires repo secret CLOUDFLARE_API_TOKEN (a token with the "Edit
+# Cloudflare Workers" permission); optionally CLOUDFLARE_ACCOUNT_ID if deploy
+# complains it can't pick an account.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  PublishPages:
+    name: PublishPages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish Blazor WASM
+        run: dotnet publish src/RockBandSpotify/RockBandSpotify.csproj -c Release -o dist
+
+      - name: Rewrite base href for project pages
+        # Project pages are served under /<repo>/, so the SPA needs a matching base href.
+        run: |
+          REPO="${GITHUB_REPOSITORY#*/}"
+          sed -i "s|<base href=\"/\" />|<base href=\"/$REPO/\" />|g" dist/wwwroot/index.html
+
+      - name: Add SPA fallback and .nojekyll
+        run: |
+          cp dist/wwwroot/index.html dist/wwwroot/404.html
+          touch dist/wwwroot/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/wwwroot
+
+  DeployPages:
+    name: DeployPages
+    needs: PublishPages
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  PublishGateway:
+    name: PublishGateway
+    runs-on: ubuntu-latest
+    concurrency:
+      group: gateway-deploy
+      cancel-in-progress: true
+    defaults:
+      run:
+        working-directory: gateway
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Worker
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: gateway
+          command: deploy
+
+      - name: Show deployed URL
+        run: |
+          echo "### Gateway deployed" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "URL: \`${{ steps.deploy.outputs.deployment-url }}\`" >> "$GITHUB_STEP_SUMMARY"

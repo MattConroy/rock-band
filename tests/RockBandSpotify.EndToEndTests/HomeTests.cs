@@ -1,4 +1,4 @@
-namespace RockBandSpotify.E2E;
+namespace RockBandSpotify.EndToEndTests;
 
 /// <summary>Smoke test for the original Spotify/PSN connect flow, so the
 /// layout change made for the catalogue page can't silently break it.</summary>

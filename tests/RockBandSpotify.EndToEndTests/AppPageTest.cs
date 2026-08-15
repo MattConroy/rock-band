@@ -1,7 +1,7 @@
 using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 
-namespace RockBandSpotify.E2E;
+namespace RockBandSpotify.EndToEndTests;
 
 /// <summary>
 /// Base for browser tests: points at the running app (started by the caller —

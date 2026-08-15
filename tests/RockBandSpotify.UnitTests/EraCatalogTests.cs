@@ -1,6 +1,6 @@
 using RockBandSpotify.Models;
 
-namespace RockBandSpotify.Tests;
+namespace RockBandSpotify.UnitTests;
 
 public class EraCatalogTests
 {

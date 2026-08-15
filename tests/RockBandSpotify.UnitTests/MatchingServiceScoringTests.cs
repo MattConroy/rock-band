@@ -1,7 +1,7 @@
 using RockBandSpotify.Models;
 using RockBandSpotify.Services;
 
-namespace RockBandSpotify.Tests;
+namespace RockBandSpotify.UnitTests;
 
 public class MatchingServiceScoringTests
 {
