@@ -63,8 +63,23 @@
 
 .column-picker {
     position: relative;
-    margin-left: auto;
 }
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    background: #e9ecef;
+    color: var(--rb-text);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.icon-btn:hover { background: #dde1e6; }
 
 .column-picker-menu {
     position: absolute;
