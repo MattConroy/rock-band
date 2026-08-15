@@ -12,10 +12,6 @@ export const AUTH_BASE = "https://ca.account.sony.com/api/authz/v3/oauth";
 export const ENTITLEMENT_URL =
   "https://m.np.playstation.com/api/entitlement/v2/users/me/internal/entitlements";
 
-export const DEFAULT_INCLUDE = "rock ?band";
-export const DEFAULT_EXCLUDE =
-  "rock band 4|rock band rivals|season pass|full game|bundle|track pack|rb4";
-
 // npsso -> authorization code -> access token. The authorize call must NOT follow
 // its redirect; the code is in the Location header of the 302.
 export async function getAccessToken(npsso) {
@@ -85,39 +81,6 @@ export async function fetchEntitlements(accessToken) {
   return [...byId.values()];
 }
 
-// Probe the several field names PSN has used for a human-readable entitlement name.
-export function entitlementName(e) {
-  return (
-    e?.drm_def?.contentName ||
-    e?.game_meta?.name ||
-    e?.product_name ||
-    e?.entitlement_name ||
-    e?.name ||
-    ""
-  );
-}
-
-// Rock Band store names look like "Song Name - Artist" or '"Song" by Artist'.
-export function parseSongName(raw) {
-  let s = String(raw).trim();
-  s = s.replace(/^rock ?band[\s:–-]*\s*/i, "").trim();
-  s = s.replace(/^["“](.+)["”]$/u, "$1").trim();
-
-  let title = s;
-  let artist = "";
-  const byMatch = s.match(/^["“]?(.+?)["”]?\s+by\s+(.+)$/i);
-  const dashMatch = s.match(/^(.+?)\s+[-–—]\s+(.+)$/);
-  if (byMatch) {
-    title = byMatch[1].trim();
-    artist = byMatch[2].trim();
-  } else if (dashMatch) {
-    title = dashMatch[1].trim();
-    artist = dashMatch[2].trim();
-  }
-  title = title.replace(/^["“](.+)["”]$/u, "$1").trim();
-  return { title, artist };
-}
-
 // The 7 confirmed Rock Band game title codes (publisher-title). A song is owned
 // if either the entitlement id OR its productId sits under one of these.
 export const RB_TITLES = new Set([
@@ -157,25 +120,4 @@ export function ownedRockBandSongs(entitlements) {
     byCode.set(code, { code, id: e.id, type });
   }
   return [...byCode.values()];
-}
-
-export function toSongs(entitlements, include, exclude) {
-  const songs = [];
-  const seen = new Set();
-  for (const e of entitlements) {
-    const name = entitlementName(e);
-    if (!name || !include.test(name) || exclude.test(name)) continue;
-    const { title, artist } = parseSongName(name);
-    if (!title) continue;
-    const key = `${artist}|${title}`.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    songs.push({ title, artist, source: name });
-  }
-  songs.sort(
-    (a, b) =>
-      (a.artist || "").localeCompare(b.artist || "") ||
-      a.title.localeCompare(b.title),
-  );
-  return songs;
 }
