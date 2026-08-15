@@ -1,0 +1,87 @@
+@page "/catalogue"
+
+<PageTitle>Song catalogue — Rock Band → Spotify</PageTitle>
+
+<div class="rb-card">
+    <h2>Browse the Rock Band catalogue</h2>
+    <p class="rb-muted">
+        Every song officially released for Rock Band — @_all.Count tracks.
+        Check the ones you own; connecting PlayStation later will pre-check the rest for you.
+    </p>
+
+    <div class="filter-bar">
+        <input class="rb-select search" type="search" placeholder="Search song or artist…"
+               value="@_search" @oninput="OnSearchChanged" />
+
+        <select class="rb-select" @onchange="OnGenreChanged">
+            <option value="">All genres</option>
+            @foreach (var g in _genres)
+            {
+                <option value="@g" selected="@(g == _genre)">@g</option>
+            }
+        </select>
+
+        <select class="rb-select" @onchange="OnOriginChanged">
+            <option value="">All eras</option>
+            @foreach (var o in _origins)
+            {
+                <option value="@o" selected="@(o == _origin)">@o</option>
+            }
+        </select>
+
+        <select class="rb-select" @onchange="OnRb4Changed">
+            <option value="">Any RB4 availability</option>
+            @foreach (var r in _rb4Values)
+            {
+                <option value="@r" selected="@(r == _rb4)">@r</option>
+            }
+        </select>
+
+        <label class="rb-row-actions selected-only">
+            <input type="checkbox" checked="@_selectedOnly" @onchange="OnSelectedOnlyChanged" />
+            Selected only
+        </label>
+
+        @if (HasFilters)
+        {
+            <button class="rb-btn rb-btn-secondary" @onclick="ClearFilters">Clear filters</button>
+        }
+    </div>
+
+    <div class="rb-row-actions result-row">
+        <span class="rb-muted">@_filtered.Count shown</span>
+        <span class="rb-pill rb-pill-ok">@_selected.Count selected</span>
+    </div>
+
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="col-check"></th>
+                    <th>Song</th>
+                    <th>Artist</th>
+                    <th>Year</th>
+                    <th>Genre</th>
+                    <th>Era</th>
+                    <th>RB4</th>
+                </tr>
+            </thead>
+            <tbody>
+                <Virtualize Items="_filtered" Context="s" ItemSize="38">
+                    <tr>
+                        <td>
+                            <input type="checkbox" checked="@_selected.Contains(s.Id)"
+                                   @onchange="e => ToggleSelected(s.Id, e)" />
+                        </td>
+                        <td>@s.Song</td>
+                        <td>@s.Artist</td>
+                        <td>@s.Year</td>
+                        <td>@s.Genre</td>
+                        <td>@s.Origin</td>
+                        <td>@s.Rb4</td>
+                    </tr>
+                </Virtualize>
+            </tbody>
+        </table>
+    </div>
+</div>
