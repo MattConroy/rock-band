@@ -36,9 +36,20 @@
         {
             <button class="rb-btn rb-btn-secondary" @onclick="ClearFilters">Clear filters</button>
         }
+    </div>
+
+    <div class="rb-row-actions result-row">
+        <span class="rb-muted">@_filtered.Count shown</span>
 
         <div class="column-picker">
-            <button class="rb-btn rb-btn-secondary" @onclick="ToggleColumnPicker">Columns ▾</button>
+            <button type="button" class="icon-btn" @onclick="ToggleColumnPicker"
+                    title="Choose columns" aria-label="Choose columns">
+                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                    <rect x="1" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
+                    <rect x="6.25" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
+                    <rect x="11.5" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
+                </svg>
+            </button>
             @if (_showColumnPicker)
             {
                 <div class="column-picker-menu">
@@ -53,10 +64,6 @@
                 </div>
             }
         </div>
-    </div>
-
-    <div class="rb-row-actions result-row">
-        <span class="rb-muted">@_filtered.Count shown</span>
     </div>
 
     <div class="table-wrap">

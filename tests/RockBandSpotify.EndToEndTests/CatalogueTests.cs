@@ -55,7 +55,7 @@ public class CatalogueTests : AppPageTest
     [Test]
     public async Task Column_picker_toggles_a_column_on_and_off()
     {
-        await Page.GetByText("Columns ▾").ClickAsync();
+        await Page.GetByLabel("Choose columns").ClickAsync();
         var yearCheckbox = Page.GetByRole(AriaRole.Checkbox, new() { Name = "Year" });
 
         await Expect(yearCheckbox).ToBeCheckedAsync(); // on by default at this width
@@ -72,7 +72,7 @@ public class CatalogueTests : AppPageTest
     [Test]
     public async Task Column_choice_survives_a_reload()
     {
-        await Page.GetByText("Columns ▾").ClickAsync();
+        await Page.GetByLabel("Choose columns").ClickAsync();
         await Page.GetByRole(AriaRole.Checkbox, new() { Name = "Year" }).UncheckAsync();
 
         await Page.ReloadAsync();
