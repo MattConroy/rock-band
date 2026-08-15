@@ -1,3 +1,3 @@
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("RockBandSpotify.Tests")]
+[assembly: InternalsVisibleTo("RockBandSpotify.UnitTests")]

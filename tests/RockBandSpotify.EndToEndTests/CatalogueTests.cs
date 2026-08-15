@@ -1,6 +1,6 @@
 using Microsoft.Playwright;
 
-namespace RockBandSpotify.E2E;
+namespace RockBandSpotify.EndToEndTests;
 
 /// <summary>
 /// Browser tests for the standalone /catalogue page — the parts that only a

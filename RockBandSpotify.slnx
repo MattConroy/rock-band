@@ -3,7 +3,7 @@
     <Project Path="src/RockBandSpotify/RockBandSpotify.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/RockBandSpotify.E2E/RockBandSpotify.E2E.csproj" />
-    <Project Path="tests/RockBandSpotify.Tests/RockBandSpotify.Tests.csproj" />
+    <Project Path="tests/RockBandSpotify.EndToEndTests/RockBandSpotify.EndToEndTests.csproj" />
+    <Project Path="tests/RockBandSpotify.UnitTests/RockBandSpotify.UnitTests.csproj" />
   </Folder>
 </Solution>
