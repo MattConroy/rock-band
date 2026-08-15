@@ -126,10 +126,17 @@
    any given scroll position — auto layout was recalculating "ideal" widths
    from the currently-visible rows alone, so columns visibly jumped between
    scroll positions. Song and Artist get fixed shares; whichever optional
-   columns (Year/Genre/Source) are toggled on split the remainder evenly. */
+   columns (Year/Genre/Source) are toggled on split the remainder evenly.
+
+   border-collapse: separate (not collapse) because a collapsed border
+   shared between the sticky thead and the first tbody row breaks once that
+   row scrolls out from under the header — the divider line vanishes and row
+   content can paint above the sticky header. Separate borders render
+   independently of scroll position. */
 .catalogue-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     table-layout: fixed;
     font-size: 0.82rem;
 }
@@ -139,6 +146,20 @@
 
 .catalogue-table th:nth-child(2),
 .catalogue-table td:nth-child(2) { width: 26%; }
+
+/* Virtualize needs every row to be the same height to position items
+   correctly — a wrapped 2-line row (~53px) among 1-line rows (~33px) throws
+   off its offset math, which showed up as row content rendering behind/above
+   the sticky header. Fixing every row to one height (matching ItemSize on
+   the Virtualize element below) and clipping anything taller keeps that
+   assumption true; two lines comfortably fits every song in the catalogue,
+   including the longest title (92 characters). */
+.catalogue-table td {
+    height: 54px;
+    max-height: 54px;
+    overflow: hidden;
+    line-height: 1.3;
+}
 
 .catalogue-table th,
 .catalogue-table td {
