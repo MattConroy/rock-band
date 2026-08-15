@@ -26,12 +26,12 @@ public class CatalogueTests : AppPageTest
     }
 
     [Test]
-    public async Task Wide_viewport_shows_song_artist_and_the_wide_default_columns()
+    public async Task Standard_viewport_defaults_to_song_artist_year_genre_era()
     {
-        // Default Playwright viewport (1280x720) is "wide" — Year/Genre/Era plus
-        // RB1/2, RB3, Other. RB4 stays customizer-only at every width.
+        // Default Playwright viewport (1280x720) is well above the narrow
+        // breakpoint, so all three optional columns show.
         var headers = await Page.Locator("th").AllInnerTextsAsync();
-        Assert.That(headers, Is.EqualTo(new[] { "SONG", "ARTIST", "YEAR", "GENRE", "ERA", "RB1/2", "RB3", "OTHER" }));
+        Assert.That(headers, Is.EqualTo(new[] { "SONG", "ARTIST", "YEAR", "GENRE", "ERA" }));
     }
 
     [Test]
@@ -49,30 +49,30 @@ public class CatalogueTests : AppPageTest
     public async Task Column_picker_toggles_a_column_on_and_off()
     {
         await Page.GetByText("Columns ▾").ClickAsync();
-        var rb4Checkbox = Page.GetByRole(AriaRole.Checkbox, new() { Name = "RB4" });
+        var yearCheckbox = Page.GetByRole(AriaRole.Checkbox, new() { Name = "Year" });
 
-        await Expect(rb4Checkbox).Not.ToBeCheckedAsync(); // off by default at every width
-        await rb4Checkbox.CheckAsync();
+        await Expect(yearCheckbox).ToBeCheckedAsync(); // on by default at this width
+        await yearCheckbox.UncheckAsync();
 
         var headers = await Page.Locator("th").AllInnerTextsAsync();
-        Assert.That(headers, Does.Contain("RB4"));
+        Assert.That(headers, Does.Not.Contain("YEAR"));
 
-        await rb4Checkbox.UncheckAsync();
+        await yearCheckbox.CheckAsync();
         headers = await Page.Locator("th").AllInnerTextsAsync();
-        Assert.That(headers, Does.Not.Contain("RB4"));
+        Assert.That(headers, Does.Contain("YEAR"));
     }
 
     [Test]
     public async Task Column_choice_survives_a_reload()
     {
         await Page.GetByText("Columns ▾").ClickAsync();
-        await Page.GetByRole(AriaRole.Checkbox, new() { Name = "RB4" }).CheckAsync();
+        await Page.GetByRole(AriaRole.Checkbox, new() { Name = "Year" }).UncheckAsync();
 
         await Page.ReloadAsync();
         await Expect(Page.GetByText("4960 shown")).ToBeVisibleAsync();
 
         var headers = await Page.Locator("th").AllInnerTextsAsync();
-        Assert.That(headers, Does.Contain("RB4"));
+        Assert.That(headers, Does.Not.Contain("YEAR"));
     }
 
     [Test]
