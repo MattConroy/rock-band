@@ -18,6 +18,20 @@
 
 .search { flex: 1 1 220px; max-width: 320px; }
 
+/* Genre and era belong together — keep them as one flex item so they wrap
+   as a pair instead of splitting across lines independently. */
+.select-group {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.select-group .rb-select {
+    min-width: 0;
+    max-width: 160px;
+}
+
 .result-row {
     justify-content: space-between;
     margin-bottom: 0.5rem;

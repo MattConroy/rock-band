@@ -12,21 +12,23 @@
         <input class="rb-select search" type="search" placeholder="Search song or artist…"
                value="@_search" @oninput="OnSearchChanged" />
 
-        <select class="rb-select" @onchange="OnGenreChanged">
-            <option value="">All genres</option>
-            @foreach (var g in _genres)
-            {
-                <option value="@g" selected="@(g == _genre)">@g</option>
-            }
-        </select>
+        <div class="select-group">
+            <select class="rb-select" @onchange="OnGenreChanged">
+                <option value="">All genres</option>
+                @foreach (var g in _genres)
+                {
+                    <option value="@g" selected="@(g == _genre)">@g</option>
+                }
+            </select>
 
-        <select class="rb-select" @onchange="OnOriginChanged">
-            <option value="">All eras</option>
-            @foreach (var o in _origins)
-            {
-                <option value="@o" selected="@(o == _origin)">@EraCatalog.Name(o)</option>
-            }
-        </select>
+            <select class="rb-select" @onchange="OnOriginChanged">
+                <option value="">All eras</option>
+                @foreach (var o in _origins)
+                {
+                    <option value="@o" selected="@(o == _origin)">@EraCatalog.Name(o)</option>
+                }
+            </select>
+        </div>
 
         @if (HasFilters)
         {
