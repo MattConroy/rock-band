@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using RockBandSpotify.Models;
 
@@ -18,21 +19,24 @@ public class SpotifyAuthService
     private const string TokenEndpoint = "https://accounts.spotify.com/api/token";
     private const string VerifierKey = "rb_pkce_verifier";
     private const string TokenKey = "rb_spotify_token";
+    private const string ReturnPathKey = "rb_pkce_return_path";
 
     private readonly HttpClient _http;
     private readonly IJSRuntime _js;
+    private readonly NavigationManager _nav;
     private readonly SpotifyConfig _config;
     private readonly string _redirectUri;
 
-    public SpotifyAuthService(HttpClient http, IJSRuntime js, SpotifyConfig config, string baseAddress)
+    public SpotifyAuthService(HttpClient http, IJSRuntime js, NavigationManager nav, SpotifyConfig config, string baseAddress)
     {
         _http = http;
         _js = js;
+        _nav = nav;
         _config = config;
-        // Spotify requires an exact redirect URI match; the app's base address
-        // (e.g. https://user.github.io/rock-band/) must be registered in the
-        // Spotify dashboard as a Redirect URI.
-        _redirectUri = baseAddress;
+        // Spotify requires an exact redirect URI match; this dedicated callback
+        // route (e.g. https://user.github.io/rock-band/spotify-connect) must be
+        // registered in the Spotify dashboard as a Redirect URI.
+        _redirectUri = baseAddress + "spotify-connect";
     }
 
     public bool IsConfigured => !string.IsNullOrWhiteSpace(_config.ClientId)
@@ -54,6 +58,9 @@ public class SpotifyAuthService
         var verifier = GenerateCodeVerifier();
         var challenge = GenerateCodeChallenge(verifier);
         await _js.InvokeVoidAsync("rbSpotify.setItem", VerifierKey, verifier);
+        // Remember where login was triggered from, so the callback page can
+        // send the user back there instead of always landing on one fixed page.
+        await _js.InvokeVoidAsync("rbSpotify.setItem", ReturnPathKey, _nav.ToBaseRelativePath(_nav.Uri));
 
         var query = new Dictionary<string, string>
         {
@@ -67,6 +74,15 @@ public class SpotifyAuthService
         var url = AuthorizeEndpoint + "?" + string.Join("&",
             query.Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));
         await _js.InvokeVoidAsync("rbSpotify.redirect", url);
+    }
+
+    /// <summary>The page login was triggered from, so the callback page can
+    /// return the user there. Clears the stashed value; defaults to home.</summary>
+    public async Task<string> ConsumeReturnPathAsync()
+    {
+        var path = await _js.InvokeAsync<string?>("rbSpotify.getItem", ReturnPathKey);
+        await _js.InvokeVoidAsync("rbSpotify.removeItem", ReturnPathKey);
+        return string.IsNullOrEmpty(path) ? "/" : path;
     }
 
     /// <summary>
