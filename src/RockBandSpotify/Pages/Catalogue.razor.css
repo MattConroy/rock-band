@@ -72,14 +72,14 @@
     width: 26px;
     height: 26px;
     padding: 0;
-    background: #e9ecef;
+    background: #2a2c33;
     color: var(--rb-text);
     border: none;
     border-radius: 6px;
     cursor: pointer;
 }
 
-.icon-btn:hover { background: #dde1e6; }
+.icon-btn:hover { background: #34363f; color: var(--rb-accent); }
 
 .column-picker-menu {
     position: absolute;
@@ -88,7 +88,7 @@
     background: var(--rb-card);
     border: 1px solid var(--rb-border);
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
     padding: 0.5rem 0.75rem;
     display: flex;
     flex-direction: column;
@@ -112,14 +112,17 @@
     overflow-x: auto;
 }
 
-.table {
+/* Named catalogue-table, not table, to avoid colliding with Bootstrap's own
+   .table component (loaded ahead of app.css) — Bootstrap forces row
+   backgrounds via --bs-table-bg regardless of our theme. */
+.catalogue-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.82rem;
 }
 
-.table th,
-.table td {
+.catalogue-table th,
+.catalogue-table td {
     text-align: left;
     padding: 0.4rem 0.55rem;
     border-bottom: 1px solid var(--rb-border);
@@ -127,13 +130,17 @@
     white-space: nowrap;
 }
 
-.table th {
+.catalogue-table th {
     font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
-    color: var(--rb-muted);
+    letter-spacing: 0.6px;
+    font-weight: 800;
+    color: var(--rb-accent);
     position: sticky;
     top: 0;
     background: var(--rb-card);
+    border-bottom: 2px solid var(--rb-accent);
     z-index: 1;
 }
+
+.catalogue-table tbody tr:hover { background: rgba(255, 157, 46, 0.08); }
