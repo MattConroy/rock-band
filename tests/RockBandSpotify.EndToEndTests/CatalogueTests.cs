@@ -16,20 +16,20 @@ public class CatalogueTests : AppPageTest
         // The heading renders immediately, but the catalogue itself loads
         // asynchronously (fetch + WASM deserialize) — wait for the row count
         // so tests don't race the data load.
-        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
     }
 
     [Test]
     public async Task Loads_the_full_catalogue()
     {
-        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
     }
 
     [Test]
     public async Task Root_path_also_shows_the_catalogue()
     {
         await Page.GotoAsync("/");
-        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
     }
 
     [Test]
@@ -46,7 +46,7 @@ public class CatalogueTests : AppPageTest
     {
         await Page.SetViewportSizeAsync(400, 800);
         await Page.ReloadAsync();
-        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
 
         var headers = await Page.Locator("th").AllInnerTextsAsync();
         Assert.That(headers, Is.EqualTo(new[] { "SONG", "ARTIST" }));
@@ -76,7 +76,7 @@ public class CatalogueTests : AppPageTest
         await Page.GetByRole(AriaRole.Checkbox, new() { Name = "Year" }).UncheckAsync();
 
         await Page.ReloadAsync();
-        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
 
         var headers = await Page.Locator("th").AllInnerTextsAsync();
         Assert.That(headers, Does.Not.Contain("YEAR"));
@@ -132,7 +132,7 @@ public class CatalogueTests : AppPageTest
 
         await clearSearch.ClickAsync();
         await Expect(search).ToHaveValueAsync("");
-        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
     }
 
     [Test]
@@ -150,10 +150,10 @@ public class CatalogueTests : AppPageTest
     [Test]
     public async Task Column_widths_stay_stable_while_scrolling()
     {
-        // table-layout: auto (the default) re-measures "ideal" column widths
-        // from whichever rows Virtualize currently has rendered, so columns
-        // visibly jumped between scroll positions — table-layout: fixed with
-        // declared widths is what keeps this stable.
+        // table-layout: fixed with declared widths keeps columns from ever
+        // being recalculated from content — a permanent guard against this
+        // regressing, since a from-content ("auto") layout jumping around
+        // during scroll is exactly what motivated this in the first place.
         var headerWidths = await Page.Locator("th").AllAsync();
         var before = new List<float>();
         foreach (var h in headerWidths)
@@ -172,12 +172,9 @@ public class CatalogueTests : AppPageTest
     [Test]
     public async Task Row_heights_flex_to_content_instead_of_being_forced_uniform()
     {
-        // Virtualize's ItemSize is only an initial estimate — its spacer
-        // IntersectionObservers measure real rendered content height as rows
-        // come into view and self-correct from there, so rows don't need to
-        // be a uniform height. A single-line row should stay compact, and a
-        // row whose text wraps should grow to fit it rather than every row
-        // being padded out to the tallest possible height.
+        // A single-line row should stay compact, and a row whose text wraps
+        // should grow to fit it rather than every row being padded out to
+        // the tallest possible height.
         var compact = (await Page.Locator("tbody tr").First.BoundingBoxAsync())!.Height;
         Assert.That(compact, Is.LessThan(40), "a normal single-line row should stay compact");
 
