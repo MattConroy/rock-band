@@ -67,36 +67,42 @@
     </div>
 
     <div class="table-wrap">
-        <table class="catalogue-table">
-            <thead>
-                <tr>
-                    <th>Song</th>
-                    <th>Artist</th>
-                    @foreach (var col in OptionalColumns)
-                    {
-                        if (_visibleColumns.Contains(col.Key))
-                        {
-                            <th>@col.Label</th>
-                        }
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var s in _filtered)
-                {
+        <div class="table-header-wrap">
+            <table class="catalogue-table">
+                <thead>
                     <tr>
-                        <td>@s.Song</td>
-                        <td>@s.Artist</td>
+                        <th>Song</th>
+                        <th>Artist</th>
                         @foreach (var col in OptionalColumns)
                         {
                             if (_visibleColumns.Contains(col.Key))
                             {
-                                <td title="@col.Title?.Invoke(s)">@col.Value(s)</td>
+                                <th>@col.Label</th>
                             }
                         }
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+            </table>
+        </div>
+        <div class="table-body-wrap">
+            <table class="catalogue-table">
+                <tbody>
+                    @foreach (var s in _filtered)
+                    {
+                        <tr>
+                            <td>@s.Song</td>
+                            <td>@s.Artist</td>
+                            @foreach (var col in OptionalColumns)
+                            {
+                                if (_visibleColumns.Contains(col.Key))
+                                {
+                                    <td title="@col.Title?.Invoke(s)">@col.Value(s)</td>
+                                }
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

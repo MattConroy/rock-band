@@ -143,8 +143,8 @@ public class CatalogueTests : AppPageTest
         Assert.That(pageScrollable, Is.False, "the outer page should never scroll on the catalogue view");
 
         var wrapScrollable = await Page.EvalOnSelectorAsync<bool>(
-            ".table-wrap", "el => el.scrollHeight > el.clientHeight");
-        Assert.That(wrapScrollable, Is.True, "the grid itself should be the scrolling region");
+            ".table-body-wrap", "el => el.scrollHeight > el.clientHeight");
+        Assert.That(wrapScrollable, Is.True, "the grid body should be the scrolling region");
     }
 
     [Test]
@@ -159,7 +159,7 @@ public class CatalogueTests : AppPageTest
         foreach (var h in headerWidths)
             before.Add((await h.BoundingBoxAsync())!.Width);
 
-        await Page.EvalOnSelectorAsync(".table-wrap", "el => el.scrollTop = 40000");
+        await Page.EvalOnSelectorAsync(".table-body-wrap", "el => el.scrollTop = 40000");
         await Page.WaitForTimeoutAsync(200);
 
         var after = new List<float>();

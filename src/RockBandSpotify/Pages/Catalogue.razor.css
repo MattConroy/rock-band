@@ -110,41 +110,58 @@
     cursor: pointer;
 }
 
-/* contain: paint forces this element to establish its own stacking/paint
-   context and clips all descendants (including the sticky thead) to its
-   box. Without it, iOS Safari's elastic rubber-band scroll can composite
-   this nested overflow:auto region incorrectly and let body row content
-   paint outside its bounds, above the sticky header, during the bounce.
-
-   scrollbar-color / the ::-webkit-scrollbar-* rules below give the
-   scrollbar thumb a light color that's visible against the dark theme
-   (the default is themed off the OS light-mode assumption otherwise). */
+/* The header lives in its own table, outside the scrolling element
+   entirely — not a position: sticky row inside it. Sticky-inside-scroll
+   only *looks* fixed; the row content is still scrolling in the same
+   region and rides behind the header, which is exactly what let it bleed
+   through above the header during iOS Safari's rubber-band overscroll.
+   Taking the header out of the scrolling DOM removes that whole bug class
+   instead of working around it. */
 .table-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Reserves the same width the body's scrollbar takes out of its content
+   area, so the two independent tables' columns still line up exactly.
+   --rb-scrollbar-width is measured in JS (0 on mobile/overlay scrollbars,
+   ~15-17px on a typical desktop browser). */
+.table-header-wrap {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    padding-right: var(--rb-scrollbar-width, 0px);
+    overflow: hidden;
+}
+
+/* scrollbar-color / the ::-webkit-scrollbar-* rules give the scrollbar
+   thumb a light color that's visible against the dark theme (the default
+   is themed off an assumed light page otherwise). */
+.table-body-wrap {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
     overflow-x: auto;
-    position: relative;
-    contain: paint;
     -webkit-overflow-scrolling: touch;
     scrollbar-color: var(--rb-muted) var(--rb-card);
 }
 
-.table-wrap::-webkit-scrollbar {
+.table-body-wrap::-webkit-scrollbar {
     width: 10px;
     height: 10px;
 }
 
-.table-wrap::-webkit-scrollbar-track {
+.table-body-wrap::-webkit-scrollbar-track {
     background: var(--rb-card);
 }
 
-.table-wrap::-webkit-scrollbar-thumb {
+.table-body-wrap::-webkit-scrollbar-thumb {
     background: var(--rb-muted);
     border-radius: 6px;
 }
 
-.table-wrap::-webkit-scrollbar-thumb:hover {
+.table-body-wrap::-webkit-scrollbar-thumb:hover {
     background: var(--rb-text);
 }
 
@@ -154,18 +171,15 @@
 
    table-layout: fixed makes column widths depend only on these declared
    percentages instead of the browser recalculating "ideal" widths from
-   content — cheap for 4953 rows to skip.
+   content — cheap for 4953 rows to skip. It's also what keeps the header
+   and body tables' columns in sync with each other, since both use the
+   same fixed percentages rather than sizing from whichever rows happen to
+   be in each table.
 
    Most Source names ("Rock Band Network 1", "Rock Band 2 DLC", ...) are
    15-20 characters and cover the majority of the catalogue, so it gets
    real width rather than splitting evenly with Year (which only ever needs
-   4 digits) — sized to fit those on one line at typical viewport widths.
-
-   border-collapse: separate (not collapse) because a collapsed border
-   shared between the sticky thead and the first tbody row breaks once that
-   row scrolls out from under the header — the divider line vanishes and row
-   content can paint above the sticky header. Separate borders render
-   independently of scroll position. */
+   4 digits) — sized to fit those on one line at typical viewport widths. */
 .catalogue-table {
     width: 100%;
     border-collapse: separate;
@@ -196,11 +210,7 @@
     letter-spacing: 0.6px;
     font-weight: 800;
     color: var(--rb-accent);
-    position: sticky;
-    top: 0;
-    background: var(--rb-card);
     border-bottom: 2px solid var(--rb-accent);
-    z-index: 1;
 }
 
 .catalogue-table tbody tr:hover {
