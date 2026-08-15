@@ -148,6 +148,28 @@ public class CatalogueTests : AppPageTest
     }
 
     [Test]
+    public async Task Column_widths_stay_stable_while_scrolling()
+    {
+        // table-layout: auto (the default) re-measures "ideal" column widths
+        // from whichever rows Virtualize currently has rendered, so columns
+        // visibly jumped between scroll positions — table-layout: fixed with
+        // declared widths is what keeps this stable.
+        var headerWidths = await Page.Locator("th").AllAsync();
+        var before = new List<float>();
+        foreach (var h in headerWidths)
+            before.Add((await h.BoundingBoxAsync())!.Width);
+
+        await Page.EvalOnSelectorAsync(".table-wrap", "el => el.scrollTop = 40000");
+        await Page.WaitForTimeoutAsync(200);
+
+        var after = new List<float>();
+        foreach (var h in headerWidths)
+            after.Add((await h.BoundingBoxAsync())!.Width);
+
+        Assert.That(after, Is.EqualTo(before), "column widths should not change after scrolling");
+    }
+
+    [Test]
     public async Task No_console_errors_while_browsing()
     {
         var errors = new List<string>();

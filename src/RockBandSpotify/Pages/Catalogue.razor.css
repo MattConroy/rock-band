@@ -119,12 +119,26 @@
 
 /* Named catalogue-table, not table, to avoid colliding with Bootstrap's own
    .table component (loaded ahead of app.css) — Bootstrap forces row
-   backgrounds via --bs-table-bg regardless of our theme. */
+   backgrounds via --bs-table-bg regardless of our theme.
+
+   table-layout: fixed makes column widths depend only on these declared
+   percentages, not on whatever rows Virtualize happens to have rendered at
+   any given scroll position — auto layout was recalculating "ideal" widths
+   from the currently-visible rows alone, so columns visibly jumped between
+   scroll positions. Song and Artist get fixed shares; whichever optional
+   columns (Year/Genre/Source) are toggled on split the remainder evenly. */
 .catalogue-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
     font-size: 0.82rem;
 }
+
+.catalogue-table th:nth-child(1),
+.catalogue-table td:nth-child(1) { width: 34%; }
+
+.catalogue-table th:nth-child(2),
+.catalogue-table td:nth-child(2) { width: 26%; }
 
 .catalogue-table th,
 .catalogue-table td {
@@ -132,7 +146,7 @@
     padding: 0.4rem 0.55rem;
     border-bottom: 1px solid var(--rb-border);
     vertical-align: middle;
-    white-space: nowrap;
+    overflow-wrap: break-word;
 }
 
 .catalogue-table th {
