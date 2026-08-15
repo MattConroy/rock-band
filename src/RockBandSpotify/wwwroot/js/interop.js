@@ -35,3 +35,21 @@ window.rbSpotify = {
     setAppViewportHeight();
     window.addEventListener("resize", setAppViewportHeight);
 })();
+
+// The catalogue grid's header sits in its own non-scrolling table above the
+// body's scrolling table, so their columns line up exactly only if the body
+// table's content width (which a visible scrollbar narrows) is matched by
+// reserving the same width on the header. Scrollbar width varies by
+// platform (0 on mobile/overlay scrollbars, ~15-17px on desktop) so it's
+// measured directly rather than guessed.
+(function () {
+    function setScrollbarWidth() {
+        var probe = document.createElement("div");
+        probe.style.cssText = "position:absolute; visibility:hidden; top:-9999px; width:100px; height:100px; overflow:scroll;";
+        document.body.appendChild(probe);
+        var width = probe.offsetWidth - probe.clientWidth;
+        document.body.removeChild(probe);
+        document.documentElement.style.setProperty("--rb-scrollbar-width", width + "px");
+    }
+    setScrollbarWidth();
+})();
