@@ -124,14 +124,13 @@
     flex-direction: column;
 }
 
-/* Reserves the same width the body's scrollbar takes out of its content
-   area, so the two independent tables' columns still line up exactly.
-   --rb-scrollbar-width is measured in JS (0 on mobile/overlay scrollbars,
-   ~15-17px on a typical desktop browser). */
+/* Doesn't reserve space for the body's scrollbar: on the actual target
+   platform (mobile Safari) scrollbars are an overlay and take none, so
+   there's nothing to match. On desktop browsers with a classic scrollbar
+   this can leave the last column's edge a few px out of line with the
+   header — a minor cosmetic gap, not worth compensating for. */
 .table-header-wrap {
     flex-shrink: 0;
-    box-sizing: border-box;
-    padding-right: var(--rb-scrollbar-width, 0px);
     overflow: hidden;
 }
 
