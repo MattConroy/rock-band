@@ -115,15 +115,20 @@ code {
 }
 /* ---- Rock Band → Spotify: design tokens + shared primitives ----
    Component-specific layout lives in each component's scoped .razor.css.
-   This file holds only the cross-cutting design system reused everywhere. */
+   This file holds only the cross-cutting design system reused everywhere.
+   Palette is an original dark/amber treatment evoking a rhythm-game menu
+   (dark stage-lit panels, a bold amber accent, condensed uppercase
+   headings) — no art, fonts, or assets from any Rock Band game. */
 :root {
     --rb-green: #1db954;
     --rb-green-dark: #169c46;
-    --rb-bg: #f6f7f9;
-    --rb-card: #ffffff;
-    --rb-border: #e3e6ea;
-    --rb-text: #1a1d21;
-    --rb-muted: #6b7280;
+    --rb-accent: #ff9d2e;
+    --rb-accent-dark: #e6851a;
+    --rb-bg: #121317;
+    --rb-card: #1c1e24;
+    --rb-border: #34363f;
+    --rb-text: #f2f1ec;
+    --rb-muted: #9b9ba5;
 }
 
 body {
@@ -136,12 +141,20 @@ body {
 .rb-card {
     background: var(--rb-card);
     border: 1px solid var(--rb-border);
-    border-radius: 12px;
+    border-top: 3px solid var(--rb-accent);
+    border-radius: 6px;
     padding: 1.1rem 1.25rem;
     margin-bottom: 1rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
-.rb-card h2 { font-size: 1.05rem; margin: 0 0 0.35rem; }
+.rb-card h2 {
+    font-size: 0.95rem;
+    margin: 0 0 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 800;
+    color: var(--rb-accent);
+}
 
 /* Buttons */
 .rb-btn {
@@ -150,24 +163,35 @@ body {
 }
 .rb-btn:hover:not(:disabled) { background: var(--rb-green-dark); }
 .rb-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.rb-btn-secondary { background: #e9ecef; color: var(--rb-text); }
-.rb-btn-secondary:hover:not(:disabled) { background: #dde1e6; }
+.rb-btn-secondary {
+    background: #2a2c33;
+    color: var(--rb-text);
+    border-radius: 6px;
+}
+.rb-btn-secondary:hover:not(:disabled) { background: #34363f; color: var(--rb-accent); }
 
 /* Pills */
 .rb-pill { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
-.rb-pill-ok { background: #e5f7ec; color: #157a3a; }
-.rb-pill-warn { background: #fef3cd; color: #8a6d0b; }
-.rb-pill-bad { background: #fde2e1; color: #a12722; }
+.rb-pill-ok { background: rgba(29, 185, 84, 0.18); color: #3ddc73; }
+.rb-pill-warn { background: rgba(255, 157, 46, 0.18); color: #ffb85c; }
+.rb-pill-bad { background: rgba(220, 53, 69, 0.2); color: #ff7a86; }
 
 /* Alerts */
-.rb-alert { padding: 0.7rem 0.9rem; border-radius: 8px; margin: 0.5rem 0; }
-.rb-alert-info { background: #e7f1ff; color: #0b4a8f; }
-.rb-alert-warn { background: #fff6e0; color: #8a6d0b; }
-.rb-alert-ok { background: #e5f7ec; color: #157a3a; }
-.rb-alert-bad { background: #fde2e1; color: #a12722; }
+.rb-alert { padding: 0.7rem 0.9rem; border-radius: 6px; margin: 0.5rem 0; }
+.rb-alert-info { background: rgba(59, 130, 246, 0.14); color: #8ab8ff; }
+.rb-alert-warn { background: rgba(255, 157, 46, 0.14); color: #ffb85c; }
+.rb-alert-ok { background: rgba(29, 185, 84, 0.14); color: #3ddc73; }
+.rb-alert-bad { background: rgba(220, 53, 69, 0.16); color: #ff7a86; }
 
 /* Text + layout helpers */
 .rb-muted { color: var(--rb-muted); font-size: 0.9rem; }
 .rb-sub { color: var(--rb-muted); font-size: 0.8rem; }
 .rb-row-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
-.rb-select { padding: 0.3rem 0.4rem; border-radius: 6px; border: 1px solid var(--rb-border); max-width: 320px; }
+.rb-select {
+    padding: 0.3rem 0.4rem;
+    border-radius: 6px;
+    border: 1px solid var(--rb-border);
+    background: #23252c;
+    color: var(--rb-text);
+    max-width: 320px;
+}

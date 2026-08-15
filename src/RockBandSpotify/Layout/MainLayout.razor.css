@@ -15,9 +15,10 @@
 }
 
 .app-header {
-    background: #121417;
+    background: #0d0e11;
     color: #fff;
     padding: 0.8rem 1rem;
+    border-bottom: 3px solid var(--rb-accent);
 }
 
 .app-header-inner {
@@ -29,17 +30,24 @@
 }
 
 .app-logo { font-size: 1.5rem; }
-.app-title { font-weight: 700; font-size: 1.15rem; letter-spacing: 0.2px; }
+.app-title {
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
 
 .app-nav { display: flex; gap: 1rem; margin-left: auto; }
 .app-nav :deep(a) {
     color: #c7cbd1;
     text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
 }
-.app-nav :deep(a.active) { color: #fff; }
-.app-nav :deep(a:hover) { color: #fff; }
+.app-nav :deep(a.active) { color: var(--rb-accent); }
+.app-nav :deep(a:hover) { color: var(--rb-accent); }
 
 .app-main {
     max-width: 1100px;
