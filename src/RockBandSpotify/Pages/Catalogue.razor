@@ -4,8 +4,14 @@
 
 <div class="rb-card">
     <div class="filter-bar">
-        <input class="rb-select search" type="search" placeholder="Search song or artist…"
-               value="@_search" @oninput="OnSearchChanged" />
+        <div class="search-box">
+            <input class="rb-select search" type="search" placeholder="Search song or artist…"
+                   value="@_search" @oninput="OnSearchChanged" />
+            @if (_search.Length > 0)
+            {
+                <button type="button" class="search-clear" title="Clear search" @onclick="ClearSearch">×</button>
+            }
+        </div>
 
         <div class="select-group">
             <select class="rb-select" @onchange="OnGenreChanged">

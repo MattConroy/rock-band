@@ -135,6 +135,12 @@ public partial class Catalogue
         ApplyFilters();
     }
 
+    private void ClearSearch()
+    {
+        _search = "";
+        ApplyFilters();
+    }
+
     private void ApplyFilters()
         => _filtered = CatalogueFilter.Apply(_all, _search, _genre, _origin);
 }

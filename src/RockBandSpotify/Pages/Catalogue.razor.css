@@ -16,7 +16,29 @@
     flex-shrink: 0;
 }
 
-.search { flex: 1 1 220px; max-width: 320px; }
+.search-box {
+    position: relative;
+    flex: 1 1 220px;
+    max-width: 320px;
+}
+
+.search { width: 100%; box-sizing: border-box; padding-right: 1.8rem; }
+
+.search-clear {
+    position: absolute;
+    right: 0.3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--rb-muted);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.15rem 0.35rem;
+}
+
+.search-clear:hover { color: var(--rb-text); }
 
 /* Genre and era belong together — keep them as one flex item so they wrap
    as a pair instead of splitting across lines independently. */
