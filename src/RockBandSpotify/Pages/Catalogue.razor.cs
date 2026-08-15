@@ -32,10 +32,6 @@ public partial class Catalogue
         new("Year", "Year", s => s.Year?.ToString()),
         new("Genre", "Genre", s => s.Genre),
         new("Era", "Era", s => EraCatalog.Name(s.Origin), s => EraCatalog.Description(s.Origin)),
-        new("Rb12", "RB1/2", s => s.Rb12),
-        new("Rb3", "RB3", s => s.Rb3),
-        new("Rb4", "RB4", s => s.Rb4),
-        new("Other", "Other", s => s.Other),
     };
 
     private List<CatalogueSong> _all = new();
@@ -66,9 +62,7 @@ public partial class Catalogue
         ApplyFilters();
     }
 
-    // Narrow: just Song/Artist. Medium: + the columns everyone wants. Wide:
-    // + the columns there's finally room for. RB4 stays customizer-only at
-    // every width — it clutters more than it helps as a default.
+    // Narrow: just Song/Artist. Everything else: + Year/Genre/Era.
     private HashSet<string> DefaultColumnsForViewport()
     {
         int width;
@@ -81,9 +75,7 @@ public partial class Catalogue
             width = 1024; // pre-rendering or non-WASM host: assume desktop
         }
 
-        if (width < 640) return new HashSet<string>();
-        if (width < 1024) return new HashSet<string> { "Year", "Genre", "Era" };
-        return new HashSet<string> { "Year", "Genre", "Era", "Rb12", "Rb3", "Other" };
+        return width < 640 ? new HashSet<string>() : new HashSet<string> { "Year", "Genre", "Era" };
     }
 
     private HashSet<string>? LoadColumnPreference()
