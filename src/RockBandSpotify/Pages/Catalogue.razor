@@ -25,15 +25,7 @@
             <option value="">All eras</option>
             @foreach (var o in _origins)
             {
-                <option value="@o" selected="@(o == _origin)">@o</option>
-            }
-        </select>
-
-        <select class="rb-select" @onchange="OnRb4Changed">
-            <option value="">Any RB4 availability</option>
-            @foreach (var r in _rb4Values)
-            {
-                <option value="@r" selected="@(r == _rb4)">@r</option>
+                <option value="@o" selected="@(o == _origin)">@EraName(o)</option>
             }
         </select>
 
@@ -63,7 +55,6 @@
                     <th>Year</th>
                     <th>Genre</th>
                     <th>Era</th>
-                    <th>RB4</th>
                 </tr>
             </thead>
             <tbody>
@@ -77,8 +68,7 @@
                         <td>@s.Artist</td>
                         <td>@s.Year</td>
                         <td>@s.Genre</td>
-                        <td>@s.Origin</td>
-                        <td>@s.Rb4</td>
+                        <td title="@EraDescription(s.Origin)">@EraName(s.Origin)</td>
                     </tr>
                 </Virtualize>
             </tbody>

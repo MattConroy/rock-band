@@ -1,4 +1,9 @@
-.app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+/* A hard height (not min-height) so nested flex children — the Catalogue
+   page's table, in particular — have an actual ceiling to clip against
+   instead of growing to fit all their content. Pages that don't opt into
+   that (Home) still overflow this box and scroll the page normally, since
+   only .app-shell itself is height-bound, not made to hide overflow. */
+.app-shell { height: 100vh; display: flex; flex-direction: column; }
 
 .app-header {
     background: #121417;
@@ -33,4 +38,8 @@
     margin: 0 auto;
     padding: 1.25rem 1rem 3rem;
     box-sizing: border-box;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
