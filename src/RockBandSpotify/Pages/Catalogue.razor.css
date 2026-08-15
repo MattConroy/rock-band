@@ -122,9 +122,8 @@
    backgrounds via --bs-table-bg regardless of our theme.
 
    table-layout: fixed makes column widths depend only on these declared
-   percentages, not on whatever rows Virtualize currently has rendered —
-   auto layout recalculates "ideal" widths from whatever's visible at any
-   given scroll position, which made columns visibly jump around.
+   percentages instead of the browser recalculating "ideal" widths from
+   content — cheap for 4953 rows to skip.
 
    Most Source names ("Rock Band Network 1", "Rock Band 2 DLC", ...) are
    15-20 characters and cover the majority of the catalogue, so it gets

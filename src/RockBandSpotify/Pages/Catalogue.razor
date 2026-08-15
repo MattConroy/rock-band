@@ -82,7 +82,8 @@
                 </tr>
             </thead>
             <tbody>
-                <Virtualize Items="_filtered" Context="s" ItemSize="33">
+                @foreach (var s in _filtered)
+                {
                     <tr>
                         <td>@s.Song</td>
                         <td>@s.Artist</td>
@@ -94,7 +95,7 @@
                             }
                         }
                     </tr>
-                </Virtualize>
+                }
             </tbody>
         </table>
     </div>
