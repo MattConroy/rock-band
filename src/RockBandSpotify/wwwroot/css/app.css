@@ -120,6 +120,10 @@ code {
    menu (dark stage-lit panels, a bright blue accent, condensed uppercase
    headings) — no art, fonts, or assets from any Rock Band game. */
 :root {
+    /* Tells the browser this page is dark, so native chrome it themes
+       itself — overlay scrollbars on iOS Safari in particular — picks a
+       light-on-dark treatment instead of assuming a light page. */
+    color-scheme: dark;
     --rb-green: #1db954;
     --rb-green-dark: #169c46;
     --rb-accent: #2f8fe0;
