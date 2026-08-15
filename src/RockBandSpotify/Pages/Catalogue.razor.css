@@ -110,11 +110,42 @@
     cursor: pointer;
 }
 
+/* contain: paint forces this element to establish its own stacking/paint
+   context and clips all descendants (including the sticky thead) to its
+   box. Without it, iOS Safari's elastic rubber-band scroll can composite
+   this nested overflow:auto region incorrectly and let body row content
+   paint outside its bounds, above the sticky header, during the bounce.
+
+   scrollbar-color / the ::-webkit-scrollbar-* rules below give the
+   scrollbar thumb a light color that's visible against the dark theme
+   (the default is themed off the OS light-mode assumption otherwise). */
 .table-wrap {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
     overflow-x: auto;
+    position: relative;
+    contain: paint;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-color: var(--rb-muted) var(--rb-card);
+}
+
+.table-wrap::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.table-wrap::-webkit-scrollbar-track {
+    background: var(--rb-card);
+}
+
+.table-wrap::-webkit-scrollbar-thumb {
+    background: var(--rb-muted);
+    border-radius: 6px;
+}
+
+.table-wrap::-webkit-scrollbar-thumb:hover {
+    background: var(--rb-text);
 }
 
 /* Named catalogue-table, not table, to avoid colliding with Bootstrap's own
