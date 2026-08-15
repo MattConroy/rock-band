@@ -122,11 +122,14 @@
    backgrounds via --bs-table-bg regardless of our theme.
 
    table-layout: fixed makes column widths depend only on these declared
-   percentages, not on whatever rows Virtualize happens to have rendered at
-   any given scroll position — auto layout was recalculating "ideal" widths
-   from the currently-visible rows alone, so columns visibly jumped between
-   scroll positions. Song and Artist get fixed shares; whichever optional
-   columns (Year/Genre/Source) are toggled on split the remainder evenly.
+   percentages, not on whatever rows Virtualize currently has rendered —
+   auto layout recalculates "ideal" widths from whatever's visible at any
+   given scroll position, which made columns visibly jump around.
+
+   Most Source names ("Rock Band Network 1", "Rock Band 2 DLC", ...) are
+   15-20 characters and cover the majority of the catalogue, so it gets
+   real width rather than splitting evenly with Year (which only ever needs
+   4 digits) — sized to fit those on one line at typical viewport widths.
 
    border-collapse: separate (not collapse) because a collapsed border
    shared between the sticky thead and the first tbody row breaks once that
@@ -142,24 +145,10 @@
 }
 
 .catalogue-table th:nth-child(1),
-.catalogue-table td:nth-child(1) { width: 34%; }
+.catalogue-table td:nth-child(1) { width: 30%; }
 
 .catalogue-table th:nth-child(2),
-.catalogue-table td:nth-child(2) { width: 26%; }
-
-/* Virtualize needs every row to be the same height to position items
-   correctly — a wrapped 2-line row (~53px) among 1-line rows (~33px) throws
-   off its offset math, which showed up as row content rendering behind/above
-   the sticky header. Fixing every row to one height (matching ItemSize on
-   the Virtualize element below) and clipping anything taller keeps that
-   assumption true; two lines comfortably fits every song in the catalogue,
-   including the longest title (92 characters). */
-.catalogue-table td {
-    height: 54px;
-    max-height: 54px;
-    overflow: hidden;
-    line-height: 1.3;
-}
+.catalogue-table td:nth-child(2) { width: 22%; }
 
 .catalogue-table th,
 .catalogue-table td {
@@ -168,6 +157,7 @@
     border-bottom: 1px solid var(--rb-border);
     vertical-align: middle;
     overflow-wrap: break-word;
+    line-height: 1.3;
 }
 
 .catalogue-table th {

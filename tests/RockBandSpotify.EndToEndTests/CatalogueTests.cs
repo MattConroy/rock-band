@@ -170,19 +170,24 @@ public class CatalogueTests : AppPageTest
     }
 
     [Test]
-    public async Task Rows_stay_a_uniform_height_even_when_text_wraps()
+    public async Task Row_heights_flex_to_content_instead_of_being_forced_uniform()
     {
-        // Virtualize positions rows assuming every one is ItemSize tall. A
-        // wrapped 2-line row that's taller than that throws off its offset
-        // math, which showed up as row content rendering behind the sticky
-        // header. Every row must clip to the same height regardless of
-        // whether its text wraps.
-        var rows = await Page.Locator("tbody tr").AllAsync();
-        var heights = new List<float>();
-        foreach (var row in rows.Take(20))
-            heights.Add((await row.BoundingBoxAsync())!.Height);
+        // Virtualize's ItemSize is only an initial estimate — its spacer
+        // IntersectionObservers measure real rendered content height as rows
+        // come into view and self-correct from there, so rows don't need to
+        // be a uniform height. A single-line row should stay compact, and a
+        // row whose text wraps should grow to fit it rather than every row
+        // being padded out to the tallest possible height.
+        var compact = (await Page.Locator("tbody tr").First.BoundingBoxAsync())!.Height;
+        Assert.That(compact, Is.LessThan(40), "a normal single-line row should stay compact");
 
-        Assert.That(heights.Distinct().Count(), Is.EqualTo(1), "every row should be the same height");
+        // The longest song title in the catalogue (92 characters) reliably
+        // wraps within the Song column's width.
+        await Page.GetByPlaceholder("Search song or artist…").FillAsync("It's Better to Spend Money");
+        await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
+
+        var wrapped = (await Page.Locator("tbody tr").First.BoundingBoxAsync())!.Height;
+        Assert.That(wrapped, Is.GreaterThan(40), "a row with a long wrapped title should grow taller");
     }
 
     [Test]
