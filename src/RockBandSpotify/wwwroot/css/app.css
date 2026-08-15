@@ -124,7 +124,6 @@ code {
        itself — overlay scrollbars on iOS Safari in particular — picks a
        light-on-dark treatment instead of assuming a light page. */
     color-scheme: dark;
-    --rb-scrollbar-width: 0px;
     --rb-green: #1db954;
     --rb-green-dark: #169c46;
     --rb-accent: #2f8fe0;
