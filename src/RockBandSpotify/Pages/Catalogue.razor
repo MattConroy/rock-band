@@ -71,13 +71,25 @@
             <table class="catalogue-table">
                 <thead>
                     <tr>
-                        <th>Song</th>
-                        <th>Artist</th>
+                        <th aria-sort='@AriaSort("Song")'>
+                            <button type="button" class="th-sort-btn" @onclick='() => ToggleSort("Song")'>
+                                Song<span class="sort-indicator">@SortIndicator("Song")</span>
+                            </button>
+                        </th>
+                        <th aria-sort='@AriaSort("Artist")'>
+                            <button type="button" class="th-sort-btn" @onclick='() => ToggleSort("Artist")'>
+                                Artist<span class="sort-indicator">@SortIndicator("Artist")</span>
+                            </button>
+                        </th>
                         @foreach (var col in OptionalColumns)
                         {
                             if (_visibleColumns.Contains(col.Key))
                             {
-                                <th>@col.Label</th>
+                                <th aria-sort="@AriaSort(col.Key)">
+                                    <button type="button" class="th-sort-btn" @onclick="() => ToggleSort(col.Key)">
+                                        @col.Label<span class="sort-indicator">@SortIndicator(col.Key)</span>
+                                    </button>
+                                </th>
                             }
                         }
                     </tr>
