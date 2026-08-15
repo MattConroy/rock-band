@@ -17,6 +17,16 @@
 .app-logo { font-size: 1.5rem; }
 .app-title { font-weight: 700; font-size: 1.15rem; letter-spacing: 0.2px; }
 
+.app-nav { display: flex; gap: 1rem; margin-left: auto; }
+.app-nav :deep(a) {
+    color: #c7cbd1;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+.app-nav :deep(a.active) { color: #fff; }
+.app-nav :deep(a:hover) { color: #fff; }
+
 .app-main {
     max-width: 1100px;
     width: 100%;

@@ -31,5 +31,6 @@ builder.Services.AddScoped<SpotifyApiService>();
 builder.Services.AddScoped<PsnService>();
 builder.Services.AddScoped<MatchingService>();
 builder.Services.AddScoped<PlaylistSyncService>();
+builder.Services.AddScoped<CatalogueService>();
 
 await builder.Build().RunAsync();
