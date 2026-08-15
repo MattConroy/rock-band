@@ -201,6 +201,44 @@ public class CatalogueTests : AppPageTest
     }
 
     [Test]
+    public async Task Tapping_a_column_header_cycles_unsorted_ascending_descending_unsorted()
+    {
+        var songTh = Page.Locator("th").First;
+        var songHeaderButton = songTh.Locator("button");
+        var firstCell = Page.Locator("tbody tr").First.Locator("td").First;
+
+        var originalFirst = await firstCell.InnerTextAsync();
+
+        await songHeaderButton.ClickAsync();
+        await Expect(songTh).ToHaveAttributeAsync("aria-sort", "ascending");
+        var ascFirst = await firstCell.InnerTextAsync();
+        Assert.That(ascFirst, Is.Not.EqualTo(originalFirst));
+
+        await songHeaderButton.ClickAsync();
+        await Expect(songTh).ToHaveAttributeAsync("aria-sort", "descending");
+        var descFirst = await firstCell.InnerTextAsync();
+        Assert.That(descFirst, Is.Not.EqualTo(ascFirst));
+
+        await songHeaderButton.ClickAsync();
+        Assert.That(await songTh.GetAttributeAsync("aria-sort"), Is.Null);
+        Assert.That(await firstCell.InnerTextAsync(), Is.EqualTo(originalFirst));
+    }
+
+    [Test]
+    public async Task Tapping_a_different_column_resets_the_previous_one()
+    {
+        var songTh = Page.Locator("th").First;
+        var artistTh = Page.Locator("th").Nth(1);
+
+        await songTh.Locator("button").ClickAsync();
+        await Expect(songTh).ToHaveAttributeAsync("aria-sort", "ascending");
+
+        await artistTh.Locator("button").ClickAsync();
+        await Expect(artistTh).ToHaveAttributeAsync("aria-sort", "ascending");
+        Assert.That(await songTh.GetAttributeAsync("aria-sort"), Is.Null);
+    }
+
+    [Test]
     public async Task No_console_errors_while_browsing()
     {
         var errors = new List<string>();

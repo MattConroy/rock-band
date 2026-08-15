@@ -44,6 +44,9 @@ public partial class Catalogue
     private string _genre = "";
     private string _source = "";
 
+    private string? _sortColumn;
+    private SortDirection _sortDirection = SortDirection.None;
+
     private readonly HashSet<string> _visibleColumns = new();
     private bool _showColumnPicker;
 
@@ -142,5 +145,38 @@ public partial class Catalogue
     }
 
     private void ApplyFilters()
-        => _filtered = CatalogueFilter.Apply(_all, _search, _genre, _source);
+        => _filtered = CatalogueSort.Apply(CatalogueFilter.Apply(_all, _search, _genre, _source), _sortColumn, _sortDirection);
+
+    // Tap cycle: unsorted -> ascending -> descending -> unsorted. Tapping a
+    // different column starts it fresh at ascending.
+    private void ToggleSort(string column)
+    {
+        if (_sortColumn != column)
+        {
+            _sortColumn = column;
+            _sortDirection = SortDirection.Ascending;
+        }
+        else
+        {
+            _sortDirection = _sortDirection switch
+            {
+                SortDirection.None => SortDirection.Ascending,
+                SortDirection.Ascending => SortDirection.Descending,
+                _ => SortDirection.None,
+            };
+            if (_sortDirection == SortDirection.None) _sortColumn = null;
+        }
+
+        ApplyFilters();
+    }
+
+    private string SortIndicator(string column)
+        => _sortColumn != column
+            ? ""
+            : _sortDirection switch { SortDirection.Ascending => "▲", SortDirection.Descending => "▼", _ => "" };
+
+    private string? AriaSort(string column)
+        => _sortColumn != column
+            ? null
+            : _sortDirection switch { SortDirection.Ascending => "ascending", SortDirection.Descending => "descending", _ => null };
 }
