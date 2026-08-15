@@ -17,5 +17,8 @@ window.rbSpotify = {
     // so a refresh doesn't try to reuse a spent authorization code.
     replaceUrl: function (url) {
         window.history.replaceState({}, document.title, url);
+    },
+    getViewportWidth: function () {
+        return window.innerWidth;
     }
 };

@@ -6,7 +6,6 @@
     <h2>Browse the Rock Band catalogue</h2>
     <p class="rb-muted">
         Every song officially released for Rock Band — @_all.Count tracks.
-        Check the ones you own; connecting PlayStation later will pre-check the rest for you.
     </p>
 
     <div class="filter-bar">
@@ -29,46 +28,60 @@
             }
         </select>
 
-        <label class="rb-row-actions selected-only">
-            <input type="checkbox" checked="@_selectedOnly" @onchange="OnSelectedOnlyChanged" />
-            Selected only
-        </label>
-
         @if (HasFilters)
         {
             <button class="rb-btn rb-btn-secondary" @onclick="ClearFilters">Clear filters</button>
         }
+
+        <div class="column-picker">
+            <button class="rb-btn rb-btn-secondary" @onclick="ToggleColumnPicker">Columns ▾</button>
+            @if (_showColumnPicker)
+            {
+                <div class="column-picker-menu">
+                    @foreach (var col in OptionalColumns)
+                    {
+                        <label>
+                            <input type="checkbox" checked="@_visibleColumns.Contains(col.Key)"
+                                   @onchange="_ => ToggleColumn(col.Key)" />
+                            @col.Label
+                        </label>
+                    }
+                </div>
+            }
+        </div>
     </div>
 
     <div class="rb-row-actions result-row">
         <span class="rb-muted">@_filtered.Count shown</span>
-        <span class="rb-pill rb-pill-ok">@_selected.Count selected</span>
     </div>
 
     <div class="table-wrap">
         <table class="table">
             <thead>
                 <tr>
-                    <th class="col-check"></th>
                     <th>Song</th>
                     <th>Artist</th>
-                    <th>Year</th>
-                    <th>Genre</th>
-                    <th>Era</th>
+                    @foreach (var col in OptionalColumns)
+                    {
+                        if (_visibleColumns.Contains(col.Key))
+                        {
+                            <th>@col.Label</th>
+                        }
+                    }
                 </tr>
             </thead>
             <tbody>
-                <Virtualize Items="_filtered" Context="s" ItemSize="38">
+                <Virtualize Items="_filtered" Context="s" ItemSize="32">
                     <tr>
-                        <td>
-                            <input type="checkbox" checked="@_selected.Contains(s.Id)"
-                                   @onchange="e => ToggleSelected(s.Id, e)" />
-                        </td>
                         <td>@s.Song</td>
                         <td>@s.Artist</td>
-                        <td>@s.Year</td>
-                        <td>@s.Genre</td>
-                        <td title="@EraCatalog.Description(s.Origin)">@EraCatalog.Name(s.Origin)</td>
+                        @foreach (var col in OptionalColumns)
+                        {
+                            if (_visibleColumns.Contains(col.Key))
+                            {
+                                <td title="@col.Title?.Invoke(s)">@col.Value(s)</td>
+                            }
+                        }
                     </tr>
                 </Virtualize>
             </tbody>

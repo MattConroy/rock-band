@@ -13,10 +13,8 @@ public class CatalogueFilterTests
         new() { Id = 4, Song = "Paranoid", Artist = "Black Sabbath", Genre = "Metal", Origin = "RB1" },
     };
 
-    private static List<CatalogueSong> Apply(
-        string search = "", string genre = "", string origin = "",
-        bool selectedOnly = false, ISet<int>? selected = null)
-        => CatalogueFilter.Apply(Songs, search, genre, origin, selectedOnly, selected ?? new HashSet<int>());
+    private static List<CatalogueSong> Apply(string search = "", string genre = "", string origin = "")
+        => CatalogueFilter.Apply(Songs, search, genre, origin);
 
     [Fact]
     public void No_filters_returns_everything()
@@ -45,12 +43,4 @@ public class CatalogueFilterTests
     [Fact]
     public void Filters_combine_with_AND()
         => Assert.Equal(new[] { 3 }, Apply(search: "africa", genre: "Alternative").Select(s => s.Id));
-
-    [Fact]
-    public void Selected_only_returns_nothing_when_nothing_is_selected()
-        => Assert.Empty(Apply(selectedOnly: true));
-
-    [Fact]
-    public void Selected_only_returns_exactly_the_selected_ids()
-        => Assert.Equal(new[] { 1, 4 }, Apply(selectedOnly: true, selected: new HashSet<int> { 1, 4 }).Select(s => s.Id));
 }
