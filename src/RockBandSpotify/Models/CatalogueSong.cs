@@ -23,20 +23,11 @@ public class CatalogueSong
     [JsonPropertyName("genre")]
     public string? Genre { get; set; }
 
-    /// <summary>Where the song originates: RB1-4 on-disc, DLC era, or a spin-off game.</summary>
-    [JsonPropertyName("origin")]
-    public string? Origin { get; set; }
+    /// <summary>How the song was obtainable: on-disc game, spin-off, exclusive
+    /// pack/expansion, era DLC, or Rock Band Network. See <see cref="SourceCatalog"/>.</summary>
+    [JsonPropertyName("source")]
+    public string? Source { get; set; }
 
-    [JsonPropertyName("rb12")]
-    public string? Rb12 { get; set; }
-
-    [JsonPropertyName("rb3")]
-    public string? Rb3 { get; set; }
-
-    /// <summary>Availability on Rock Band 4: "Yes", "Import Only", "No", etc.</summary>
-    [JsonPropertyName("rb4")]
-    public string? Rb4 { get; set; }
-
-    [JsonPropertyName("other")]
-    public string? Other { get; set; }
+    [JsonPropertyName("releaseDate")]
+    public DateOnly? ReleaseDate { get; set; }
 }
