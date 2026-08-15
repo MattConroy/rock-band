@@ -27,6 +27,6 @@ public class HomeTests : AppPageTest
     {
         await Page.GotoAsync("/");
         await Page.GetByRole(Microsoft.Playwright.AriaRole.Link, new() { Name = "Catalogue" }).ClickAsync();
-        await Expect(Page.GetByText("Browse the Rock Band catalogue")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("4960 shown")).ToBeVisibleAsync();
     }
 }
