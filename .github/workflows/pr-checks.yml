@@ -1,0 +1,54 @@
+name: PR checks
+
+# Runs on every pull request targeting main (opened, synchronized, reopened)
+# so problems surface before merge instead of after deploy. There's no test
+# suite yet — this is a build/syntax gate, not a correctness guarantee.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-app:
+    name: Build Blazor app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore src/RockBandSpotify/RockBandSpotify.csproj
+
+      - name: Build
+        run: dotnet build src/RockBandSpotify/RockBandSpotify.csproj -c Release --no-restore -warnaserror
+
+  check-gateway:
+    name: Check gateway Worker
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gateway
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Syntax check
+        run: |
+          for f in *.mjs *.js; do
+            [ -e "$f" ] || continue
+            echo "checking $f"
+            node --check "$f"
+          done
+
+      - name: Validate wrangler.toml
+        run: npx --yes wrangler deploy --dry-run --outdir /tmp/wrangler-dry-run
