@@ -4,7 +4,8 @@ namespace RockBandSpotify.EndToEndTests;
 
 /// <summary>
 /// Browser tests for the standalone /catalogue page — the parts that only a
-/// real rendered page can prove: filtering, selection, layout.
+/// real rendered page can prove: filtering, responsive column defaults, the
+/// column customizer, and layout.
 /// </summary>
 public class CatalogueTests : AppPageTest
 {
@@ -25,12 +26,53 @@ public class CatalogueTests : AppPageTest
     }
 
     [Test]
-    public async Task Table_has_no_RB4_column()
+    public async Task Wide_viewport_shows_song_artist_and_the_wide_default_columns()
     {
-        // Headers render uppercase via CSS text-transform, which shows up in innerText.
+        // Default Playwright viewport (1280x720) is "wide" — Year/Genre/Era plus
+        // RB1/2, RB3, Other. RB4 stays customizer-only at every width.
         var headers = await Page.Locator("th").AllInnerTextsAsync();
+        Assert.That(headers, Is.EqualTo(new[] { "SONG", "ARTIST", "YEAR", "GENRE", "ERA", "RB1/2", "RB3", "OTHER" }));
+    }
+
+    [Test]
+    public async Task Narrow_viewport_defaults_to_song_and_artist_only()
+    {
+        await Page.SetViewportSizeAsync(400, 800);
+        await Page.ReloadAsync();
+        await Expect(Page.GetByText("4960 shown")).ToBeVisibleAsync();
+
+        var headers = await Page.Locator("th").AllInnerTextsAsync();
+        Assert.That(headers, Is.EqualTo(new[] { "SONG", "ARTIST" }));
+    }
+
+    [Test]
+    public async Task Column_picker_toggles_a_column_on_and_off()
+    {
+        await Page.GetByText("Columns ▾").ClickAsync();
+        var rb4Checkbox = Page.GetByRole(AriaRole.Checkbox, new() { Name = "RB4" });
+
+        await Expect(rb4Checkbox).Not.ToBeCheckedAsync(); // off by default at every width
+        await rb4Checkbox.CheckAsync();
+
+        var headers = await Page.Locator("th").AllInnerTextsAsync();
+        Assert.That(headers, Does.Contain("RB4"));
+
+        await rb4Checkbox.UncheckAsync();
+        headers = await Page.Locator("th").AllInnerTextsAsync();
         Assert.That(headers, Does.Not.Contain("RB4"));
-        Assert.That(headers, Is.EqualTo(new[] { "", "SONG", "ARTIST", "YEAR", "GENRE", "ERA" }));
+    }
+
+    [Test]
+    public async Task Column_choice_survives_a_reload()
+    {
+        await Page.GetByText("Columns ▾").ClickAsync();
+        await Page.GetByRole(AriaRole.Checkbox, new() { Name = "RB4" }).CheckAsync();
+
+        await Page.ReloadAsync();
+        await Expect(Page.GetByText("4960 shown")).ToBeVisibleAsync();
+
+        var headers = await Page.Locator("th").AllInnerTextsAsync();
+        Assert.That(headers, Does.Contain("RB4"));
     }
 
     [Test]
@@ -46,7 +88,8 @@ public class CatalogueTests : AppPageTest
     [Test]
     public async Task Era_cell_has_a_tooltip_explaining_the_code()
     {
-        var cell = Page.Locator("tbody td").Nth(5);
+        // Column order at the default wide viewport: Song, Artist, Year, Genre, Era, ...
+        var cell = Page.Locator("tbody td").Nth(4);
         var title = await cell.GetAttributeAsync("title");
         Assert.That(title, Is.Not.Null.And.Not.Empty);
     }
@@ -66,21 +109,6 @@ public class CatalogueTests : AppPageTest
         await Page.GetByPlaceholder("Search song or artist…").FillAsync("africa");
         var rows = Page.Locator("tbody tr");
         await Expect(rows).ToHaveCountAsync(3); // Toto, Weezer, and the delisted RBN1 cover
-    }
-
-    [Test]
-    public async Task Selecting_a_song_updates_the_count_and_survives_search_changes()
-    {
-        await Page.GetByPlaceholder("Search song or artist…").FillAsync("believer");
-        await Page.Locator("tbody input[type=checkbox]").First.CheckAsync();
-        await Expect(Page.GetByText("1 selected")).ToBeVisibleAsync();
-
-        await Page.GetByPlaceholder("Search song or artist…").FillAsync("");
-        await Page.GetByText("Selected only").ClickAsync();
-
-        await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
-        await Expect(Page.GetByText("1 selected")).ToBeVisibleAsync();
-        await Expect(Page.Locator("tbody")).ToContainTextAsync("Believer");
     }
 
     [Test]

@@ -1,20 +1,45 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using RockBandSpotify.Models;
 using RockBandSpotify.Services;
 
 namespace RockBandSpotify.Pages;
 
 /// <summary>
-/// Standalone browse/filter/select page over the static song catalogue.
-/// Works with no login; selections live only in this page's memory for now.
+/// Standalone browse/filter page over the static song catalogue.
+/// Works with no login. Column visibility defaults to the viewport width on
+/// first load, then follows whatever the user picks in the column customizer
+/// (persisted to localStorage).
 /// </summary>
 public partial class Catalogue
 {
     [Inject] private CatalogueService Catalog { get; set; } = default!;
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    private const string ColumnsStorageKey = "rb_catalogue_columns";
+
+    /// <summary>One optional (non-Song/Artist) column: its storage key, header
+    /// label, cell value, and an optional tooltip for the cell.</summary>
+    private sealed record ColumnDef(
+        string Key,
+        string Label,
+        Func<CatalogueSong, string?> Value,
+        Func<CatalogueSong, string?>? Title = null);
+
+    private static readonly ColumnDef[] OptionalColumns =
+    {
+        new("Year", "Year", s => s.Year?.ToString()),
+        new("Genre", "Genre", s => s.Genre),
+        new("Era", "Era", s => EraCatalog.Name(s.Origin), s => EraCatalog.Description(s.Origin)),
+        new("Rb12", "RB1/2", s => s.Rb12),
+        new("Rb3", "RB3", s => s.Rb3),
+        new("Rb4", "RB4", s => s.Rb4),
+        new("Other", "Other", s => s.Other),
+    };
 
     private List<CatalogueSong> _all = new();
     private List<CatalogueSong> _filtered = new();
-    private readonly HashSet<int> _selected = new();
 
     private List<string> _genres = new();
     private List<string> _origins = new();
@@ -22,10 +47,16 @@ public partial class Catalogue
     private string _search = "";
     private string _genre = "";
     private string _origin = "";
-    private bool _selectedOnly;
 
-    private bool HasFilters => _search.Length > 0 || _genre.Length > 0 || _origin.Length > 0
-                                || _selectedOnly;
+    private readonly HashSet<string> _visibleColumns = new();
+    private bool _showColumnPicker;
+
+    private bool HasFilters => _search.Length > 0 || _genre.Length > 0 || _origin.Length > 0;
+
+    protected override void OnInitialized()
+    {
+        _visibleColumns.UnionWith(LoadColumnPreference() ?? DefaultColumnsForViewport());
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -34,6 +65,59 @@ public partial class Catalogue
         _origins = _all.Where(s => !string.IsNullOrEmpty(s.Origin)).Select(s => s.Origin!).Distinct().OrderBy(EraCatalog.Name).ToList();
         ApplyFilters();
     }
+
+    // Narrow: just Song/Artist. Medium: + the columns everyone wants. Wide:
+    // + the columns there's finally room for. RB4 stays customizer-only at
+    // every width — it clutters more than it helps as a default.
+    private HashSet<string> DefaultColumnsForViewport()
+    {
+        int width;
+        try
+        {
+            width = ((IJSInProcessRuntime)JS).Invoke<int>("rbSpotify.getViewportWidth");
+        }
+        catch
+        {
+            width = 1024; // pre-rendering or non-WASM host: assume desktop
+        }
+
+        if (width < 640) return new HashSet<string>();
+        if (width < 1024) return new HashSet<string> { "Year", "Genre", "Era" };
+        return new HashSet<string> { "Year", "Genre", "Era", "Rb12", "Rb3", "Other" };
+    }
+
+    private HashSet<string>? LoadColumnPreference()
+    {
+        try
+        {
+            var raw = ((IJSInProcessRuntime)JS).Invoke<string?>("rbSpotify.getItem", ColumnsStorageKey);
+            if (string.IsNullOrEmpty(raw)) return null;
+            var keys = JsonSerializer.Deserialize<string[]>(raw);
+            return keys is null ? null : new HashSet<string>(keys);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private void SaveColumnPreference()
+    {
+        try
+        {
+            ((IJSInProcessRuntime)JS).InvokeVoid("rbSpotify.setItem", ColumnsStorageKey, JsonSerializer.Serialize(_visibleColumns));
+        }
+        catch { /* localStorage unavailable — preference just won't persist */ }
+    }
+
+    private void ToggleColumn(string key)
+    {
+        if (!_visibleColumns.Remove(key))
+            _visibleColumns.Add(key);
+        SaveColumnPreference();
+    }
+
+    private void ToggleColumnPicker() => _showColumnPicker = !_showColumnPicker;
 
     private void OnSearchChanged(ChangeEventArgs e)
     {
@@ -53,29 +137,12 @@ public partial class Catalogue
         ApplyFilters();
     }
 
-    private void OnSelectedOnlyChanged(ChangeEventArgs e)
-    {
-        _selectedOnly = (bool)(e.Value ?? false);
-        ApplyFilters();
-    }
-
     private void ClearFilters()
     {
-        _search = ""; _genre = ""; _origin = ""; _selectedOnly = false;
+        _search = ""; _genre = ""; _origin = "";
         ApplyFilters();
-    }
-
-    private void ToggleSelected(int id, ChangeEventArgs e)
-    {
-        if ((bool)(e.Value ?? false))
-            _selected.Add(id);
-        else
-            _selected.Remove(id);
-
-        if (_selectedOnly)
-            ApplyFilters();
     }
 
     private void ApplyFilters()
-        => _filtered = CatalogueFilter.Apply(_all, _search, _genre, _origin, _selectedOnly, _selected);
+        => _filtered = CatalogueFilter.Apply(_all, _search, _genre, _origin);
 }
