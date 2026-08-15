@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,7 @@ builder.Services.AddSingleton(playlistConfig);
 builder.Services.AddScoped(sp => new SpotifyAuthService(
     sp.GetRequiredService<HttpClient>(),
     sp.GetRequiredService<IJSRuntime>(),
+    sp.GetRequiredService<NavigationManager>(),
     spotifyConfig,
     baseAddress));
 

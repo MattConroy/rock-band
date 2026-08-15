@@ -17,7 +17,6 @@ public partial class Home
     [Inject] private MatchingService Matcher { get; set; } = default!;
     [Inject] private PlaylistSyncService Sync { get; set; } = default!;
     [Inject] private PlaylistConfig PlaylistCfg { get; set; } = default!;
-    [Inject] private NavigationManager Nav { get; set; } = default!;
 
     // Spotify
     private bool _signedIn;
@@ -48,8 +47,6 @@ public partial class Home
 
     protected override async Task OnInitializedAsync()
     {
-        // Complete a Spotify login redirect if we just came back from one.
-        await Auth.TryCompleteLoginAsync(Nav.Uri);
         _signedIn = await Auth.IsAuthenticatedAsync();
         if (_signedIn)
         {

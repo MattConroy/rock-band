@@ -51,8 +51,8 @@ See [`gateway/README.md`](gateway/README.md) for details and filter tuning.
 ### 2. Create a Spotify app
 
 1. [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) → **Create app**.
-2. Add Redirect URI (with trailing slash): `https://<you>.github.io/<repo>/`
-   (and `https://localhost:5001/` for local dev).
+2. Add Redirect URI: `https://<you>.github.io/<repo>/spotify-connect`
+   (and `https://localhost:5001/spotify-connect` for local dev).
 3. Copy the **Client ID** (no secret needed — PKCE).
 
 ### 3. Configure the app
