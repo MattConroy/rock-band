@@ -24,6 +24,10 @@
 //   3. Pack            RB1EXPORTCCF0099
 //      A single entitlement granting many songs. Expanded via the catalogue's
 //      own `source` field, so one purchase unlocks its whole tracklist.
+//
+// On top of those, block interpolation (see DISC_BLOCKS) emits a COUNTERS table:
+// exact counter -> song mappings, including for songs no dump has ever contained.
+// It needs tools/data/disc-tracklists.json; without it that step is skipped.
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -33,6 +37,7 @@ import { ownedRockBandSongs } from "../gateway/psn.mjs";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA = join(__dirname, "..", "src", "RockBandSpotify", "wwwroot", "data");
 const CATALOGUE_PATH = join(DATA, "catalogue.json");
+const TRACKLISTS_PATH = join(__dirname, "data", "disc-tracklists.json");
 const OUTPUT_PATH = join(DATA, "entitlements.json");
 
 // Pack code prefix -> the catalogue `source` value(s) it grants. Hand-maintained:
@@ -49,7 +54,44 @@ const PACK_SOURCES = {
   RBEXPANSI: ["RIVALS"],
 };
 
+// Contiguous counter blocks, one per game disc, with the sort key Harmonix used
+// inside each. Measured against a real dump: ordering anchors by counter and
+// checking adjacent pairs gives RB1 37/37 and RB3 74/74 on lowercased title,
+// RB2 67/70 and LEGO 30/31 on lowercased artist. Case and punctuation matter and
+// articles do not get stripped — "(Don't Fear) The Reaper" really does sort ahead
+// of "29 Fingers", which is how the raw title ordering was confirmed.
+//
+// `lo`/`hi` bound the block so that a song re-issued later (Dani California sits
+// at 2174, far below the RB1 disc block) cannot be mistaken for a block member.
+const DISC_BLOCKS = {
+  RB1: { lo: 2416, hi: 2473, layout: "dec4", key: (s) => s.song.toLowerCase() },
+  RB2: { lo: 2014, hi: 2111, layout: "dec4", key: (s) => s.artist.toLowerCase() },
+  RB3: { lo: 2307, hi: 2396, layout: "dec4", key: (s) => s.song.toLowerCase() },
+  LEGO: { lo: 1911, hi: 1955, layout: "dec4", key: (s) => s.artist.toLowerCase() },
+};
+
 const norm = (t) => t.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+
+/** Longest strictly-increasing (by `.c`) subsequence, preserving list order. */
+function longestIncreasing(items) {
+  if (!items.length) return [];
+  const tails = [];
+  const prev = new Array(items.length).fill(-1);
+  for (let i = 0; i < items.length; i++) {
+    let lo = 0, hi = tails.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (items[tails[mid]].c < items[i].c) lo = mid + 1;
+      else hi = mid;
+    }
+    if (lo > 0) prev[i] = tails[lo - 1];
+    if (lo === tails.length) tails.push(i);
+    else tails[lo] = i;
+  }
+  const out = [];
+  for (let k = tails[tails.length - 1]; k !== -1; k = prev[k]) out.push(items[k]);
+  return out.reverse();
+}
 
 /**
  * Splits a title-bearing code into its layout, name field, and release-order
@@ -117,6 +159,93 @@ for (const code of items.keys()) {
 }
 for (const curve of Object.values(calibration)) curve.sort((a, b) => a[0] - b[0]);
 
+// --- Table 4: counters (exact counter -> song id), from disc blocks ----------
+// The counter is an internal Harmonix song ID, and a game's disc songs occupy one
+// contiguous run of them, ordered by that game's sort key. So the songs a dump
+// *does* contain pin down positions for the ones it does not: between two anchors
+// whose counter gap exactly equals their position gap in the sorted disc list,
+// every song in between is determined.
+//
+// This is the only route to an entry for a song no dump has ever contained. It is
+// deliberately conservative — a span whose arithmetic does not close exactly is
+// skipped rather than guessed, because it means the block holds entries the disc
+// list does not account for (RB3's block spans 90 counters for 83 disc songs).
+// Leave-one-out over the anchors predicts 149 of 216 with zero errors; hiding
+// random halves and three-quarters of them keeps precision at 100%.
+//
+// Unlike `calibration`, which yields an approximate date, these are exact.
+const byId = new Map(catalogue.map((s) => [s.id, s]));
+const counters = {};
+const interpolated = {};
+let observedCount = 0;
+let derivedCount = 0;
+let tracklists = null;
+try {
+  tracklists = JSON.parse(readFileSync(TRACKLISTS_PATH, "utf8"));
+} catch {
+  console.warn(
+    `\n! ${TRACKLISTS_PATH} missing — skipping block interpolation.\n` +
+      `  Run: node tools/fetch-disc-tracklists.mjs`,
+  );
+}
+
+if (tracklists) {
+  // counter observed in a dump, per song, for the layouts blocks are defined in
+  const observed = new Map();
+  for (const code of items.keys()) {
+    const d = decodeTitleCode(code);
+    if (!d) continue;
+    const stripped = d.field.replace(/X+$/, "");
+    if (stripped.length < 3) continue;
+    const matches = catalogue.filter((s) =>
+      stripped.length < d.field.length ? norm(s.song) === stripped : norm(s.song).startsWith(stripped),
+    );
+    if (matches.length === 1) observed.set(matches[0].id, { counter: d.counter, layout: d.layout });
+  }
+
+  for (const [game, block] of Object.entries(DISC_BLOCKS)) {
+    const disc = tracklists.games[game];
+    if (!disc) continue;
+    const table = (counters[block.layout] ||= {});
+    const derivedHere = (interpolated[block.layout] ||= []);
+
+    const list = disc.songs
+      .map((s) => byId.get(s.id))
+      .filter(Boolean)
+      .sort((a, b) => (block.key(a) < block.key(b) ? -1 : block.key(a) > block.key(b) ? 1 : 0));
+
+    // Anchors: songs in this block whose counter came from a dump.
+    const anchors = [];
+    list.forEach((s, i) => {
+      const o = observed.get(s.id);
+      if (o && o.layout === block.layout && o.counter >= block.lo && o.counter <= block.hi) {
+        anchors.push({ i, c: o.counter, id: s.id });
+      }
+    });
+    // A stray anchor out of alphabetical order would drag a whole span with it.
+    const keep = longestIncreasing(anchors);
+    for (const a of keep) {
+      table[a.c] = a.id;
+      observedCount++;
+    }
+
+    for (let k = 1; k < keep.length; k++) {
+      const a = keep[k - 1], b = keep[k];
+      if (b.c - a.c !== b.i - a.i) continue; // block holds entries the disc list lacks
+      for (let i = a.i + 1; i < b.i; i++) {
+        const s = list[i];
+        if (observed.has(s.id)) continue;
+        const counter = a.c + (i - a.i);
+        if (counter in table) continue;
+        table[counter] = s.id;
+        derivedHere.push(counter);
+        derivedCount++;
+      }
+    }
+    derivedHere.sort((x, y) => x - y);
+  }
+}
+
 // --- Table 0: name index (name field -> song ids), covering EVERY song ------
 // The name field is a pure function of the title, so this is derivable for the
 // whole catalogue — not just songs some dump happened to contain. Both known
@@ -173,6 +302,10 @@ writeFileSync(
       generatedFromDumps: dumps.length,
       index,
       calibration,
+      counters,
+      // Which of `counters` were interpolated rather than seen in a dump, so a
+      // suspect mapping can be traced back to the method that produced it.
+      interpolated,
       packs,
       opaque,
       unidentified,
@@ -190,6 +323,11 @@ for (const width of [7, 10]) {
 }
 for (const [layout, curve] of Object.entries(calibration)) {
   console.log(`calibration ${layout.padEnd(6)} : ${curve.length} anchors  (${curve[0][1]} -> ${curve[curve.length - 1][1]})`);
+}
+for (const [layout, table] of Object.entries(counters)) {
+  const n = Object.keys(table).length;
+  const d = (interpolated[layout] || []).length;
+  console.log(`counters ${layout.padEnd(9)} : ${n} exact  (${n - d} observed, ${d} interpolated)`);
 }
 console.log(`packs               : ${Object.keys(packs).length} -> ${packSongs} songs`);
 console.log(`opaque (confirmed)  : ${Object.keys(opaque).length}`);
