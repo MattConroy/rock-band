@@ -101,6 +101,42 @@ Note that a **track** is not always a **song**: a medley ships as one playable
 track and gets one catalogue entry, while the article prose counts its halves
 separately. That is why Green Day's disc is 44 tracks here and "47 songs" there.
 
+## `apply-source-rules.mjs`
+
+Recomputes every song's `source` in `catalogue.json` from a fixed rule set.
+
+```bash
+node tools/apply-source-rules.mjs          # report only
+node tools/apply-source-rules.mjs --write  # apply
+```
+
+Idempotent, so it doubles as a guard — run it after any catalogue change and it
+reports nothing when everything already agrees. The rules and the evidence for
+each are in the file's header comment.
+
+**`source` = where a song first appeared.** Not which discs hold it, not what a
+pack grants. Overloading it with those two other meanings is what put 40 songs in
+the wrong bucket: songs on the RB1/RB2/LEGO discs that were credited to Unplugged,
+Reloaded or Blitz because those side games re-used them.
+
+The short version of the rules:
+
+1. Shipped on a mainline (RB1–RB4) or spin-off (TBRB, GDRB, LEGO) disc → that
+   game, earliest one wins. Verified: no song on those discs predates its disc,
+   so "first appeared" and "on the disc" never disagree there.
+2. Exclusive-at-launch packs and expansions keep their own source — `ACDC_TP`,
+   `CTP2`, `RIVALS`. Spin-off-exclusive DLC stays with its spin-off (Beatles DLC
+   was never playable elsewhere). Side games and the Rock Band Network keep
+   theirs too.
+3. Everything else is DLC of the mainline game in force on its release date.
+   This currently changes nothing — all 2,371 `*_DLC` songs are already in the
+   right era, to the day.
+
+The entitlement code's **layout is not used**, despite looking like an era
+marker: the layouts coexist for years (`dec4` spans 2007–2019; 2010 alone has
+all three). The counter inside the code does track release order — that is what
+`calibration` and `counters` use.
+
 ## `psn-rockband.ps1` / `psn-names.ps1`
 
 Local PowerShell scripts for pulling your own entitlements (`psn-rockband.ps1`)

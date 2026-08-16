@@ -163,11 +163,11 @@ Fetched and committed: `tools/data/disc-tracklists.json`, produced by
 | UNPLUGGED | 41 | 98 | 1 |
 
 This confirms and quantifies why `source` could never have supplied disc
-membership: **41 of 489** on-disc tracks are tagged with some other game. The RB2
-disc breaks down as `RB2` 53, `UNPLUGGED` 22, `RELOADED` 7, `BLITZ` 2 — the exact
-mixing predicted above. A neat single illustration: "Seven" by Vagiant is on the
-RB1 disc but carries `source: RELOADED`, and the band is in the catalogue under
-its later name, Tijuana Sweetheart.
+membership. **The table above is the state before the source rules were applied**
+— see the next section; 40 of those 41 were genuine errors and are now fixed, and
+the RB1/RB2/LEGO rows now match their disc size exactly. The one remaining
+legitimate disagreement is a song first sold as DLC that later appeared on a
+spin-off disc.
 
 Two counting traps worth knowing before trusting any figure here:
 
@@ -176,6 +176,67 @@ Two counting traps worth knowing before trusting any figure here:
   tracks / "47 songs"; The Beatles' is 44 / "45".
 - **`source` totals ≠ disc size** in *both* directions. TBRB shows 73 because
   that count includes its DLC, not because the disc holds 73.
+
+## What `source` means, and the 40 songs that had it wrong
+
+`source` records **where a song first appeared**. It is not disc membership and
+it is not pack contents, and it had quietly been doing all three jobs. The rules
+now live in `tools/apply-source-rules.mjs`, which is idempotent and so doubles as
+a guard.
+
+Validating them against the tracklists turned up three things worth keeping:
+
+- **"No song is on two discs" is false — 23 are.** Harmless, though: every
+  collision is a mainline/spin-off disc against a *side game* (RB2 ↔ Unplugged
+  22, Blitz ↔ RB2 2, Blitz ↔ Unplugged 1), never mainline↔mainline. Earliest-wins
+  therefore always picks the game the rule intends anyway.
+- **"Shipped there first" is exactly true for mainline and spin-off discs.** Of
+  the 419 songs across RB1–RB4, LEGO, TBRB and GDRB, *zero* have a release date
+  earlier than their disc. Only the side games re-use (Unplugged 32 of 41, Blitz
+  2 of 25) — precisely why they must lose the tiebreak.
+- **The code layout is not an era marker.** Tempting, but false: layouts overlap
+  for years (`dec4` spans 2007–2019; 2010 alone has ccf 27, dec4 78, 7hex 14).
+  Only the counter inside the code tracks release order.
+
+The corrections, all from the first rule:
+
+| Move | Songs |
+|---|---|
+| `UNPLUGGED -> RB2` | 22 |
+| `RELOADED -> RB1` | 8 |
+| `RELOADED -> RB2` | 7 |
+| `BLITZ -> RB2` | 2 |
+| `RELOADED -> LEGO` | 1 |
+
+Two near-misses the rules had to be sharpened to avoid:
+
+- **Beatles DLC.** 29 TBRB songs aren't on the TBRB disc, and a naive era rule
+  files them as `RB2_DLC`. Wikipedia is explicit that Beatles DLC "was not
+  playable in the other games", so spin-off-exclusive DLC stays with its spin-off.
+- **"Exclusive" has to mean *at launch*.** Country Track Pack 2 and the Rivals
+  songs were both sold individually later, so an exclusive-*forever* test would
+  dissolve them into DLC. At-launch keeps them, and still correctly excludes the
+  retail compilations (Track Pack Vol. 1 was assembled from existing DLC).
+
+Rock Band Network was left alone and checks out as a clean partition: none of its
+1,923 songs is on any disc, and no song+artist pair exists under both an RBN and
+a non-RBN source.
+
+### Knock-on: packs no longer expand through `source`
+
+Disc-export packs used to be expanded by matching `source`, which only worked
+while `source` doubled as disc membership. They now read the tracklists directly:
+
+| Pack | Was | Now | True disc |
+|---|---|---|---|
+| `RB1EXPORT` | 50 | **58** | 58 |
+| `RBRB2EXPO` | 53 | **84** | 84 |
+| `RBLRBEXPO` / `RBLRBXKEY` | 44 | **45** | 45 |
+| `RBUNPLUGG` | 98 | **41** | 41 |
+| `RBBLITZ00` | 25 | **25** | 25 |
+
+`RBUNPLUGG` was the worst, granting Unplugged's DLC as well as its disc.
+`RBEXPANSI` (Rivals) has no disc and stays keyed on `source`.
 
 ## Block interpolation — done
 
