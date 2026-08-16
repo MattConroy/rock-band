@@ -1,25 +1,30 @@
 #!/usr/bin/env node
 // Fetches each Rock Band game's true on-disc tracklist from Wikipedia and
-// writes tools/data/disc-tracklists.json.
+// writes tools/data/game-tracklists.json.
 //
-//   node tools/fetch-disc-tracklists.mjs
+//   node tools/fetch-game-tracklists.mjs
 //
 // Maintainer-run and offline, like generate-entitlement-db.mjs. The output is
 // committed so the app and the generator never need network access.
 //
 // WHY THIS EXISTS
 // ---------------
-// Block interpolation (see docs/psn-entitlement-research.md) needs to know which
-// songs shipped on which game disc. The catalogue's `source` field cannot answer
-// that: it records where a song *originated*, so the Rock Band 2 disc block comes
-// back tagged a mix of RB2, RELOADED and UNPLUGGED, and songs that a later game
-// re-used are attributed to the earlier one. Disc membership is a separate fact
-// and has to come from a separate source.
+// Which songs shipped in which game is a fact the catalogue cannot supply on its
+// own, and two things depend on it: the `sources` array (see
+// apply-source-rules.mjs) and block interpolation (see
+// docs/psn-entitlement-research.md).
 //
-// Wikipedia's per-game song-list articles are that source. They are cited to
-// Harmonix's own published setlists, and the article prose states the disc count
-// explicitly — which is what EXPECTED below checks against, so a silent edit or a
-// parser regression fails the run instead of quietly producing a short list.
+// Before this file existed the catalogue held one scalar `source` per song, so a
+// song re-used by a later game could only be credited to one of them — the Rock
+// Band 2 tracklist came back a mix of RB2, RELOADED and UNPLUGGED. Membership is
+// many-valued and had to come from somewhere else.
+//
+// Wikipedia's per-game song-list articles are that somewhere. They are cited to
+// Harmonix's own published setlists, and the article prose states the track count
+// explicitly — which is what `expected` below checks against, so a silent edit or
+// a parser regression fails the run instead of quietly producing a short list.
+//
+// "Game", not "disc": Blitz was download-only and Unplugged was a PSP title.
 
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -29,7 +34,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const CATALOGUE_PATH = join(
   __dirname, "..", "src", "RockBandSpotify", "wwwroot", "data", "catalogue.json",
 );
-const OUTPUT_PATH = join(__dirname, "data", "disc-tracklists.json");
+const OUTPUT_PATH = join(__dirname, "data", "game-tracklists.json");
 
 // Wikipedia asks automated clients to identify themselves.
 const USER_AGENT =
@@ -127,6 +132,17 @@ const GAMES = [
     song: 0,
     artist: 1,
     expected: 25,
+  },
+  {
+    key: "RELOADED",
+    title: "Rock Band Reloaded",
+    page: "Rock_Band_Reloaded",
+    // Only the bundled playlist. The article's "Free downloads" and "Premium
+    // downloads" sections are this game's own DLC, not part of the game.
+    sections: { "Included playlist": "main" },
+    song: 0,
+    artist: 1,
+    expected: 15,
   },
   {
     key: "UNPLUGGED",

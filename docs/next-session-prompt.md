@@ -17,10 +17,13 @@ Band DLC someone owns. No runtime PSN queries, nothing collected from users.
 **Since last session — item 3 (block interpolation) is done.**
 
 - Wikipedia is reachable now (`/wiki/` and `action=raw`; `api.php` and
-  `rest_v1` still 429). `tools/fetch-disc-tracklists.mjs` pulls all nine discs
-  into `tools/data/disc-tracklists.json` — 489 tracks, each resolved to exactly
-  one catalogue song. This confirmed `source` can't stand in for disc membership:
-  41 of 489 are tagged with a different game.
+  `rest_v1` still 429). `tools/fetch-game-tracklists.mjs` pulls all nine discs
+  into `tools/data/game-tracklists.json` — 504 tracks across 10 games, each
+  resolved to exactly one catalogue song.
+- **`source` is now `sources`, an array** of the full games a song shipped in,
+  origin first. Everlong is `["RB2","UNPLUGGED"]`. 32 songs have more than one.
+  Index 0 is the origin, so sorting/grouping still work; filtering matches any
+  entry. It is membership only — deliberately not playability or pack contents.
 - `generate-entitlement-db.mjs` now emits a **`counters`** table — exact
   `counter -> song id`, unlike `calibration`'s approximate `counter -> date`.
   226 entries for the four known blocks: 205 observed, **21 interpolated for

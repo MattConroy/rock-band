@@ -6,7 +6,7 @@ namespace RockBandSpotify.Models;
 /// spin-off game, an exclusive pack/expansion, era-specific DLC, or the Rock
 /// Band Network. It is deliberately not a record of every game a song can be
 /// played in: 23 songs sit on more than one disc, and disc membership lives in
-/// tools/data/disc-tracklists.json instead.
+/// tools/data/game-tracklists.json instead.
 /// Unrecognized codes fall back to the raw code with no description.
 /// </summary>
 public static class SourceCatalog
@@ -39,4 +39,21 @@ public static class SourceCatalog
 
     public static string? Description(string? code) =>
         code is not null && Info.TryGetValue(code, out var info) ? info.Description : null;
+
+    /// <summary>Names of every source a song shipped in, origin first.</summary>
+    public static string Names(IReadOnlyList<string> codes) =>
+        string.Join(" · ", codes.Select(Name));
+
+    /// <summary>
+    /// Tooltip for a multi-source song: the origin's description, plus a line
+    /// naming the other games it also shipped in.
+    /// </summary>
+    public static string? Descriptions(IReadOnlyList<string> codes)
+    {
+        if (codes.Count == 0) return null;
+        var primary = Description(codes[0]);
+        if (codes.Count == 1) return primary;
+        var also = $"Also shipped in {string.Join(", ", codes.Skip(1).Select(Name))}.";
+        return primary is null ? also : $"{primary}\n{also}";
+    }
 }

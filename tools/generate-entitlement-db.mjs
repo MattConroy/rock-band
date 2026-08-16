@@ -27,7 +27,7 @@
 //
 // On top of those, block interpolation (see DISC_BLOCKS) emits a COUNTERS table:
 // exact counter -> song mappings, including for songs no dump has ever contained.
-// It needs tools/data/disc-tracklists.json; without it that step is skipped.
+// It needs tools/data/game-tracklists.json; without it that step is skipped.
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -37,7 +37,7 @@ import { ownedRockBandSongs } from "../gateway/psn.mjs";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA = join(__dirname, "..", "src", "RockBandSpotify", "wwwroot", "data");
 const CATALOGUE_PATH = join(DATA, "catalogue.json");
-const TRACKLISTS_PATH = join(__dirname, "data", "disc-tracklists.json");
+const TRACKLISTS_PATH = join(__dirname, "data", "game-tracklists.json");
 const OUTPUT_PATH = join(DATA, "entitlements.json");
 
 // What each pack grants. Hand-maintained: a pack's contents are a fact about
@@ -197,7 +197,7 @@ try {
 } catch {
   console.warn(
     `\n! ${TRACKLISTS_PATH} missing — skipping block interpolation.\n` +
-      `  Run: node tools/fetch-disc-tracklists.mjs`,
+      `  Run: node tools/fetch-game-tracklists.mjs`,
   );
 }
 
@@ -283,7 +283,7 @@ for (const [prefix, game] of Object.entries(PACK_DISCS)) {
   packs[prefix] = disc.songs.map((s) => s.id);
 }
 for (const [prefix, sources] of Object.entries(PACK_SOURCES)) {
-  const ids = catalogue.filter((s) => sources.includes(s.source)).map((s) => s.id);
+  const ids = catalogue.filter((s) => s.sources.some((v) => sources.includes(v))).map((s) => s.id);
   if (ids.length) packs[prefix] = ids;
 }
 

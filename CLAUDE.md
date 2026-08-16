@@ -72,10 +72,16 @@ Two settled decisions:
 The single input that cannot be reconstructed is a real PSN entitlement dump.
 `tools/psn-rockband.ps1` produces one locally; dumps are gitignored.
 
-**`source` means "where a song first appeared" and nothing else.** It is not disc
-membership (23 songs are on more than one disc) and it is not pack contents. The
-true per-game tracklists live in `tools/data/disc-tracklists.json`, refreshed by
-`tools/fetch-disc-tracklists.mjs`; disc-export packs expand through those, not
-through `source`. The rules that decide `source` are documented and enforced in
+**`sources` is an array: the full games a song shipped in, origin first.** Most
+songs have one entry; 32 have two or three (Everlong is `["RB2","UNPLUGGED"]`).
+Index 0 is the origin — use `CatalogueSong.Primary`, and sort/group on that so
+multi-source songs stay with the game they came from. Filtering matches *any*
+entry.
+
+It is membership, **not** playability — exports let most songs be played in later
+games without appearing in their tracklists — and not pack contents. Per-game
+tracklists live in `tools/data/game-tracklists.json` (10 games, refreshed by
+`tools/fetch-game-tracklists.mjs`); export packs expand through those, not
+through `sources`. The rules are documented and enforced in
 `tools/apply-source-rules.mjs` — run it after any catalogue change; it reports
 violations and is a no-op when everything already agrees.

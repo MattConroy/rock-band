@@ -1,19 +1,31 @@
 #!/usr/bin/env node
-// Recomputes every song's `source` in catalogue.json from a fixed rule set and
+// Recomputes every song's `sources` in catalogue.json from a fixed rule set and
 // reports what changed.
 //
 //   node tools/apply-source-rules.mjs          # report only
 //   node tools/apply-source-rules.mjs --write  # rewrite catalogue.json
 //
 // Idempotent: a second run reports zero changes. Needs
-// tools/data/disc-tracklists.json (see fetch-disc-tracklists.mjs).
+// tools/data/game-tracklists.json (see fetch-game-tracklists.mjs).
 //
-// WHAT `source` MEANS
-// -------------------
-// `source` answers "where did this song FIRST appear". It is not "which discs
-// hold it" and it is not "what does this pack grant" — those are different
-// questions with different answers, and conflating them is what put 40 songs in
-// the wrong bucket. Pack contents come from disc-tracklists.json instead.
+// WHAT `sources` MEANS
+// --------------------
+// `sources` lists the full games a song shipped in, ORIGIN FIRST. Most songs have
+// a single entry; the 31 that shipped in more than one game carry them all, so
+// Everlong is ["RB2", "UNPLUGGED"] — it is on both those games' tracklists.
+//
+// Index 0 is load-bearing: it is the origin, the single answer to "where did this
+// song first appear", decided by the rules below. Keeping it first makes the
+// array a superset of the old scalar, so sorting and grouping by "the" source
+// still work and nothing has to guess which entry is the primary one.
+//
+// What `sources` deliberately does NOT answer:
+//   - which games can PLAY the song. Exports move songs between games — 49 of
+//     RB1's 58 export to RB2/RB3/RB4 and 9 do not — so playability is a
+//     different and much larger relation.
+//   - what a PACK grants. That is keyed by pack, and comes from the tracklists.
+// Folding either of those in would make the array ambiguous, so they are kept
+// out: two songs with identical `sources` can still differ on both.
 //
 // THE RULES, in precedence order
 // ------------------------------
@@ -67,7 +79,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const CATALOGUE_PATH = join(
   __dirname, "..", "src", "RockBandSpotify", "wwwroot", "data", "catalogue.json",
 );
-const TRACKLISTS_PATH = join(__dirname, "data", "disc-tracklists.json");
+const TRACKLISTS_PATH = join(__dirname, "data", "game-tracklists.json");
 
 const MAINLINE = ["RB1", "RB2", "RB3", "RB4"];
 const SPINOFF = ["TBRB", "GDRB", "LEGO"];
@@ -100,33 +112,34 @@ const DLC_ERAS = [
 const catalogue = JSON.parse(readFileSync(CATALOGUE_PATH, "utf8"));
 const tracklists = JSON.parse(readFileSync(TRACKLISTS_PATH, "utf8"));
 
-// song id -> the discs it shipped on, earliest game first
-const discsOf = new Map();
+// song id -> every full game whose tracklist contains it, earliest game first
+const gamesOf = new Map();
 for (const [game, disc] of Object.entries(tracklists.games)) {
   for (const s of disc.songs) {
-    if (!discsOf.has(s.id)) discsOf.set(s.id, []);
-    discsOf.get(s.id).push(game);
+    if (!gamesOf.has(s.id)) gamesOf.set(s.id, []);
+    gamesOf.get(s.id).push(game);
   }
 }
-for (const games of discsOf.values()) {
+for (const games of gamesOf.values()) {
   games.sort((a, b) => (LAUNCHED[a] < LAUNCHED[b] ? -1 : 1));
 }
 
-function expectedSource(song) {
-  // Rule 1 — earliest mainline or spinoff disc.
-  const claimed = (discsOf.get(song.id) ?? []).find(
+/** The song's ORIGIN — where it first appeared. Always exactly one value. */
+function primarySource(song, current) {
+  // Rule 1 — earliest mainline or spinoff game.
+  const claimed = (gamesOf.get(song.id) ?? []).find(
     (g) => MAINLINE.includes(g) || SPINOFF.includes(g),
   );
   if (claimed) return claimed;
 
   // Rules 2, 2b, 2c, 2d — categories that keep their own source.
   if (
-    EXCLUSIVE_PACKS.includes(song.source) ||
-    SPINOFF.includes(song.source) ||
-    SIDE_GAMES.includes(song.source) ||
-    NETWORK.includes(song.source)
+    EXCLUSIVE_PACKS.includes(current) ||
+    SPINOFF.includes(current) ||
+    SIDE_GAMES.includes(current) ||
+    NETWORK.includes(current)
   ) {
-    return song.source;
+    return current;
   }
 
   // Rule 3 — DLC of the mainline game in force at release.
@@ -137,44 +150,69 @@ function expectedSource(song) {
   return DLC_ERAS[DLC_ERAS.length - 1][0];
 }
 
+/**
+ * The full `sources` array: the origin first, then every other full game the
+ * song also shipped in, oldest game first.
+ *
+ * Keeping the origin at index 0 means the multi-valued field stays a superset of
+ * the old single value — sorting and grouping by "the" source still work, and
+ * nothing has to guess which entry is the primary one.
+ */
+function expectedSources(song, current) {
+  const primary = primarySource(song, current);
+  if (primary === null) return null;
+  const also = (gamesOf.get(song.id) ?? []).filter((g) => g !== primary);
+  return [primary, ...also];
+}
+
 const changes = [];
 let undecidable = 0;
 for (const song of catalogue) {
-  const want = expectedSource(song);
+  // Accepts either shape so the tool can be run against a pre-array catalogue.
+  const current = Array.isArray(song.sources) ? song.sources[0] : song.source;
+  const have = Array.isArray(song.sources) ? song.sources : current ? [current] : [];
+  const want = expectedSources(song, current);
   if (want === null) {
     undecidable++;
     continue;
   }
-  if (want !== song.source) changes.push({ song, from: song.source, to: want });
+  if (want.join(",") !== have.join(",")) changes.push({ song, from: have, to: want });
 }
 
 if (undecidable) console.log(`${undecidable} song(s) have no release date and were left alone\n`);
 
 if (changes.length === 0) {
-  console.log(`No changes — all ${catalogue.length} sources already match the rules.`);
+  console.log(`No changes — all ${catalogue.length} songs already match the rules.`);
 } else {
   const tally = {};
   for (const c of changes) {
-    const k = `${c.from} -> ${c.to}`;
+    const k = `${c.from.join("+") || "(none)"} -> ${c.to.join("+")}`;
     tally[k] = (tally[k] || 0) + 1;
   }
-  console.log(`${changes.length} of ${catalogue.length} songs have a source the rules disagree with:\n`);
+  console.log(`${changes.length} of ${catalogue.length} songs disagree with the rules:\n`);
   for (const [move, n] of Object.entries(tally).sort((a, b) => b[1] - a[1])) {
-    console.log(`  ${String(n).padStart(3)}  ${move}`);
+    console.log(`  ${String(n).padStart(4)}  ${move}`);
   }
-  console.log();
-  for (const c of changes) {
-    console.log(
-      `  ${c.from.padEnd(10)} -> ${c.to.padEnd(6)} ${c.song.song.slice(0, 42).padEnd(43)} ${c.song.artist.slice(0, 26)}`,
-    );
-  }
+  const multi = changes.filter((c) => c.to.length > 1).length;
+  if (multi) console.log(`\n  (${multi} of these gain a second or third game)`);
 }
 
 if (process.argv.includes("--write") && changes.length) {
-  for (const c of changes) c.song.source = c.to;
+  for (const c of changes) c.song.sources = c.to;
+  // Emit `sources` in the slot `source` used to occupy so the field order stays
+  // stable, and drop the old scalar.
+  const rewritten = catalogue.map((s) => ({
+    id: s.id,
+    song: s.song,
+    artist: s.artist,
+    year: s.year,
+    genre: s.genre,
+    sources: s.sources ?? (s.source ? [s.source] : []),
+    releaseDate: s.releaseDate,
+  }));
   // catalogue.json is compact single-line JSON; keep it that way so the diff
   // stays about the data rather than the formatting.
-  writeFileSync(CATALOGUE_PATH, JSON.stringify(catalogue));
+  writeFileSync(CATALOGUE_PATH, JSON.stringify(rewritten));
   console.log(`\nWrote ${CATALOGUE_PATH}`);
 } else if (changes.length) {
   console.log(`\n(report only — pass --write to apply)`);
