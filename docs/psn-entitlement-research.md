@@ -179,9 +179,10 @@ Two counting traps worth knowing before trusting any figure here:
 
 ## What `sources` means, and the 40 songs that had it wrong
 
-`sources` is an **array of the full games a song shipped in, origin first**. Most
-songs have one entry; 32 have two or three — Everlong is `["RB2","UNPLUGGED"]`.
-Index 0 is the origin, so the array stays a superset of the old scalar and
+`sources` is an **array of the full games a song shipped in, mainline first**.
+Most songs have one entry; 32 have two or three — Everlong is
+`["RB2","UNPLUGGED"]`. Index 0 is the mainline game, or the origin when no
+mainline shipped the song, so the array stays a superset of the old scalar and
 sorting or grouping by "the" source still works. The rules live in
 `tools/apply-source-rules.mjs`, which is idempotent and so doubles as a guard.
 
