@@ -102,6 +102,33 @@ public class CatalogueTests : AppPageTest
     }
 
     [Test]
+    public async Task Multi_source_song_lists_every_game_it_shipped_in()
+    {
+        // Everlong shipped on the Rock Band 2 disc and again in Unplugged.
+        await Page.GetByPlaceholder("Search song or artist…").FillAsync("everlong");
+        await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
+
+        var cell = Page.Locator("tbody td").Nth(4);
+        await Expect(cell).ToContainTextAsync("Rock Band 2");
+        await Expect(cell).ToContainTextAsync("Rock Band Unplugged");
+
+        // The tooltip names the extra game rather than only describing the origin.
+        var title = await cell.GetAttributeAsync("title");
+        Assert.That(title, Does.Contain("Also shipped in"));
+    }
+
+    [Test]
+    public async Task Filtering_by_a_non_origin_source_still_finds_the_song()
+    {
+        // Everlong's origin is Rock Band 2, but filtering to Unplugged must find
+        // it too — membership, not just origin.
+        await Page.Locator("select").Nth(1).SelectOptionAsync(new SelectOptionValue { Value = "UNPLUGGED" });
+        await Page.GetByPlaceholder("Search song or artist…").FillAsync("everlong");
+        await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
+        await Expect(Page.Locator("tbody")).ToContainTextAsync("Everlong");
+    }
+
+    [Test]
     public async Task Search_narrows_to_the_matching_song()
     {
         await Page.GetByPlaceholder("Search song or artist…").FillAsync("believer");

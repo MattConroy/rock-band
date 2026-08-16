@@ -31,9 +31,12 @@ public static class CatalogueSort
             "Genre" => asc
                 ? songs.OrderBy(s => s.Genre, StringComparer.OrdinalIgnoreCase)
                 : songs.OrderByDescending(s => s.Genre, StringComparer.OrdinalIgnoreCase),
+            // Sorts on the origin alone. A song's extra sources are shown in the
+            // cell but must not affect its position, or the 32 multi-source songs
+            // would scatter away from the game they came from.
             "Source" => asc
-                ? songs.OrderBy(s => SourceCatalog.Name(s.Source), StringComparer.OrdinalIgnoreCase)
-                : songs.OrderByDescending(s => SourceCatalog.Name(s.Source), StringComparer.OrdinalIgnoreCase),
+                ? songs.OrderBy(s => SourceCatalog.Name(s.Primary), StringComparer.OrdinalIgnoreCase)
+                : songs.OrderByDescending(s => SourceCatalog.Name(s.Primary), StringComparer.OrdinalIgnoreCase),
             _ => throw new ArgumentOutOfRangeException(nameof(column), column, "Unknown sort column"),
         };
 

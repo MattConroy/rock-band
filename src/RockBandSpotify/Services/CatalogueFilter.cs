@@ -23,8 +23,11 @@ public static class CatalogueFilter
         if (genre.Length > 0)
             q = q.Where(s => s.Genre == genre);
 
+        // Matches any of the song's sources, not just its origin — filtering to
+        // "Rock Band Unplugged" should find Everlong even though it originated
+        // on the Rock Band 2 disc.
         if (source.Length > 0)
-            q = q.Where(s => s.Source == source);
+            q = q.Where(s => s.Sources.Contains(source));
 
         return q.ToList();
     }

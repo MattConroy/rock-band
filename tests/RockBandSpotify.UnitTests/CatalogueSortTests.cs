@@ -7,10 +7,10 @@ public class CatalogueSortTests
 {
     private static readonly List<CatalogueSong> Songs = new()
     {
-        new() { Id = 1, Song = "Believer", Artist = "Imagine Dragons", Year = 2017, Genre = "Alternative", Source = "RB4_DLC" },
-        new() { Id = 2, Song = "Africa", Artist = "Toto", Year = 1982, Genre = "Pop-Rock", Source = "RB4_DLC" },
-        new() { Id = 3, Song = "africa", Artist = "Weezer", Year = null, Genre = "Alternative", Source = "RB1" },
-        new() { Id = 4, Song = "Paranoid", Artist = "Black Sabbath", Year = 1970, Genre = "Metal", Source = "RB1" },
+        new() { Id = 1, Song = "Believer", Artist = "Imagine Dragons", Year = 2017, Genre = "Alternative", Sources = ["RB4_DLC"] },
+        new() { Id = 2, Song = "Africa", Artist = "Toto", Year = 1982, Genre = "Pop-Rock", Sources = ["RB4_DLC"] },
+        new() { Id = 3, Song = "africa", Artist = "Weezer", Year = null, Genre = "Alternative", Sources = ["RB1"] },
+        new() { Id = 4, Song = "Paranoid", Artist = "Black Sabbath", Year = 1970, Genre = "Metal", Sources = ["RB1"] },
     };
 
     private static List<CatalogueSong> Apply(string? column, SortDirection direction)
@@ -54,6 +54,21 @@ public class CatalogueSortTests
         // "Rock Band 1" (RB1) sorts before "Rock Band 4 DLC" (RB4_DLC) by name.
         var result = Apply("Source", SortDirection.Ascending).Select(s => s.Id).ToList();
         Assert.Equal(new[] { 3, 4, 1, 2 }, result);
+    }
+
+    [Fact]
+    public void Source_sorts_on_the_origin_and_ignores_extra_sources()
+    {
+        // Both songs originate on the Rock Band 2 disc. The second also shipped
+        // in Unplugged, which must not drag it away from its origin group.
+        var songs = new List<CatalogueSong>
+        {
+            new() { Id = 1, Song = "Zzz", Artist = "A", Sources = ["RB4_DLC"] },
+            new() { Id = 2, Song = "Everlong", Artist = "Foo Fighters", Sources = ["RB2", "UNPLUGGED"] },
+            new() { Id = 3, Song = "Aaa", Artist = "B", Sources = ["RB2"] },
+        };
+        var result = CatalogueSort.Apply(songs, "Source", SortDirection.Ascending).Select(s => s.Id);
+        Assert.Equal(new[] { 2, 3, 1 }, result);
     }
 
     [Fact]

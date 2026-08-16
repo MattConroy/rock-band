@@ -22,7 +22,7 @@ and only one of them can be derived from the song catalogue alone:
 | Kind | Example | How a song is identified |
 |---|---|---|
 | Title-bearing | `RBALLIWANCCF01FE` | Truncated title + a release-order counter. Resolved at runtime against `catalogue.json`; this file supplies the `calibration` curve used to break ties between songs sharing a truncated title, and the `counters` table where the counter is known exactly. |
-| Pack | `RB1EXPORTCCF0099` | One entitlement granting a whole tracklist. Expanded through the catalogue's `source` field via `PACK_SOURCES` in the script. |
+| Pack | `RB1EXPORTCCF0099` | One entitlement granting a whole tracklist. Expanded through `game-tracklists.json` via `PACK_DISCS`, or through `sources` via `PACK_SOURCES` for Rivals, which has no tracklist. |
 | Opaque | `PROCKBANDX000012` | A bare product number with no title in it. **Nothing can derive these** — they need a hand-confirmed mapping in `opaque`. |
 
 ### The `counters` table (block interpolation)
@@ -35,7 +35,7 @@ sort key (title for RB1 and RB3, artist for RB2 and LEGO — see
 `DISC_BLOCKS`). So the songs a dump contains pin down positions for the ones it
 does not: where two anchors' counter gap equals their position gap in the sorted
 disc list, everything between them is determined. This needs
-`tools/data/disc-tracklists.json`; without it the step is skipped with a warning.
+`tools/data/game-tracklists.json`; without it the step is skipped with a warning.
 
 It is deliberately conservative — a span whose arithmetic doesn't close exactly
 is skipped rather than guessed. Against the reference dump: 226 entries, 205
@@ -55,18 +55,20 @@ some means outside the code itself, which song that product actually is.
 
 ### Adding pack contents
 
-`PACK_SOURCES` maps a pack's code prefix to the catalogue `source` value(s) it
-grants. A pack's contents are a fact about what Harmonix sold, so this is
-hand-maintained; add an entry when a dump turns up a pack code that isn't
-covered.
+`PACK_DISCS` maps an export pack's code prefix to the game whose tracklist it
+grants; `PACK_SOURCES` covers Rivals, which is an expansion with no tracklist. A
+pack's contents are a fact about what Harmonix sold, so both are hand-maintained;
+add an entry when a dump turns up a pack code that isn't covered.
 
-## `fetch-disc-tracklists.mjs`
+## `fetch-game-tracklists.mjs`
 
-Fetches every game's true **on-disc tracklist** from Wikipedia and writes
-`tools/data/disc-tracklists.json`.
+Fetches every game's true **tracklist** from Wikipedia and writes
+`tools/data/game-tracklists.json` — 10 games, 504 tracks. Not all of them are
+discs: Blitz was download-only and Unplugged was PSP, which is why this is
+"game" and not "disc".
 
 ```bash
-node tools/fetch-disc-tracklists.mjs
+node tools/fetch-game-tracklists.mjs
 ```
 
 Needs network access; the output is committed so nothing else does. This is a
@@ -75,26 +77,19 @@ maintainer input to the entitlement database, not an app asset — it stays unde
 
 ### Why the catalogue can't supply this
 
-`catalogue.json`'s `source` field records where a song **originated**, which is
-not the same question as which disc it shipped on. Measured against the fetched
-lists, **41 of 489 on-disc tracks** carry a `source` other than the game whose
-disc they are on. The Rock Band 2 disc is the worst case — its 84 tracks are
-tagged:
+This file is what makes `sources` derivable rather than guessed. Before it
+existed the catalogue had a single `source` per song, and **41 of 489 tracks**
+named a game other than the one whose disc they were on — the Rock Band 2 disc
+alone was tagged `RB2` 53, `UNPLUGGED` 22, `RELOADED` 7, `BLITZ` 2, because those
+later games re-used its songs and the scalar could only hold one answer.
 
-| `source` | tracks |
-|---|---|
-| `RB2` | 53 |
-| `UNPLUGGED` | 22 |
-| `RELOADED` | 7 |
-| `BLITZ` | 2 |
-
-Block interpolation needs the disc list, so it needs this file.
+Block interpolation needs each game's tracklist too, so it needs this file.
 
 ### Validation
 
 The script fails rather than writing a partial file. Every game has an expected
 track count taken from its article, and every track must resolve to exactly one
-`catalogue.json` song — all 489 currently do. If Wikipedia reshapes a table, fix
+`catalogue.json` song — all 504 currently do. If Wikipedia reshapes a table, fix
 the parser or add an alias; don't lower an expectation.
 
 Note that a **track** is not always a **song**: a medley ships as one playable
@@ -103,7 +98,7 @@ separately. That is why Green Day's disc is 44 tracks here and "47 songs" there.
 
 ## `apply-source-rules.mjs`
 
-Recomputes every song's `source` in `catalogue.json` from a fixed rule set.
+Recomputes every song's `sources` in `catalogue.json` from a fixed rule set.
 
 ```bash
 node tools/apply-source-rules.mjs          # report only
@@ -114,10 +109,18 @@ Idempotent, so it doubles as a guard — run it after any catalogue change and i
 reports nothing when everything already agrees. The rules and the evidence for
 each are in the file's header comment.
 
-**`source` = where a song first appeared.** Not which discs hold it, not what a
-pack grants. Overloading it with those two other meanings is what put 40 songs in
-the wrong bucket: songs on the RB1/RB2/LEGO discs that were credited to Unplugged,
-Reloaded or Blitz because those side games re-used them.
+**`sources` = the full games a song shipped in, origin first.** Most songs have
+one entry; 32 have two or three, so Everlong is `["RB2","UNPLUGGED"]`. Index 0 is
+the origin, which keeps the array a superset of the old scalar: sorting and
+grouping by "the" source still work, and nothing has to guess which entry is
+primary.
+
+It is **not** playability — exports let most songs be played in later games
+without appearing in their tracklists (49 of RB1's 58 export; 9 don't) — and not
+pack contents. Folding either in would make the array ambiguous. Overloading the
+old scalar with disc membership is what put 40 songs in the wrong bucket: songs
+on the RB1/RB2/LEGO discs credited to Unplugged, Reloaded or Blitz because those
+side games re-used them.
 
 The short version of the rules:
 

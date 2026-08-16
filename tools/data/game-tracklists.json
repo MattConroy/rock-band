@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-08-16T16:34:52.928Z",
+  "fetchedAt": "2026-08-16T20:07:01.334Z",
   "games": {
     "RB1": {
       "title": "Rock Band",
@@ -2733,6 +2733,102 @@
           "id": 3042,
           "song": "The Wicker Man",
           "artist": "Iron Maiden",
+          "group": "main"
+        }
+      ]
+    },
+    "RELOADED": {
+      "title": "Rock Band Reloaded",
+      "source": "https://en.wikipedia.org/wiki/Rock_Band_Reloaded",
+      "songs": [
+        {
+          "id": 200,
+          "song": "A-Punk",
+          "artist": "Vampire Weekend",
+          "group": "main"
+        },
+        {
+          "id": 1567,
+          "song": "Bodies",
+          "artist": "Drowning Pool",
+          "group": "main"
+        },
+        {
+          "id": 744,
+          "song": "Call Me When You're Sober",
+          "artist": "Evanescence",
+          "group": "main"
+        },
+        {
+          "id": 643,
+          "song": "Heartbreaker",
+          "artist": "Pat Benatar",
+          "group": "main"
+        },
+        {
+          "id": 538,
+          "song": "Hella Good",
+          "artist": "No Doubt",
+          "group": "main"
+        },
+        {
+          "id": 95,
+          "song": "Hungry Like the Wolf",
+          "artist": "Duran Duran",
+          "group": "main"
+        },
+        {
+          "id": 22,
+          "song": "In Bloom",
+          "artist": "Nirvana",
+          "group": "main"
+        },
+        {
+          "id": 857,
+          "song": "Kryptonite",
+          "artist": "3 Doors Down",
+          "group": "main"
+        },
+        {
+          "id": 116,
+          "song": "Peace Sells",
+          "artist": "Megadeth",
+          "group": "main"
+        },
+        {
+          "id": 1573,
+          "song": "Remedy",
+          "artist": "Seether",
+          "group": "main"
+        },
+        {
+          "id": 138,
+          "song": "Rock'n Me",
+          "artist": "Steve Miller Band",
+          "group": "main"
+        },
+        {
+          "id": 82,
+          "song": "So What'cha Want",
+          "artist": "Beastie Boys",
+          "group": "main"
+        },
+        {
+          "id": 255,
+          "song": "The Perfect Drug",
+          "artist": "Nine Inch Nails",
+          "group": "main"
+        },
+        {
+          "id": 85,
+          "song": "White Wedding (Part 1)",
+          "artist": "Billy Idol",
+          "group": "main"
+        },
+        {
+          "id": 1008,
+          "song": "Your Decision",
+          "artist": "Alice in Chains",
           "group": "main"
         }
       ]

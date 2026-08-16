@@ -95,7 +95,7 @@ calibration curve; their counter spaces are unrelated.
 | Kind | Example | Resolved by |
 |---|---|---|
 | Title-bearing | `RBALLIWANCCF01FE` | Name index + calibration tie-break |
-| Pack | `RB1EXPORTCCF0099` | Expanded via the catalogue's `source` field |
+| Pack | `RB1EXPORTCCF0099` | Expanded via `game-tracklists.json` (Rivals via `sources`) |
 | **Opaque** | `PROCKBANDX000012`, `RBRLPBONUSSONG01` | **Nothing derives these.** A bare product number with no title in it. Needs a hand-confirmed mapping. 74 outstanding. |
 
 Packs punch above their weight: 8 pack codes unlock **358 songs**.
@@ -146,9 +146,9 @@ Catalogue-wide coverage of the derivable name index (independent of any dump):
 
 ## On-disc tracklists — the block-interpolation input
 
-Fetched and committed: `tools/data/disc-tracklists.json`, produced by
-`tools/fetch-disc-tracklists.mjs` from Wikipedia's per-game song-list articles.
-**489 tracks across 9 discs, every one resolved to exactly one catalogue song.**
+Fetched and committed: `tools/data/game-tracklists.json`, produced by
+`tools/fetch-game-tracklists.mjs` from Wikipedia's per-game song-list articles.
+**504 tracks across 10 games, every one resolved to exactly one catalogue song.**
 
 | Game | Disc tracks | Tagged with that `source` | Tracks whose `source` differs |
 |---|---|---|---|
@@ -177,12 +177,21 @@ Two counting traps worth knowing before trusting any figure here:
 - **`source` totals ≠ disc size** in *both* directions. TBRB shows 73 because
   that count includes its DLC, not because the disc holds 73.
 
-## What `source` means, and the 40 songs that had it wrong
+## What `sources` means, and the 40 songs that had it wrong
 
-`source` records **where a song first appeared**. It is not disc membership and
-it is not pack contents, and it had quietly been doing all three jobs. The rules
-now live in `tools/apply-source-rules.mjs`, which is idempotent and so doubles as
-a guard.
+`sources` is an **array of the full games a song shipped in, origin first**. Most
+songs have one entry; 32 have two or three — Everlong is `["RB2","UNPLUGGED"]`.
+Index 0 is the origin, so the array stays a superset of the old scalar and
+sorting or grouping by "the" source still works. The rules live in
+`tools/apply-source-rules.mjs`, which is idempotent and so doubles as a guard.
+
+It answers **membership only**. Two relations were deliberately left out because
+folding them in would make the array ambiguous:
+
+- **Playability.** Exports move songs between games — 49 of RB1's 58 export to
+  RB2/RB3/RB4 and 9 do not. Enter Sandman and Learn to Fly have identical
+  `sources` and differ 1-vs-4 on playability.
+- **Pack contents.** Keyed by pack, and derived from the tracklists.
 
 Validating them against the tracklists turned up three things worth keeping:
 
@@ -319,7 +328,7 @@ research. Re-verified 2026-08-16:
 
 ```bash
 # Refresh the on-disc tracklists from Wikipedia (needs network; output committed)
-node tools/fetch-disc-tracklists.mjs
+node tools/fetch-game-tracklists.mjs
 
 # Regenerate the static database from one or more real dumps
 node tools/generate-entitlement-db.mjs entitlements-raw.json [more...]
