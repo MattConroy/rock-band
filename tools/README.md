@@ -109,11 +109,16 @@ Idempotent, so it doubles as a guard — run it after any catalogue change and i
 reports nothing when everything already agrees. The rules and the evidence for
 each are in the file's header comment.
 
-**`sources` = the full games a song shipped in, origin first.** Most songs have
+**`sources` = the full games a song shipped in, mainline first.** Most songs have
 one entry; 32 have two or three, so Everlong is `["RB2","UNPLUGGED"]`. Index 0 is
-the origin, which keeps the array a superset of the old scalar: sorting and
-grouping by "the" source still work, and nothing has to guess which entry is
-primary.
+the mainline game (RB1–RB4), or the origin when no mainline shipped the song,
+which keeps the array a superset of the old scalar: sorting and grouping by "the"
+source still work, and nothing has to guess which entry is primary.
+
+Mainline-first is stated as a rule rather than left to chance. It currently
+coincides with origin-first — no song on a mainline disc predates that disc — but
+that is a property of today's tracklists, not a guarantee, so a future game
+re-using a mainline song still groups under the mainline.
 
 It is **not** playability — exports let most songs be played in later games
 without appearing in their tracklists (49 of RB1's 58 export; 9 don't) — and not

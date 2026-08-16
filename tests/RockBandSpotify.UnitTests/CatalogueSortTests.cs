@@ -73,6 +73,22 @@ public class CatalogueSortTests
     }
 
     [Fact]
+    public void Source_keeps_a_games_songs_together_ahead_of_its_DLC()
+    {
+        // The regression element-wise comparison exists to prevent: on joined cell
+        // text, "Rock Band 2 DLC" sorts between "Rock Band 2" and
+        // "Rock Band 2 · Rock Band Unplugged", splitting the Rock Band 2 group.
+        var songs = new List<CatalogueSong>
+        {
+            new() { Id = 1, Song = "A", Artist = "A", Sources = ["RB2_DLC"] },
+            new() { Id = 2, Song = "B", Artist = "B", Sources = ["RB2", "UNPLUGGED"] },
+            new() { Id = 3, Song = "C", Artist = "C", Sources = ["RB2"] },
+        };
+        var result = CatalogueSort.Apply(songs, "Source", SortDirection.Ascending).Select(s => s.Id);
+        Assert.Equal(new[] { 3, 2, 1 }, result);
+    }
+
+    [Fact]
     public void Source_orders_within_an_origin_group_by_the_visible_cell_text()
     {
         // All four share an origin, so only the extra sources distinguish them.

@@ -72,11 +72,11 @@ Two settled decisions:
 The single input that cannot be reconstructed is a real PSN entitlement dump.
 `tools/psn-rockband.ps1` produces one locally; dumps are gitignored.
 
-**`sources` is an array: the full games a song shipped in, origin first.** Most
+**`sources` is an array: the full games a song shipped in, mainline first.** Most
 songs have one entry; 32 have two or three (Everlong is `["RB2","UNPLUGGED"]`).
-Index 0 is the origin — use `CatalogueSong.Primary`, and sort/group on that so
-multi-source songs stay with the game they came from. Filtering matches *any*
-entry.
+Index 0 is the mainline game, or the origin when no mainline shipped it — use
+`CatalogueSong.Primary`. Sorting compares the array element by element, so a
+game's songs stay together and ahead of its DLC. Filtering matches *any* entry.
 
 It is membership, **not** playability — exports let most songs be played in later
 games without appearing in their tracklists — and not pack contents. Per-game

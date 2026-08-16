@@ -10,14 +10,14 @@
 //
 // WHAT `sources` MEANS
 // --------------------
-// `sources` lists the full games a song shipped in, ORIGIN FIRST. Most songs have
-// a single entry; the 31 that shipped in more than one game carry them all, so
-// Everlong is ["RB2", "UNPLUGGED"] — it is on both those games' tracklists.
+// `sources` lists the full games a song shipped in, MAINLINE FIRST. Most songs
+// have a single entry; the 32 that shipped in more than one game carry them all,
+// so Everlong is ["RB2", "UNPLUGGED"] — it is on both those games' tracklists.
 //
-// Index 0 is load-bearing: it is the origin, the single answer to "where did this
-// song first appear", decided by the rules below. Keeping it first makes the
-// array a superset of the old scalar, so sorting and grouping by "the" source
-// still work and nothing has to guess which entry is the primary one.
+// Index 0 is load-bearing: it is the mainline game the song belongs to, or its
+// origin when no mainline shipped it. That makes the array a superset of the old
+// scalar, so sorting and grouping by "the" source still work and nothing has to
+// guess which entry is the primary one.
 //
 // What `sources` deliberately does NOT answer:
 //   - which games can PLAY the song. Exports move songs between games — 49 of
@@ -151,18 +151,26 @@ function primarySource(song, current) {
 }
 
 /**
- * The full `sources` array: the origin first, then every other full game the
- * song also shipped in, oldest game first.
+ * The full `sources` array. Ordering, in priority order:
  *
- * Keeping the origin at index 0 means the multi-valued field stays a superset of
- * the old single value — sorting and grouping by "the" source still work, and
- * nothing has to guess which entry is the primary one.
+ *   1. the mainline game (RB1-RB4), if the song shipped in one
+ *   2. otherwise the origin
+ *   3. then every remaining game, oldest first
+ *
+ * Mainline-first is the rule rather than a happy accident. Today it coincides
+ * with origin-first — no song on a mainline disc predates that disc, so the
+ * mainline is already the oldest entry — but that is a property of the current
+ * tracklists, not something the data guarantees. Stating it explicitly means a
+ * future game whose tracklist re-uses a mainline song still sorts and groups
+ * under the mainline rather than under the newcomer.
  */
 function expectedSources(song, current) {
   const primary = primarySource(song, current);
   if (primary === null) return null;
-  const also = (gamesOf.get(song.id) ?? []).filter((g) => g !== primary);
-  return [primary, ...also];
+  const games = gamesOf.get(song.id) ?? [];
+  const lead = games.find((g) => MAINLINE.includes(g)) ?? primary;
+  const rest = [primary, ...games].filter((g, i, a) => g !== lead && a.indexOf(g) === i);
+  return [lead, ...rest];
 }
 
 const changes = [];

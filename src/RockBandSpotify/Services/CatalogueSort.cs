@@ -31,20 +31,47 @@ public static class CatalogueSort
             "Genre" => asc
                 ? songs.OrderBy(s => s.Genre, StringComparer.OrdinalIgnoreCase)
                 : songs.OrderByDescending(s => s.Genre, StringComparer.OrdinalIgnoreCase),
-            // Origin first, so a multi-source song stays with the game it came
-            // from rather than sorting under its second game. Then the whole cell
-            // text, so rows within one origin group are ordered by what the user
-            // can actually see — without it the 32 multi-source songs sit at
-            // arbitrary positions among their single-source siblings and the
-            // column reads as unsorted.
             "Source" => asc
-                ? songs.OrderBy(s => SourceCatalog.Name(s.Primary), StringComparer.OrdinalIgnoreCase)
-                       .ThenBy(s => SourceCatalog.Names(s.Sources), StringComparer.OrdinalIgnoreCase)
-                : songs.OrderByDescending(s => SourceCatalog.Name(s.Primary), StringComparer.OrdinalIgnoreCase)
-                       .ThenByDescending(s => SourceCatalog.Names(s.Sources), StringComparer.OrdinalIgnoreCase),
+                ? songs.OrderBy(s => s, SourceOrder.Instance)
+                : songs.OrderByDescending(s => s, SourceOrder.Instance),
             _ => throw new ArgumentOutOfRangeException(nameof(column), column, "Unknown sort column"),
         };
 
         return ordered.ToList();
+    }
+
+    /// <summary>
+    /// Orders songs by their <see cref="CatalogueSong.Sources"/> in the order the
+    /// data holds them: first source, then second, and so on — so a Rock Band 2
+    /// song sorts on "Rock Band 2" before Unplugged is even considered.
+    /// <para>
+    /// Comparing element by element rather than on the joined cell text is what
+    /// keeps a game's songs together. "Rock Band 2 DLC" would otherwise fall
+    /// between "Rock Band 2" and "Rock Band 2 · Rock Band Unplugged", because the
+    /// separator sorts after a letter, splitting the Rock Band 2 group in half.
+    /// </para>
+    /// <para>
+    /// Where one list is a prefix of the other the shorter comes first, so a song
+    /// that only shipped in Rock Band 2 precedes one that also shipped elsewhere.
+    /// </para>
+    /// </summary>
+    private sealed class SourceOrder : IComparer<CatalogueSong>
+    {
+        internal static readonly SourceOrder Instance = new();
+
+        public int Compare(CatalogueSong? x, CatalogueSong? y)
+        {
+            IReadOnlyList<string> a = x?.Sources ?? [];
+            IReadOnlyList<string> b = y?.Sources ?? [];
+
+            for (var i = 0; i < Math.Min(a.Count, b.Count); i++)
+            {
+                var byName = string.Compare(
+                    SourceCatalog.Name(a[i]), SourceCatalog.Name(b[i]), StringComparison.OrdinalIgnoreCase);
+                if (byName != 0) return byName;
+            }
+
+            return a.Count.CompareTo(b.Count);
+        }
     }
 }
