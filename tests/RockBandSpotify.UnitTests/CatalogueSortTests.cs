@@ -57,10 +57,11 @@ public class CatalogueSortTests
     }
 
     [Fact]
-    public void Source_sorts_on_the_origin_and_ignores_extra_sources()
+    public void Source_groups_by_origin_before_other_sources()
     {
-        // Both songs originate on the Rock Band 2 disc. The second also shipped
-        // in Unplugged, which must not drag it away from its origin group.
+        // Both RB2 songs stay together and ahead of the RB4 one, even though
+        // "Rock Band 2 · Rock Band Unplugged" would sort after "Rock Band 4 DLC"
+        // on cell text alone.
         var songs = new List<CatalogueSong>
         {
             new() { Id = 1, Song = "Zzz", Artist = "A", Sources = ["RB4_DLC"] },
@@ -68,7 +69,28 @@ public class CatalogueSortTests
             new() { Id = 3, Song = "Aaa", Artist = "B", Sources = ["RB2"] },
         };
         var result = CatalogueSort.Apply(songs, "Source", SortDirection.Ascending).Select(s => s.Id);
-        Assert.Equal(new[] { 2, 3, 1 }, result);
+        Assert.Equal(new[] { 3, 2, 1 }, result);
+    }
+
+    [Fact]
+    public void Source_orders_within_an_origin_group_by_the_visible_cell_text()
+    {
+        // All four share an origin, so only the extra sources distinguish them.
+        // They must come out in the order the cell renders, not input order.
+        var songs = new List<CatalogueSong>
+        {
+            new() { Id = 1, Song = "A", Artist = "A", Sources = ["RB2", "UNPLUGGED"] },
+            new() { Id = 2, Song = "B", Artist = "B", Sources = ["RB2"] },
+            new() { Id = 3, Song = "C", Artist = "C", Sources = ["RB2", "BLITZ"] },
+            new() { Id = 4, Song = "D", Artist = "D", Sources = ["RB2"] },
+        };
+        var result = CatalogueSort.Apply(songs, "Source", SortDirection.Ascending).ToList();
+
+        // "Rock Band 2" < "Rock Band 2 · Rock Band Blitz" < "… · Rock Band Unplugged"
+        Assert.Equal(new[] { 2, 4, 3, 1 }, result.Select(s => s.Id));
+        // and the rendered column is genuinely non-decreasing
+        var cells = result.Select(s => SourceCatalog.Names(s.Sources)).ToList();
+        Assert.Equal(cells.OrderBy(c => c, StringComparer.OrdinalIgnoreCase), cells);
     }
 
     [Fact]
