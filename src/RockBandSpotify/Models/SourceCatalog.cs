@@ -1,9 +1,12 @@
 namespace RockBandSpotify.Models;
 
 /// <summary>
-/// Full names and explanations for the catalogue's Source codes — how a song
-/// was actually obtainable: an on-disc mainline game, a full spin-off game, an
-/// exclusive pack/expansion, era-specific DLC, or the Rock Band Network.
+/// Full names and explanations for the catalogue's Source codes. Source records
+/// where a song <em>first appeared</em> — an on-disc mainline game, a full
+/// spin-off game, an exclusive pack/expansion, era-specific DLC, or the Rock
+/// Band Network. It is deliberately not a record of every game a song can be
+/// played in: 23 songs sit on more than one disc, and disc membership lives in
+/// tools/data/disc-tracklists.json instead.
 /// Unrecognized codes fall back to the raw code with no description.
 /// </summary>
 public static class SourceCatalog
@@ -23,11 +26,11 @@ public static class SourceCatalog
         ["LEGO"] = ("LEGO Rock Band", "On-disc tracklist of the LEGO-themed spin-off (2009)."),
         ["GDRB"] = ("Green Day: Rock Band", "On-disc tracklist of the Green Day-themed spin-off (2010)."),
         ["TBRB"] = ("The Beatles: Rock Band", "Disc and DLC for the Beatles-themed spin-off — never cross-compatible with the mainline games."),
-        ["RIVALS"] = ("Rock Band Rivals", "Songs exclusive to the Rock Band 4 Rivals update (2017) — not purchasable as regular DLC."),
+        ["RIVALS"] = ("Rock Band Rivals", "Free with the Rock Band 4 Rivals expansion at launch; sold individually only later."),
         ["UNPLUGGED"] = ("Rock Band Unplugged", "Songs that originated on Rock Band Unplugged (PSP, 2009)."),
         ["RELOADED"] = ("Rock Band Reloaded", "Songs that originated on Rock Band Reloaded (mobile)."),
         ["BLITZ"] = ("Rock Band Blitz", "Songs that originated on Rock Band Blitz (2012)."),
-        ["CTP2"] = ("Country Track Pack 2", "Exclusive to the pack when it released, not sold as individual DLC."),
+        ["CTP2"] = ("Country Track Pack 2", "Exclusive to the pack at release (Feb 2011); sold as individual DLC from Nov 2011."),
         ["ACDC_TP"] = ("AC/DC Track Pack", "Never sold as individual DLC — only obtainable by owning the pack."),
     };
 

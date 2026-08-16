@@ -72,7 +72,10 @@ Two settled decisions:
 The single input that cannot be reconstructed is a real PSN entitlement dump.
 `tools/psn-rockband.ps1` produces one locally; dumps are gitignored.
 
-Disc membership is a *separate fact* from the catalogue's `source` field, which
-records where a song originated — 41 of 489 on-disc tracks disagree. The true
-per-game tracklists live in `tools/data/disc-tracklists.json`, refreshed by
-`tools/fetch-disc-tracklists.mjs`. Don't infer a disc's contents from `source`.
+**`source` means "where a song first appeared" and nothing else.** It is not disc
+membership (23 songs are on more than one disc) and it is not pack contents. The
+true per-game tracklists live in `tools/data/disc-tracklists.json`, refreshed by
+`tools/fetch-disc-tracklists.mjs`; disc-export packs expand through those, not
+through `source`. The rules that decide `source` are documented and enforced in
+`tools/apply-source-rules.mjs` — run it after any catalogue change; it reports
+violations and is a no-op when everything already agrees.

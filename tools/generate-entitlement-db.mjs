@@ -40,17 +40,29 @@ const CATALOGUE_PATH = join(DATA, "catalogue.json");
 const TRACKLISTS_PATH = join(__dirname, "data", "disc-tracklists.json");
 const OUTPUT_PATH = join(DATA, "entitlements.json");
 
-// Pack code prefix -> the catalogue `source` value(s) it grants. Hand-maintained:
-// a pack's contents are a fact about what Harmonix sold, not something derivable
-// from an entitlement code.
+// What each pack grants. Hand-maintained: a pack's contents are a fact about
+// what Harmonix sold, not something derivable from an entitlement code.
+//
+// Most of these are disc exports, so they grant exactly that game's TRACKLIST.
+// They used to be expanded through the catalogue's `source` field, which only
+// worked while `source` was doubling as a record of disc membership. It isn't —
+// `source` is where a song first appeared, and 41 on-disc tracks first appeared
+// somewhere else — so the two answers had drifted apart. Reading the tracklists
+// directly fixes RB1EXPORT (50 -> 58), RBRB2EXPO (53 -> 84), the LEGO exports
+// (44 -> 45) and RBUNPLUGG (98 -> 41, which was picking up Unplugged's DLC).
+const PACK_DISCS = {
+  RB1EXPORT: "RB1",
+  RBRB2EXPO: "RB2",
+  RBLRBEXPO: "LEGO",
+  RBLRBXKEY: "LEGO",
+  RBUNPLUGG: "UNPLUGGED",
+  RBGDBONUS: "GDRB",
+  RBBLITZ00: "BLITZ",
+};
+
+// Rivals is an expansion rather than a disc, so it has no tracklist to read and
+// stays keyed on `source`.
 const PACK_SOURCES = {
-  RB1EXPORT: ["RB1"],
-  RBRB2EXPO: ["RB2"],
-  RBLRBEXPO: ["LEGO"],
-  RBLRBXKEY: ["LEGO"],
-  RBUNPLUGG: ["UNPLUGGED"],
-  RBGDBONUS: ["GDRB"],
-  RBBLITZ00: ["BLITZ"],
   RBEXPANSI: ["RIVALS"],
 };
 
@@ -265,6 +277,11 @@ for (const width of [7, 10]) {
 
 // --- Table 2: packs (pack code -> song ids) ---------------------------------
 const packs = {};
+for (const [prefix, game] of Object.entries(PACK_DISCS)) {
+  const disc = tracklists?.games[game];
+  if (!disc) continue; // no tracklists on disk; warned about above
+  packs[prefix] = disc.songs.map((s) => s.id);
+}
 for (const [prefix, sources] of Object.entries(PACK_SOURCES)) {
   const ids = catalogue.filter((s) => sources.includes(s.source)).map((s) => s.id);
   if (ids.length) packs[prefix] = ids;
