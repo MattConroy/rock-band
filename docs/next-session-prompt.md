@@ -4,7 +4,7 @@ Paste this as the first message of a new session.
 
 ---
 
-Working on `MattConroy/rock-band`, branch `claude/spotify-rockband-playlist-jevclx`.
+Working on `MattConroy/rock-band`, branch `claude/rock-band-wikipedia-query-9e9186`.
 
 Read `CLAUDE.md` and `docs/psn-entitlement-research.md` first — the research doc
 records what's already been tried and measured for PSN entitlement matching,
@@ -13,31 +13,41 @@ including several dead ends I don't want re-attempted.
 Context in one line: we're building a **static, maintainer-generated** database
 that maps PSN content codes to catalogue songs, so the app can show which Rock
 Band DLC someone owns. No runtime PSN queries, nothing collected from users.
-Currently identifying 77.5% of real codes.
 
-**Since last session:** the on-disc tracklist blocker on item 3 is cleared.
-Wikipedia is reachable now (article and `action=raw` routes — the `api.php` and
-`rest_v1` routes still 429). `tools/fetch-disc-tracklists.mjs` fetches all nine
-discs into `tools/data/disc-tracklists.json` — 489 tracks, every one resolved to
-exactly one catalogue song. That confirmed the `source` field really can't stand
-in for disc membership: 41 of the 489 are tagged with a different game, and the
-RB2 disc alone splits `RB2` 53 / `UNPLUGGED` 22 / `RELOADED` 7 / `BLITZ` 2.
+**Since last session — item 3 (block interpolation) is done.**
+
+- Wikipedia is reachable now (`/wiki/` and `action=raw`; `api.php` and
+  `rest_v1` still 429). `tools/fetch-disc-tracklists.mjs` pulls all nine discs
+  into `tools/data/disc-tracklists.json` — 489 tracks, each resolved to exactly
+  one catalogue song. This confirmed `source` can't stand in for disc membership:
+  41 of 489 are tagged with a different game.
+- `generate-entitlement-db.mjs` now emits a **`counters`** table — exact
+  `counter -> song id`, unlike `calibration`'s approximate `counter -> date`.
+  226 entries for the four known blocks: 205 observed, **21 interpolated for
+  songs no dump contains**. Leave-one-out: 149 predicted, 149 correct, zero
+  errors; precision holds at 100% with three-quarters of anchors hidden.
+- Rock Band 3's block was recorded as "unclear (36/74)" — that was the wrong sort
+  key. It sorts by **title** and is 74/74. The keys are lowercased but keep
+  punctuation and articles.
 
 The outstanding work, in value order:
 
-1. Decode the 7-hex code layout (92 codes, ~12%) — give it its own calibration
-   curve, the way `dec4` already has one.
-2. Fix pack misclassification in `gateway/psn.mjs` (`BUNDLE_RE` misses artist
-   packs like `RBFOOPACK`, `RBQUEENPA`) — ~18 codes wrongly counted as failures.
-3. Block interpolation — **the static half is done**; what's left needs a dump.
-   Locate each game's counter block, sort its disc list by that game's sort key
-   (title for RB1, artist for RB2 and LEGO), and assign positions across the
-   block so that songs absent from any dump still get an entry.
-4. Wire the database into the app; `PsnService` currently yields zero songs
-   because it expects a different response shape than the gateway returns.
+1. **Decode the 7-hex layout** (92 codes, ~12%) — the largest remaining gap.
+   Give it its own calibration curve the way `dec4` has one. Needs a dump.
+2. **Fix pack misclassification** in `gateway/psn.mjs` — `BUNDLE_RE` misses
+   artist packs (`RBFOOPACK`, `RBQUEENPA`, …), so ~18 packs are counted as failed
+   songs. Regex fix, no dump needed.
+3. **Wire the database into the app.** `PsnService.FetchSongsAsync()` still POSTs
+   an npsso to the gateway and deserializes `{songs:[...]}` while the gateway
+   returns `{items:[...]}`, so it silently yields zero songs. Given the
+   no-runtime-PSN decision this should become "load a local dump → match against
+   the static database", which also retires the gateway. Nothing yet reads
+   `counters` or `calibration` — that consumer doesn't exist. No dump needed.
+4. Optional extensions to `counters`: TBRB/GDRB/RB4/BLITZ produced no `dec4`
+   anchors at all, so their blocks are unlocated; and every resolved DLC anchor
+   is an exact fact that could be added beyond the disc blocks.
 
 **To regenerate the database you need a real PSN entitlement dump**, which is
 gitignored and does not survive between sessions — I'll need to re-upload it.
-Ask me for it before doing anything that depends on regenerating. Items 1 and 3
-both need it; item 2 is a regex fix and item 4 is app wiring, so those two can
-be done without it.
+Ask me for it before doing anything that depends on regenerating. Items 2 and 3
+don't need it.

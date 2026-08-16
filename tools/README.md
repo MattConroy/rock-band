@@ -21,9 +21,30 @@ and only one of them can be derived from the song catalogue alone:
 
 | Kind | Example | How a song is identified |
 |---|---|---|
-| Title-bearing | `RBALLIWANCCF01FE` | Truncated title + a release-order counter. Resolved at runtime against `catalogue.json`; this file supplies only the `calibration` curve used to break ties between songs sharing a truncated title. |
+| Title-bearing | `RBALLIWANCCF01FE` | Truncated title + a release-order counter. Resolved at runtime against `catalogue.json`; this file supplies the `calibration` curve used to break ties between songs sharing a truncated title, and the `counters` table where the counter is known exactly. |
 | Pack | `RB1EXPORTCCF0099` | One entitlement granting a whole tracklist. Expanded through the catalogue's `source` field via `PACK_SOURCES` in the script. |
 | Opaque | `PROCKBANDX000012` | A bare product number with no title in it. **Nothing can derive these** — they need a hand-confirmed mapping in `opaque`. |
+
+### The `counters` table (block interpolation)
+
+`calibration` turns a counter into an approximate *date*. `counters` turns one
+into an exact *song*, for the songs where that is possible.
+
+A game's disc songs occupy one contiguous run of counters, ordered by that game's
+sort key (title for RB1 and RB3, artist for RB2 and LEGO — see
+`DISC_BLOCKS`). So the songs a dump contains pin down positions for the ones it
+does not: where two anchors' counter gap equals their position gap in the sorted
+disc list, everything between them is determined. This needs
+`tools/data/disc-tracklists.json`; without it the step is skipped with a warning.
+
+It is deliberately conservative — a span whose arithmetic doesn't close exactly
+is skipped rather than guessed. Against the reference dump: 226 entries, 205
+observed and **21 interpolated for songs no dump contains**. Leave-one-out over
+the anchors predicts 149 of 216 with zero errors, and precision stays at 100%
+when three-quarters of the anchors are hidden.
+
+The `interpolated` key lists which counters were derived rather than observed, so
+a suspect mapping can be traced back.
 
 ### The `unidentified` list
 

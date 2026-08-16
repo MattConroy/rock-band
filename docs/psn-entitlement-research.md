@@ -59,13 +59,27 @@ the sort key differs between games:
 
 | Counter range | Game | Sorted by | Monotonic pairs |
 |---|---|---|---|
-| 2416–2459 | Rock Band 1 | **song title** | 38/39 |
+| 2416–2459 | Rock Band 1 | **song title** | **37/37** |
 | 2014–2111 | Rock Band 2 | **artist** | 67/70 |
-| 1918–1939 | LEGO Rock Band | **artist** | 30/31 |
-| 2307–2386 | Rock Band 3 | unclear | 36/74 |
+| 1911–1955 | LEGO Rock Band | **artist** | **30/31** |
+| 2307–2396 | Rock Band 3 | **song title** | **74/74** |
 
 Rock Band 2 has a second alphabetical run from 2103 for its bonus/indie tier,
 restarting from A.
+
+**Rock Band 3 was previously recorded as "unclear" at 36/74 — that was the wrong
+key, not a disordered block.** It sorts by title, and on title it is perfect.
+The sort key is the raw field **lowercased**, with punctuation kept and leading
+articles *not* stripped:
+
+- `"(Don't Fear) The Reaper"` really does sort ahead of `"29 Fingers"` — the
+  opening parenthesis orders before a digit. Strip punctuation and RB1 drops from
+  37/37 to 35/37.
+- LEGO's artists sort as displayed: Bryan Adams under B, Katrina & the Waves
+  under K. Lowercasing matters (30/31 vs 29/31 raw); stripping "The" hurts.
+
+Getting this key exactly right is what makes interpolation safe, so it is worth
+re-measuring rather than assuming when a new block turns up.
 
 Because DLC counters *do* climb steadily with release date, a counter can be
 interpolated to a release date and used to break ties between songs sharing a
@@ -118,11 +132,9 @@ Catalogue-wide coverage of the derivable name index (independent of any dump):
 2. **Fix pack misclassification** in `gateway/psn.mjs` — `BUNDLE_RE` misses
    artist packs (`RBFOOPACK`, `RBQUEENPA`, `RBMAROONP`, `RBAVENGED`, …), so ~18
    packs are counted as failed songs. Regex fix.
-3. **Block interpolation** — within a contiguous alphabetical block, positions
-   for *unowned* songs can be filled in. This is the only known route to
-   entries for songs no dump contains. **The tracklist blocker is cleared** (see
-   below); what remains is the interpolation itself, which needs a dump to
-   establish each block's counter range.
+3. ~~**Block interpolation**~~ — **done**, see below. 226 exact
+   `counter -> song` mappings for the four known blocks, 21 of them for songs no
+   dump contains.
 4. **Wire it into the app.** `PsnService.FetchSongsAsync()` still POSTs an npsso
    to the gateway Worker and deserializes into `SongLibrary` (`{songs:[...]}`),
    but the gateway returns `{items:[{code,id,type}]}` — mismatched shapes, so it
@@ -165,14 +177,63 @@ Two counting traps worth knowing before trusting any figure here:
 - **`source` totals ≠ disc size** in *both* directions. TBRB shows 73 because
   that count includes its DLC, not because the disc holds 73.
 
-### Still to do for interpolation
+## Block interpolation — done
 
-The tracklists are the static half. The other half needs a dump: each game's
-counter block has to be located (RB1 2416–2459, RB2 2014–2111, LEGO 1918–1939,
-RB3 2307–2386 from the last dump), the disc list sorted by that game's sort key
-(title for RB1, artist for RB2 and LEGO), and positions assigned across the
-block — including the slots for songs the dump does not contain, which is the
-whole point.
+`generate-entitlement-db.mjs` now emits a **`counters`** table: exact
+`counter -> song id` mappings, as opposed to `calibration`'s approximate
+`counter -> date`. Against the reference dump it holds **226 entries for the four
+known blocks — 205 observed in the dump, 21 interpolated for songs the dump does
+not contain**, which is the first time songs nobody owns have entries at all.
+
+### How it works, and why it is conservative
+
+Sort a game's disc list by its sort key. Songs the dump *does* contain pin down
+positions for the ones it does not: where two anchors have a counter gap exactly
+equal to their position gap, every song between them is determined.
+
+A span whose arithmetic does not close is **skipped, not guessed**. That happens
+because blocks contain entries the disc list cannot account for — RB3's block
+spans 90 counters for 83 disc songs, a drift of exactly 7. Anchors that break
+alphabetical order are dropped first, by keeping the longest strictly increasing
+subsequence, so one stray code cannot drag a whole span with it.
+
+### Validation
+
+Leave-one-out over all 216 anchors: **149 predicted, 149 correct, zero errors.**
+Because real gaps cluster (leave-one-out always leaves tight neighbours), that
+overstates recall, so precision was re-checked while hiding anchors in bulk:
+
+| Anchors hidden | Recall | Precision |
+|---|---|---|
+| 25% | 62.4% | 99.7% (2 wrong of 649) |
+| 50% | 53.5% | 100% |
+| 75% | 42.2% | 100% |
+
+Recall degrades with sparsity, as expected; precision does not. That asymmetry is
+the point of the design — it emits nothing it cannot pin down.
+
+Interpolated entries slot cleanly into their neighbourhoods, which is the easiest
+sanity check to repeat by eye:
+
+```
+2416   (Don't Fear) The Reaper      2027   Dinosaur Jr.
+2417   29 Fingers                   2028   Disturbed
+2418 * Are You Gonna Be My Girl     2029 * Dream Theater
+2419   Ballroom Blitz               2030   Duran Duran
+2420   Black Hole Sun               2031   Elvis Costello
+```
+
+`entitlements.json` records which counters were interpolated (the `interpolated`
+key) so a suspect mapping can be traced back to the method that produced it.
+
+### What would extend it
+
+- Only four blocks are mapped. TBRB, GDRB, RB4 and BLITZ produced **no `dec4`
+  anchors at all** in this dump, so their blocks are unlocated — those games'
+  codes presumably use another layout.
+- The 7-hex layout is still undecoded, which is the largest remaining gap.
+- `counters` currently covers disc blocks only. Every resolved DLC anchor is also
+  an exact fact and could be added, at the cost of a larger table.
 
 ## Environment notes
 
