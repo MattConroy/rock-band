@@ -1,0 +1,2993 @@
+{
+  "fetchedAt": "2026-08-16T16:34:52.928Z",
+  "games": {
+    "RB1": {
+      "title": "Rock Band",
+      "source": "https://en.wikipedia.org/wiki/List_of_songs_in_Rock_Band",
+      "songs": [
+        {
+          "id": 16,
+          "song": "Are You Gonna Be My Girl",
+          "artist": "Jet",
+          "group": "main"
+        },
+        {
+          "id": 34,
+          "song": "Ballroom Blitz (Cover)",
+          "artist": "Sweet",
+          "group": "main"
+        },
+        {
+          "id": 32,
+          "song": "Black Hole Sun",
+          "artist": "Soundgarden",
+          "group": "main"
+        },
+        {
+          "id": 28,
+          "song": "Blitzkrieg Bop",
+          "artist": "Ramones",
+          "group": "main"
+        },
+        {
+          "id": 14,
+          "song": "Celebrity Skin",
+          "artist": "Hole",
+          "group": "main"
+        },
+        {
+          "id": 31,
+          "song": "Cherub Rock",
+          "artist": "Smashing Pumpkins",
+          "group": "main"
+        },
+        {
+          "id": 27,
+          "song": "Creep",
+          "artist": "Radiohead",
+          "group": "main"
+        },
+        {
+          "id": 29,
+          "song": "Dani California",
+          "artist": "Red Hot Chili Peppers",
+          "group": "main"
+        },
+        {
+          "id": 11,
+          "song": "Dead on Arrival",
+          "artist": "Fall Out Boy",
+          "group": "main"
+        },
+        {
+          "id": 17,
+          "song": "Detroit Rock City",
+          "artist": "Kiss",
+          "group": "main"
+        },
+        {
+          "id": 4,
+          "song": "(Don't Fear) The Reaper",
+          "artist": "Blue Öyster Cult",
+          "group": "main"
+        },
+        {
+          "id": 38,
+          "song": "Electric Version",
+          "artist": "The New Pornographers",
+          "group": "main"
+        },
+        {
+          "id": 18,
+          "song": "Enter Sandman",
+          "artist": "Metallica",
+          "group": "main"
+        },
+        {
+          "id": 10,
+          "song": "Epic",
+          "artist": "Faith No More",
+          "group": "main"
+        },
+        {
+          "id": 19,
+          "song": "Flirtin' with Disaster",
+          "artist": "Molly Hatchet",
+          "group": "main"
+        },
+        {
+          "id": 6,
+          "song": "Foreplay/Long Time",
+          "artist": "Boston",
+          "group": "main"
+        },
+        {
+          "id": 41,
+          "song": "Gimme Shelter",
+          "artist": "The Rolling Stones",
+          "group": "main"
+        },
+        {
+          "id": 25,
+          "song": "Go with the Flow",
+          "artist": "Queens of the Stone Age",
+          "group": "main"
+        },
+        {
+          "id": 39,
+          "song": "Green Grass and High Tides (Cover)",
+          "artist": "The Outlaws",
+          "group": "main"
+        },
+        {
+          "id": 23,
+          "song": "Here It Goes Again",
+          "artist": "OK Go",
+          "group": "main"
+        },
+        {
+          "id": 9,
+          "song": "Highway Star",
+          "artist": "Deep Purple",
+          "group": "main"
+        },
+        {
+          "id": 13,
+          "song": "I Think I'm Paranoid",
+          "artist": "Garbage",
+          "group": "main"
+        },
+        {
+          "id": 22,
+          "song": "In Bloom",
+          "artist": "Nirvana",
+          "group": "main"
+        },
+        {
+          "id": 12,
+          "song": "Learn to Fly",
+          "artist": "Foo Fighters",
+          "group": "main"
+        },
+        {
+          "id": 36,
+          "song": "Main Offender",
+          "artist": "The Hives",
+          "group": "main"
+        },
+        {
+          "id": 45,
+          "song": "Maps",
+          "artist": "Yeah Yeah Yeahs",
+          "group": "main"
+        },
+        {
+          "id": 20,
+          "song": "Mississippi Queen (Cover)",
+          "artist": "Mountain",
+          "group": "main"
+        },
+        {
+          "id": 40,
+          "song": "Next to You",
+          "artist": "The Police",
+          "group": "main"
+        },
+        {
+          "id": 26,
+          "song": "Orange Crush",
+          "artist": "R.E.M.",
+          "group": "main"
+        },
+        {
+          "id": 3,
+          "song": "Paranoid (Cover)",
+          "artist": "Black Sabbath",
+          "group": "main"
+        },
+        {
+          "id": 42,
+          "song": "Reptilia",
+          "artist": "The Strokes",
+          "group": "main"
+        },
+        {
+          "id": 15,
+          "song": "Run to the Hills (Cover)",
+          "artist": "Iron Maiden",
+          "group": "main"
+        },
+        {
+          "id": 2,
+          "song": "Sabotage",
+          "artist": "Beastie Boys",
+          "group": "main"
+        },
+        {
+          "id": 44,
+          "song": "Say It Ain't So",
+          "artist": "Weezer",
+          "group": "main"
+        },
+        {
+          "id": 35,
+          "song": "Should I Stay or Should I Go",
+          "artist": "The Clash",
+          "group": "main"
+        },
+        {
+          "id": 8,
+          "song": "Suffragette City",
+          "artist": "David Bowie",
+          "group": "main"
+        },
+        {
+          "id": 21,
+          "song": "The Hand That Feeds",
+          "artist": "Nine Inch Nails",
+          "group": "main"
+        },
+        {
+          "id": 30,
+          "song": "Tom Sawyer (Cover)",
+          "artist": "Rush",
+          "group": "main"
+        },
+        {
+          "id": 1,
+          "song": "Train Kept A-Rollin' (Cover)",
+          "artist": "Aerosmith",
+          "group": "main"
+        },
+        {
+          "id": 33,
+          "song": "Vasoline",
+          "artist": "Stone Temple Pilots",
+          "group": "main"
+        },
+        {
+          "id": 5,
+          "song": "Wanted Dead or Alive",
+          "artist": "Bon Jovi",
+          "group": "main"
+        },
+        {
+          "id": 24,
+          "song": "Wave of Mutilation",
+          "artist": "Pixies",
+          "group": "main"
+        },
+        {
+          "id": 7,
+          "song": "Welcome Home",
+          "artist": "Coheed and Cambria",
+          "group": "main"
+        },
+        {
+          "id": 37,
+          "song": "When You Were Young",
+          "artist": "The Killers",
+          "group": "main"
+        },
+        {
+          "id": 43,
+          "song": "Won't Get Fooled Again",
+          "artist": "The Who",
+          "group": "main"
+        },
+        {
+          "id": 54,
+          "song": "29 Fingers",
+          "artist": "The Konks",
+          "group": "bonus"
+        },
+        {
+          "id": 46,
+          "song": "Blood Doll",
+          "artist": "Anarchy Club",
+          "group": "bonus"
+        },
+        {
+          "id": 51,
+          "song": "Brainpower",
+          "artist": "Freezepop",
+          "group": "bonus"
+        },
+        {
+          "id": 49,
+          "song": "Can't Let Go",
+          "artist": "Death of the Cool",
+          "group": "bonus"
+        },
+        {
+          "id": 53,
+          "song": "Day Late, Dollar Short",
+          "artist": "The Acro-Brats",
+          "group": "bonus"
+        },
+        {
+          "id": 52,
+          "song": "I Get By",
+          "artist": "Honest Bob and the Factory to Dealer Incentives",
+          "group": "bonus"
+        },
+        {
+          "id": 50,
+          "song": "I'm So Sick",
+          "artist": "Flyleaf",
+          "group": "bonus"
+        },
+        {
+          "id": 48,
+          "song": "Nightmare",
+          "artist": "Crooked X",
+          "group": "bonus"
+        },
+        {
+          "id": 58,
+          "song": "Outside",
+          "artist": "Tribe",
+          "group": "bonus"
+        },
+        {
+          "id": 47,
+          "song": "Pleasure (Pleasure)",
+          "artist": "Bang Camaro",
+          "group": "bonus"
+        },
+        {
+          "id": 56,
+          "song": "Seven",
+          "artist": "Vagiant",
+          "group": "bonus"
+        },
+        {
+          "id": 55,
+          "song": "Time We Had",
+          "artist": "The Mother Hips",
+          "group": "bonus"
+        },
+        {
+          "id": 57,
+          "song": "Timmy and the Lords of the Underworld",
+          "artist": "Timmy and the Lords of the Underworld",
+          "group": "bonus"
+        }
+      ]
+    },
+    "RB2": {
+      "title": "Rock Band 2",
+      "source": "https://en.wikipedia.org/wiki/List_of_songs_in_Rock_Band_2",
+      "songs": [
+        {
+          "id": 149,
+          "song": "A Jagged Gorgeous Winter",
+          "artist": "The Main Drag",
+          "group": "main"
+        },
+        {
+          "id": 119,
+          "song": "Ace of Spades '08",
+          "artist": "Motörhead",
+          "group": "main"
+        },
+        {
+          "id": 147,
+          "song": "Alabama Getaway",
+          "artist": "The Grateful Dead",
+          "group": "main"
+        },
+        {
+          "id": 153,
+          "song": "Alex Chilton",
+          "artist": "The Replacements",
+          "group": "main"
+        },
+        {
+          "id": 124,
+          "song": "Alive",
+          "artist": "Pearl Jam",
+          "group": "main"
+        },
+        {
+          "id": 79,
+          "song": "Almost Easy",
+          "artist": "Avenged Sevenfold",
+          "group": "main"
+        },
+        {
+          "id": 148,
+          "song": "American Woman",
+          "artist": "The Guess Who",
+          "group": "main"
+        },
+        {
+          "id": 106,
+          "song": "Any Way You Want It",
+          "artist": "Journey",
+          "group": "main"
+        },
+        {
+          "id": 103,
+          "song": "Aqualung",
+          "artist": "Jethro Tull",
+          "group": "main"
+        },
+        {
+          "id": 105,
+          "song": "Bad Reputation",
+          "artist": "Jett",
+          "group": "main"
+        },
+        {
+          "id": 117,
+          "song": "Battery",
+          "artist": "Metallica",
+          "group": "main"
+        },
+        {
+          "id": 137,
+          "song": "Bodhisattva",
+          "artist": "Steely Dan",
+          "group": "main"
+        },
+        {
+          "id": 108,
+          "song": "Carry On Wayward Son",
+          "artist": "Kansas",
+          "group": "main"
+        },
+        {
+          "id": 140,
+          "song": "Chop Suey",
+          "artist": "System of a Down",
+          "group": "main"
+        },
+        {
+          "id": 115,
+          "song": "Colony of Birchmen",
+          "artist": "Mastodon",
+          "group": "main"
+        },
+        {
+          "id": 152,
+          "song": "Come Out and Play (Keep 'Em Separated)",
+          "artist": "The Offspring",
+          "group": "main"
+        },
+        {
+          "id": 135,
+          "song": "Conventional Lover",
+          "artist": "Speck",
+          "group": "main"
+        },
+        {
+          "id": 136,
+          "song": "Cool for Cats",
+          "artist": "Squeeze",
+          "group": "main"
+        },
+        {
+          "id": 114,
+          "song": "De-Luxe",
+          "artist": "Lush",
+          "group": "main"
+        },
+        {
+          "id": 93,
+          "song": "Down with the Sickness",
+          "artist": "Disturbed",
+          "group": "main"
+        },
+        {
+          "id": 120,
+          "song": "Drain You",
+          "artist": "Nirvana",
+          "group": "main"
+        },
+        {
+          "id": 83,
+          "song": "E-Pro",
+          "artist": "Beck",
+          "group": "main"
+        },
+        {
+          "id": 98,
+          "song": "Everlong",
+          "artist": "Foo Fighters",
+          "group": "main"
+        },
+        {
+          "id": 139,
+          "song": "Eye of the Tiger",
+          "artist": "Survivor",
+          "group": "main"
+        },
+        {
+          "id": 92,
+          "song": "Feel the Pain",
+          "artist": "Dinosaur Jr.",
+          "group": "main"
+        },
+        {
+          "id": 118,
+          "song": "Float On",
+          "artist": "Modest Mouse",
+          "group": "main"
+        },
+        {
+          "id": 78,
+          "song": "Get Clean",
+          "artist": "Anarchy Club",
+          "group": "main"
+        },
+        {
+          "id": 75,
+          "song": "Girl's Not Grey",
+          "artist": "AFI",
+          "group": "main"
+        },
+        {
+          "id": 129,
+          "song": "Give It All",
+          "artist": "Rise Against",
+          "group": "main"
+        },
+        {
+          "id": 128,
+          "song": "Give It Away",
+          "artist": "Red Hot Chili Peppers",
+          "group": "main"
+        },
+        {
+          "id": 97,
+          "song": "Go Your Own Way",
+          "artist": "Fleetwood Mac",
+          "group": "main"
+        },
+        {
+          "id": 90,
+          "song": "Hello There",
+          "artist": "Cheap Trick",
+          "group": "main"
+        },
+        {
+          "id": 95,
+          "song": "Hungry Like the Wolf",
+          "artist": "Duran Duran",
+          "group": "main"
+        },
+        {
+          "id": 132,
+          "song": "I Was Wrong",
+          "artist": "Social Distortion",
+          "group": "main"
+        },
+        {
+          "id": 151,
+          "song": "Kids in America",
+          "artist": "The Muffs",
+          "group": "main"
+        },
+        {
+          "id": 131,
+          "song": "Lazy Eye",
+          "artist": "Silversun Pickups",
+          "group": "main"
+        },
+        {
+          "id": 74,
+          "song": "Let There Be Rock",
+          "artist": "AC/DC",
+          "group": "main"
+        },
+        {
+          "id": 88,
+          "song": "Livin' on a Prayer",
+          "artist": "Bon Jovi",
+          "group": "main"
+        },
+        {
+          "id": 125,
+          "song": "Lump",
+          "artist": "[[The Presidents of the United States of America (band)|Presidents of the United States of",
+          "group": "main"
+        },
+        {
+          "id": 77,
+          "song": "Man in the Box",
+          "artist": "Alice in Chains",
+          "group": "main"
+        },
+        {
+          "id": 142,
+          "song": "Master Exploder",
+          "artist": "Tenacious D",
+          "group": "main"
+        },
+        {
+          "id": 102,
+          "song": "Mountain Song",
+          "artist": "Jane's Addiction",
+          "group": "main"
+        },
+        {
+          "id": 113,
+          "song": "My Own Worst Enemy",
+          "artist": "Lit",
+          "group": "main"
+        },
+        {
+          "id": 146,
+          "song": "New Kid in School",
+          "artist": "The Donnas",
+          "group": "main"
+        },
+        {
+          "id": 81,
+          "song": "Night Lies",
+          "artist": "Bang Camaro",
+          "group": "main"
+        },
+        {
+          "id": 122,
+          "song": "Nine in the Afternoon",
+          "artist": "Panic! at the Disco",
+          "group": "main"
+        },
+        {
+          "id": 112,
+          "song": "One Step Closer",
+          "artist": "Linkin Park",
+          "group": "main"
+        },
+        {
+          "id": 86,
+          "song": "One Way or Another",
+          "artist": "Blondie",
+          "group": "main"
+        },
+        {
+          "id": 110,
+          "song": "Our Truth",
+          "artist": "Lacuna Coil",
+          "group": "main"
+        },
+        {
+          "id": 107,
+          "song": "Painkiller",
+          "artist": "Judas Priest",
+          "group": "main"
+        },
+        {
+          "id": 94,
+          "song": "Panic Attack",
+          "artist": "Dream Theater",
+          "group": "main"
+        },
+        {
+          "id": 101,
+          "song": "PDA",
+          "artist": "Interpol",
+          "group": "main"
+        },
+        {
+          "id": 116,
+          "song": "Peace Sells",
+          "artist": "Megadeth",
+          "group": "main"
+        },
+        {
+          "id": 156,
+          "song": "Pinball Wizard",
+          "artist": "The Who",
+          "group": "main"
+        },
+        {
+          "id": 109,
+          "song": "Pretend We're Dead",
+          "artist": "L7",
+          "group": "main"
+        },
+        {
+          "id": 141,
+          "song": "Psycho Killer",
+          "artist": "Talking Heads",
+          "group": "main"
+        },
+        {
+          "id": 96,
+          "song": "Pump It Up",
+          "artist": "Elvis Costello",
+          "group": "main"
+        },
+        {
+          "id": 145,
+          "song": "Ramblin' Man",
+          "artist": "The Allman Brothers Band",
+          "group": "main"
+        },
+        {
+          "id": 84,
+          "song": "Rebel Girl",
+          "artist": "Bikini Kill",
+          "group": "main"
+        },
+        {
+          "id": 144,
+          "song": "Rob the Prez-O-Dent",
+          "artist": "That Handsome Devil",
+          "group": "main"
+        },
+        {
+          "id": 138,
+          "song": "Rock'n Me",
+          "artist": "Steve Miller Band",
+          "group": "main"
+        },
+        {
+          "id": 127,
+          "song": "Round and Round",
+          "artist": "Ratt",
+          "group": "main"
+        },
+        {
+          "id": 100,
+          "song": "Shackler's Revenge",
+          "artist": "Guns N' Roses",
+          "group": "main"
+        },
+        {
+          "id": 80,
+          "song": "Shooting Star",
+          "artist": "Bad Company",
+          "group": "main"
+        },
+        {
+          "id": 89,
+          "song": "Shoulder to the Plow",
+          "artist": "Breaking Wheel",
+          "group": "main"
+        },
+        {
+          "id": 82,
+          "song": "So What'cha Want",
+          "artist": "Beastie Boys",
+          "group": "main"
+        },
+        {
+          "id": 143,
+          "song": "Souls of Black",
+          "artist": "Testament",
+          "group": "main"
+        },
+        {
+          "id": 121,
+          "song": "Spirit in the Sky",
+          "artist": "Greenbaum",
+          "group": "main"
+        },
+        {
+          "id": 134,
+          "song": "Spoonman",
+          "artist": "Soundgarden",
+          "group": "main"
+        },
+        {
+          "id": 155,
+          "song": "Supreme Girl",
+          "artist": "The Sterns",
+          "group": "main"
+        },
+        {
+          "id": 87,
+          "song": "Tangled Up in Blue",
+          "artist": "Bob Dylan",
+          "group": "main"
+        },
+        {
+          "id": 133,
+          "song": "Teen Age Riot",
+          "artist": "Sonic Youth",
+          "group": "main"
+        },
+        {
+          "id": 126,
+          "song": "Testify",
+          "artist": "Rage Against the Machine",
+          "group": "main"
+        },
+        {
+          "id": 123,
+          "song": "That's What You Get",
+          "artist": "Paramore",
+          "group": "main"
+        },
+        {
+          "id": 104,
+          "song": "The Middle",
+          "artist": "Jimmy Eat World",
+          "group": "main"
+        },
+        {
+          "id": 130,
+          "song": "The Trees (Vault Edition)",
+          "artist": "Rush",
+          "group": "main"
+        },
+        {
+          "id": 154,
+          "song": "Today",
+          "artist": "The Smashing Pumpkins",
+          "group": "main"
+        },
+        {
+          "id": 91,
+          "song": "Uncontrollable Urge",
+          "artist": "Devo",
+          "group": "main"
+        },
+        {
+          "id": 73,
+          "song": "Visions",
+          "artist": "Abnormality",
+          "group": "main"
+        },
+        {
+          "id": 99,
+          "song": "We Got the Beat",
+          "artist": "The Go-Go's",
+          "group": "main"
+        },
+        {
+          "id": 111,
+          "song": "Welcome to the Neighborhood",
+          "artist": "Libyans",
+          "group": "main"
+        },
+        {
+          "id": 150,
+          "song": "Where'd You Go?",
+          "artist": "The Mighty Mighty Bosstones",
+          "group": "main"
+        },
+        {
+          "id": 85,
+          "song": "White Wedding (Part 1)",
+          "artist": "Idol",
+          "group": "main"
+        },
+        {
+          "id": 76,
+          "song": "You Oughta Know",
+          "artist": "Morissette",
+          "group": "main"
+        }
+      ]
+    },
+    "RB3": {
+      "title": "Rock Band 3",
+      "source": "https://en.wikipedia.org/wiki/List_of_songs_in_Rock_Band_3",
+      "songs": [
+        {
+          "id": 2483,
+          "song": "20th Century Boy",
+          "artist": "T. Rex",
+          "group": "main"
+        },
+        {
+          "id": 2423,
+          "song": "25 or 6 to 4",
+          "artist": "Chicago",
+          "group": "main"
+        },
+        {
+          "id": 2464,
+          "song": "Antibodies",
+          "artist": "Poni Hoax",
+          "group": "main"
+        },
+        {
+          "id": 2416,
+          "song": "Beast and the Harlot",
+          "artist": "Avenged Sevenfold",
+          "group": "main"
+        },
+        {
+          "id": 2455,
+          "song": "The Beautiful People",
+          "artist": "Marilyn Manson",
+          "group": "main"
+        },
+        {
+          "id": 2448,
+          "song": "Been Caught Stealing",
+          "artist": "Jane's Addiction",
+          "group": "main"
+        },
+        {
+          "id": 2475,
+          "song": "Before I Forget",
+          "artist": "Slipknot",
+          "group": "main"
+        },
+        {
+          "id": 2467,
+          "song": "Bohemian Rhapsody",
+          "artist": "Queen",
+          "group": "main"
+        },
+        {
+          "id": 2432,
+          "song": "Break on Through (To the Other Side)",
+          "artist": "The Doors",
+          "group": "main"
+        },
+        {
+          "id": 2414,
+          "song": "Caught in a Mosh",
+          "artist": "Anthrax",
+          "group": "main"
+        },
+        {
+          "id": 2446,
+          "song": "Centerfold",
+          "artist": "The J. Geils Band",
+          "group": "main"
+        },
+        {
+          "id": 2431,
+          "song": "China Grove",
+          "artist": "The Doobie Brothers",
+          "group": "main"
+        },
+        {
+          "id": 2439,
+          "song": "Cold as Ice",
+          "artist": "Foreigner",
+          "group": "main"
+        },
+        {
+          "id": 2456,
+          "song": "Combat Baby",
+          "artist": "Metric",
+          "group": "main"
+        },
+        {
+          "id": 2485,
+          "song": "The Con",
+          "artist": "Tegan and Sara",
+          "group": "main"
+        },
+        {
+          "id": 2459,
+          "song": "Crazy Train",
+          "artist": "Ozzy Osbourne",
+          "group": "main"
+        },
+        {
+          "id": 2449,
+          "song": "Crosstown Traffic",
+          "artist": "The Jimi Hendrix Experience",
+          "group": "main"
+        },
+        {
+          "id": 2486,
+          "song": "Dead End Friends",
+          "artist": "Them Crooked Vultures",
+          "group": "main"
+        },
+        {
+          "id": 2473,
+          "song": "Don't Bury Me... I'm Still Not Dead",
+          "artist": "Riverboat Gamblers",
+          "group": "main"
+        },
+        {
+          "id": 2463,
+          "song": "Don't Stand So Close to Me",
+          "artist": "The Police",
+          "group": "main"
+        },
+        {
+          "id": 2469,
+          "song": "Du Hast",
+          "artist": "Rammstein",
+          "group": "main"
+        },
+        {
+          "id": 2484,
+          "song": "Everybody Wants to Rule the World",
+          "artist": "Tears for Fears",
+          "group": "main"
+        },
+        {
+          "id": 2422,
+          "song": "False Alarm",
+          "artist": "The Bronx",
+          "group": "main"
+        },
+        {
+          "id": 2480,
+          "song": "Fly Like an Eagle",
+          "artist": "Steve Miller Band",
+          "group": "main"
+        },
+        {
+          "id": 2427,
+          "song": "Foolin'",
+          "artist": "Def Leppard",
+          "group": "main"
+        },
+        {
+          "id": 2453,
+          "song": "Free Bird",
+          "artist": "Lynyrd Skynyrd",
+          "group": "main"
+        },
+        {
+          "id": 2489,
+          "song": "Get Free",
+          "artist": "The Vines",
+          "group": "main"
+        },
+        {
+          "id": 2421,
+          "song": "Get Up, Stand Up",
+          "artist": "Bob Marley and the Wailers",
+          "group": "main"
+        },
+        {
+          "id": 2418,
+          "song": "Good Vibrations (Live)",
+          "artist": "The Beach Boys",
+          "group": "main"
+        },
+        {
+          "id": 2492,
+          "song": "The Hardest Button to Button",
+          "artist": "The White Stripes",
+          "group": "main"
+        },
+        {
+          "id": 2420,
+          "song": "Heart of Glass",
+          "artist": "Blondie",
+          "group": "main"
+        },
+        {
+          "id": 2493,
+          "song": "Here I Go Again",
+          "artist": "Whitesnake",
+          "group": "main"
+        },
+        {
+          "id": 2437,
+          "song": "Hey Man, Nice Shot",
+          "artist": "Filter",
+          "group": "main"
+        },
+        {
+          "id": 2487,
+          "song": "Humanoid",
+          "artist": "Tokio Hotel",
+          "group": "main"
+        },
+        {
+          "id": 2494,
+          "song": "I Can See for Miles",
+          "artist": "The Who",
+          "group": "main"
+        },
+        {
+          "id": 2447,
+          "song": "I Got You (I Feel Good)",
+          "artist": "James Brown",
+          "group": "main"
+        },
+        {
+          "id": 2450,
+          "song": "I Love Rock N' Roll",
+          "artist": "Joan Jett & The Blackhearts",
+          "group": "main"
+        },
+        {
+          "id": 2488,
+          "song": "I Need to Know",
+          "artist": "Tom Petty and the Heartbreakers",
+          "group": "main"
+        },
+        {
+          "id": 2470,
+          "song": "I Wanna Be Sedated",
+          "artist": "Ramones",
+          "group": "main"
+        },
+        {
+          "id": 2451,
+          "song": "Imagine",
+          "artist": "John Lennon",
+          "group": "main"
+        },
+        {
+          "id": 2419,
+          "song": "In a Big Country",
+          "artist": "Big Country",
+          "group": "main"
+        },
+        {
+          "id": 2479,
+          "song": "In the Meantime",
+          "artist": "Spacehog",
+          "group": "main"
+        },
+        {
+          "id": 2466,
+          "song": "Jerry Was a Race Car Driver",
+          "artist": "Primus",
+          "group": "main"
+        },
+        {
+          "id": 2424,
+          "song": "Just Like Heaven",
+          "artist": "The Cure",
+          "group": "main"
+        },
+        {
+          "id": 2441,
+          "song": "Killing Loneliness",
+          "artist": "HIM",
+          "group": "main"
+        },
+        {
+          "id": 2434,
+          "song": "The Killing Moon",
+          "artist": "Echo & the Bunnymen",
+          "group": "main"
+        },
+        {
+          "id": 2433,
+          "song": "King George",
+          "artist": "Dover",
+          "group": "main"
+        },
+        {
+          "id": 2462,
+          "song": "Lasso",
+          "artist": "Phoenix",
+          "group": "main"
+        },
+        {
+          "id": 2471,
+          "song": "Last Dance",
+          "artist": "The Raveonettes",
+          "group": "main"
+        },
+        {
+          "id": 2478,
+          "song": "Living in America",
+          "artist": "The Sounds",
+          "group": "main"
+        },
+        {
+          "id": 2461,
+          "song": "Llama",
+          "artist": "Phish",
+          "group": "main"
+        },
+        {
+          "id": 2474,
+          "song": "The Look",
+          "artist": "Roxette",
+          "group": "main"
+        },
+        {
+          "id": 2490,
+          "song": "Low Rider",
+          "artist": "WAR",
+          "group": "main"
+        },
+        {
+          "id": 2452,
+          "song": "Me Enamora",
+          "artist": "Juanes",
+          "group": "main"
+        },
+        {
+          "id": 2436,
+          "song": "Midlife Crisis",
+          "artist": "Faith No More",
+          "group": "main"
+        },
+        {
+          "id": 2460,
+          "song": "Misery Business",
+          "artist": "Paramore",
+          "group": "main"
+        },
+        {
+          "id": 2445,
+          "song": "Need You Tonight",
+          "artist": "INXS",
+          "group": "main"
+        },
+        {
+          "id": 2468,
+          "song": "No One Knows",
+          "artist": "Queens of the Stone Age",
+          "group": "main"
+        },
+        {
+          "id": 2444,
+          "song": "Oh My God",
+          "artist": "Ida Maria",
+          "group": "main"
+        },
+        {
+          "id": 2415,
+          "song": "One Armed Scissor",
+          "artist": "At the Drive-In",
+          "group": "main"
+        },
+        {
+          "id": 2457,
+          "song": "Outer Space",
+          "artist": "The Muffs",
+          "group": "main"
+        },
+        {
+          "id": 2454,
+          "song": "Oye Mi Amor",
+          "artist": "Maná",
+          "group": "main"
+        },
+        {
+          "id": 2481,
+          "song": "Plush",
+          "artist": "Stone Temple Pilots",
+          "group": "main"
+        },
+        {
+          "id": 2472,
+          "song": "Portions for Foxes",
+          "artist": "Rilo Kiley",
+          "group": "main"
+        },
+        {
+          "id": 2442,
+          "song": "The Power of Love",
+          "artist": "Huey Lewis and the News",
+          "group": "main"
+        },
+        {
+          "id": 2440,
+          "song": "Radar Love",
+          "artist": "Golden Earring",
+          "group": "main"
+        },
+        {
+          "id": 2429,
+          "song": "Rainbow in the Dark",
+          "artist": "Dio",
+          "group": "main"
+        },
+        {
+          "id": 2413,
+          "song": "Rehab",
+          "artist": "Amy Winehouse",
+          "group": "main"
+        },
+        {
+          "id": 2417,
+          "song": "Rock Lobster",
+          "artist": "The B-52's",
+          "group": "main"
+        },
+        {
+          "id": 2495,
+          "song": "Roundabout",
+          "artist": "Yes",
+          "group": "main"
+        },
+        {
+          "id": 2435,
+          "song": "Saturday Night's Alright for Fighting",
+          "artist": "Elton John",
+          "group": "main"
+        },
+        {
+          "id": 2458,
+          "song": "Sister Christian",
+          "artist": "Night Ranger",
+          "group": "main"
+        },
+        {
+          "id": 2426,
+          "song": "Smoke on the Water",
+          "artist": "Deep Purple",
+          "group": "main"
+        },
+        {
+          "id": 2465,
+          "song": "Something Bigger, Something Brighter",
+          "artist": "Pretty Girls Make Graves",
+          "group": "main"
+        },
+        {
+          "id": 2425,
+          "song": "Space Oddity",
+          "artist": "David Bowie",
+          "group": "main"
+        },
+        {
+          "id": 2477,
+          "song": "Stop Me If You Think You've Heard This One Before",
+          "artist": "The Smiths",
+          "group": "main"
+        },
+        {
+          "id": 2482,
+          "song": "This Bastard's Life",
+          "artist": "Swingin' Utters",
+          "group": "main"
+        },
+        {
+          "id": 2443,
+          "song": "Viva la Resistance",
+          "artist": "Hypernova",
+          "group": "main"
+        },
+        {
+          "id": 2430,
+          "song": "Walk of Life",
+          "artist": "Dire Straits",
+          "group": "main"
+        },
+        {
+          "id": 2476,
+          "song": "Walkin' on the Sun",
+          "artist": "Smash Mouth",
+          "group": "main"
+        },
+        {
+          "id": 2491,
+          "song": "Werewolves of London",
+          "artist": "Warren Zevon",
+          "group": "main"
+        },
+        {
+          "id": 2428,
+          "song": "Whip It",
+          "artist": "Devo",
+          "group": "main"
+        },
+        {
+          "id": 2438,
+          "song": "Yoshimi Battles the Pink Robots Pt. 1",
+          "artist": "The Flaming Lips",
+          "group": "main"
+        }
+      ]
+    },
+    "LEGO": {
+      "title": "Lego Rock Band",
+      "source": "https://en.wikipedia.org/wiki/List_of_songs_in_Lego_Rock_Band",
+      "songs": [
+        {
+          "id": 200,
+          "song": "A-Punk",
+          "artist": "Vampire Weekend",
+          "group": "main"
+        },
+        {
+          "id": 163,
+          "song": "Accidentally in Love",
+          "artist": "Counting Crows",
+          "group": "main"
+        },
+        {
+          "id": 157,
+          "song": "Aliens Exist",
+          "artist": "Blink-182",
+          "group": "main"
+        },
+        {
+          "id": 168,
+          "song": "Breakout",
+          "artist": "Foo Fighters",
+          "group": "main"
+        },
+        {
+          "id": 201,
+          "song": "Check Yes Juliet",
+          "artist": "We the Kings",
+          "group": "main"
+        },
+        {
+          "id": 197,
+          "song": "Crash",
+          "artist": "The Primitives",
+          "group": "main"
+        },
+        {
+          "id": 165,
+          "song": "Crocodile Rock",
+          "artist": "Elton John",
+          "group": "main"
+        },
+        {
+          "id": 171,
+          "song": "Dig",
+          "artist": "Incubus",
+          "group": "main"
+        },
+        {
+          "id": 191,
+          "song": "Dreaming of You",
+          "artist": "The Coral",
+          "group": "main"
+        },
+        {
+          "id": 196,
+          "song": "Every Little Thing She Does Is Magic",
+          "artist": "The Police",
+          "group": "main"
+        },
+        {
+          "id": 194,
+          "song": "Fire",
+          "artist": "The Jimi Hendrix Experience",
+          "group": "main"
+        },
+        {
+          "id": 199,
+          "song": "Free Fallin'",
+          "artist": "Tom Petty",
+          "group": "main"
+        },
+        {
+          "id": 181,
+          "song": "Ghostbusters",
+          "artist": "Ray Parker Jr.",
+          "group": "main"
+        },
+        {
+          "id": 169,
+          "song": "Girls & Boys",
+          "artist": "Good Charlotte",
+          "group": "main"
+        },
+        {
+          "id": 187,
+          "song": "Grace",
+          "artist": "Supergrass",
+          "group": "main"
+        },
+        {
+          "id": 193,
+          "song": "I Want You Back",
+          "artist": "The Jackson 5",
+          "group": "main"
+        },
+        {
+          "id": 186,
+          "song": "In Too Deep",
+          "artist": "Sum 41",
+          "group": "main"
+        },
+        {
+          "id": 162,
+          "song": "Kung Fu Fighting",
+          "artist": "Carl Douglas",
+          "group": "main"
+        },
+        {
+          "id": 164,
+          "song": "Let's Dance",
+          "artist": "David Bowie",
+          "group": "main"
+        },
+        {
+          "id": 180,
+          "song": "Life Is a Highway",
+          "artist": "Rascal Flatts",
+          "group": "main"
+        },
+        {
+          "id": 185,
+          "song": "Make Me Smile (Come Up and See Me)",
+          "artist": "Steve Harley & Cockney Rebel",
+          "group": "main"
+        },
+        {
+          "id": 190,
+          "song": "Monster",
+          "artist": "The Automatic",
+          "group": "main"
+        },
+        {
+          "id": 195,
+          "song": "Naïve",
+          "artist": "The Kooks",
+          "group": "main"
+        },
+        {
+          "id": 167,
+          "song": "Real Wild Child",
+          "artist": "Everlife",
+          "group": "main"
+        },
+        {
+          "id": 188,
+          "song": "Ride a White Swan",
+          "artist": "T. Rex",
+          "group": "main"
+        },
+        {
+          "id": 176,
+          "song": "Rooftops (A Liberation Broadcast)",
+          "artist": "Lostprophets",
+          "group": "main"
+        },
+        {
+          "id": 172,
+          "song": "Ruby",
+          "artist": "Kaiser Chiefs",
+          "group": "main"
+        },
+        {
+          "id": 184,
+          "song": "Short and Sweet",
+          "artist": "Spinal Tap",
+          "group": "main"
+        },
+        {
+          "id": 177,
+          "song": "So What",
+          "artist": "Pink",
+          "group": "main"
+        },
+        {
+          "id": 158,
+          "song": "Song 2",
+          "artist": "Blur",
+          "group": "main"
+        },
+        {
+          "id": 182,
+          "song": "Stumble and Fall",
+          "artist": "Razorlight",
+          "group": "main"
+        },
+        {
+          "id": 175,
+          "song": "Suddenly I See",
+          "artist": "KT Tunstall",
+          "group": "main"
+        },
+        {
+          "id": 161,
+          "song": "Summer of '69",
+          "artist": "Bryan Adams",
+          "group": "main"
+        },
+        {
+          "id": 189,
+          "song": "Swing, Swing",
+          "artist": "The All-American Rejects",
+          "group": "main"
+        },
+        {
+          "id": 166,
+          "song": "The Final Countdown",
+          "artist": "Europe",
+          "group": "main"
+        },
+        {
+          "id": 170,
+          "song": "The Passenger",
+          "artist": "Iggy Pop",
+          "group": "main"
+        },
+        {
+          "id": 160,
+          "song": "Thunder",
+          "artist": "Boys Like Girls",
+          "group": "main"
+        },
+        {
+          "id": 192,
+          "song": "Tick Tick Boom",
+          "artist": "The Hives",
+          "group": "main"
+        },
+        {
+          "id": 183,
+          "song": "Two Princes",
+          "artist": "Spin Doctors",
+          "group": "main"
+        },
+        {
+          "id": 198,
+          "song": "Valerie",
+          "artist": "The Zutons",
+          "group": "main"
+        },
+        {
+          "id": 173,
+          "song": "Walking on Sunshine",
+          "artist": "Katrina & the Waves",
+          "group": "main"
+        },
+        {
+          "id": 178,
+          "song": "We Are the Champions",
+          "artist": "Queen",
+          "group": "main"
+        },
+        {
+          "id": 179,
+          "song": "We Will Rock You",
+          "artist": "Queen",
+          "group": "main"
+        },
+        {
+          "id": 174,
+          "song": "Word Up!",
+          "artist": "Korn",
+          "group": "main"
+        },
+        {
+          "id": 159,
+          "song": "You Give Love a Bad Name",
+          "artist": "Bon Jovi",
+          "group": "main"
+        }
+      ]
+    },
+    "TBRB": {
+      "title": "The Beatles: Rock Band",
+      "source": "https://en.wikipedia.org/wiki/List_of_songs_in_The_Beatles:_Rock_Band",
+      "songs": [
+        {
+          "id": 4881,
+          "song": "A Hard Day's Night",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4882,
+          "song": "And Your Bird Can Sing",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4883,
+          "song": "Back in the U.S.S.R.",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4884,
+          "song": "Birthday",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4885,
+          "song": "Boys",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4886,
+          "song": "Can't Buy Me Love",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4887,
+          "song": "Come Together",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4888,
+          "song": "Day Tripper",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4889,
+          "song": "Dear Prudence",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4890,
+          "song": "Dig a Pony",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4891,
+          "song": "Do You Want to Know a Secret",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4892,
+          "song": "Don't Let Me Down",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4893,
+          "song": "Drive My Car",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4894,
+          "song": "Eight Days a Week",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4895,
+          "song": "Get Back",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4896,
+          "song": "Getting Better",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4897,
+          "song": "Good Morning Good Morning",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4898,
+          "song": "Hello, Goodbye",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4899,
+          "song": "Helter Skelter",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4900,
+          "song": "Here Comes the Sun",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4901,
+          "song": "Hey Bulldog",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4902,
+          "song": "I Am the Walrus",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4903,
+          "song": "I Feel Fine",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4904,
+          "song": "I Me Mine",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4905,
+          "song": "I Saw Her Standing There",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4906,
+          "song": "I Wanna Be Your Man",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4907,
+          "song": "I Want to Hold Your Hand",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4908,
+          "song": "I Want You (She's So Heavy)",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4909,
+          "song": "If I Needed Someone",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4910,
+          "song": "I'm Looking Through You",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4911,
+          "song": "I've Got a Feeling",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4912,
+          "song": "Lucy in the Sky with Diamonds",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4913,
+          "song": "Octopus's Garden",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4914,
+          "song": "Paperback Writer",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4915,
+          "song": "Revolution",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4916,
+          "song": "Sgt. Pepper's Lonely Hearts Club Band / With a Little Help from My Friends",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4917,
+          "song": "Something",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4918,
+          "song": "Taxman",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4919,
+          "song": "The End",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4920,
+          "song": "Ticket to Ride",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4921,
+          "song": "Twist and Shout",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4922,
+          "song": "While My Guitar Gently Weeps",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4923,
+          "song": "Within You Without You / Tomorrow Never Knows",
+          "artist": "The Beatles",
+          "group": "main"
+        },
+        {
+          "id": 4924,
+          "song": "Yellow Submarine",
+          "artist": "The Beatles",
+          "group": "main"
+        }
+      ]
+    },
+    "GDRB": {
+      "title": "Green Day: Rock Band",
+      "source": "https://en.wikipedia.org/wiki/List_of_songs_in_Green_Day:_Rock_Band",
+      "songs": [
+        {
+          "id": 1355,
+          "song": "21st Century Breakdown",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1364,
+          "song": "American Eulogy",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1366,
+          "song": "American Idiot",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1370,
+          "song": "Are We the Waiting/St. Jimmy",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1356,
+          "song": "Before the Lobotomy",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1369,
+          "song": "Boulevard of Broken Dreams",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1347,
+          "song": "Brain Stew/Jaded",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1383,
+          "song": "Basket Case",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1377,
+          "song": "Burnout",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1379,
+          "song": "Chump",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1387,
+          "song": "Coming Clean",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1388,
+          "song": "Emenius Sleepus",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1372,
+          "song": "Extraordinary Girl",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1390,
+          "song": "F.O.D.",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1351,
+          "song": "Geek Stink Breath",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1371,
+          "song": "Give Me Novacaine/She's A Rebel",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1348,
+          "song": "Good Riddance (Time of Your Life)",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1378,
+          "song": "Having a Blast",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1353,
+          "song": "Hitchin' a Ride",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1368,
+          "song": "Holiday",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1375,
+          "song": "Homecoming",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1362,
+          "song": "Horseshoes and Handgrenades",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1389,
+          "song": "In the End",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1367,
+          "song": "Jesus of Suburbia",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1357,
+          "song": "Last Night on Earth",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1373,
+          "song": "Letterbomb",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1380,
+          "song": "Longview",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1350,
+          "song": "Minority",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1359,
+          "song": "Murder City",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1352,
+          "song": "Nice Guys Finish Last",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1358,
+          "song": "Peacemaker",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1382,
+          "song": "Pulling Teeth",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1361,
+          "song": "Restless Heart Syndrome",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1385,
+          "song": "Sassafras Roots",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1365,
+          "song": "See the Light",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1384,
+          "song": "She",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1354,
+          "song": "Song of the Century",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1363,
+          "song": "The Static Age",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1360,
+          "song": "¿Viva La Gloria? (Little Girl)",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1374,
+          "song": "Wake Me Up When September Ends",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1349,
+          "song": "Warning",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1381,
+          "song": "Welcome to Paradise",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1376,
+          "song": "Whatsername",
+          "artist": "Green Day",
+          "group": "main"
+        },
+        {
+          "id": 1386,
+          "song": "When I Come Around",
+          "artist": "Green Day",
+          "group": "main"
+        }
+      ]
+    },
+    "RB4": {
+      "title": "Rock Band 4",
+      "source": "https://en.wikipedia.org/wiki/List_of_songs_in_Rock_Band_4",
+      "songs": [
+        {
+          "id": 4022,
+          "song": "Ain't Messin 'Round",
+          "artist": "Gary Clark, Jr.",
+          "group": "main"
+        },
+        {
+          "id": 4017,
+          "song": "Albert",
+          "artist": "Eddie Japan",
+          "group": "main"
+        },
+        {
+          "id": 4035,
+          "song": "All Over You",
+          "artist": "Live",
+          "group": "main"
+        },
+        {
+          "id": 4007,
+          "song": "Arabella",
+          "artist": "Arctic Monkeys",
+          "group": "main"
+        },
+        {
+          "id": 4068,
+          "song": "At Night in Dreams",
+          "artist": "White Denim",
+          "group": "main"
+        },
+        {
+          "id": 4052,
+          "song": "Birth in Reverse",
+          "artist": "St. Vincent",
+          "group": "main"
+        },
+        {
+          "id": 4067,
+          "song": "Brown Eyed Girl",
+          "artist": "Van Morrison",
+          "group": "main"
+        },
+        {
+          "id": 4004,
+          "song": "Caught Up in You",
+          "artist": ".38 Special",
+          "group": "main"
+        },
+        {
+          "id": 4064,
+          "song": "Cedarwood Road",
+          "artist": "U2",
+          "group": "main"
+        },
+        {
+          "id": 4019,
+          "song": "Centuries",
+          "artist": "Fall Out Boy",
+          "group": "main"
+        },
+        {
+          "id": 4031,
+          "song": "Cold Clear Light",
+          "artist": "Johnny Blazes and the Pretty Boys",
+          "group": "main"
+        },
+        {
+          "id": 4049,
+          "song": "Dead Black (Heart of Ice)",
+          "artist": "Soul Remnants",
+          "group": "main"
+        },
+        {
+          "id": 4033,
+          "song": "Dream Genie",
+          "artist": "Lightning Bolt",
+          "group": "main"
+        },
+        {
+          "id": 4021,
+          "song": "The Feast and the Famine",
+          "artist": "Foo Fighters",
+          "group": "main"
+        },
+        {
+          "id": 4054,
+          "song": "Fever",
+          "artist": "The Black Keys",
+          "group": "main"
+        },
+        {
+          "id": 4023,
+          "song": "Follow You Down",
+          "artist": "Gin Blossoms",
+          "group": "main"
+        },
+        {
+          "id": 4061,
+          "song": "Free Falling",
+          "artist": "The Warning",
+          "group": "main"
+        },
+        {
+          "id": 4056,
+          "song": "Friday I'm In Love",
+          "artist": "The Cure",
+          "group": "main"
+        },
+        {
+          "id": 4008,
+          "song": "Hail to the King",
+          "artist": "Avenged Sevenfold",
+          "group": "main"
+        },
+        {
+          "id": 4032,
+          "song": "Halls of Valhalla",
+          "artist": "Judas Priest",
+          "group": "main"
+        },
+        {
+          "id": 4027,
+          "song": "I Am Electric",
+          "artist": "Heaven's Basement",
+          "group": "main"
+        },
+        {
+          "id": 4028,
+          "song": "I Bet My Life",
+          "artist": "Imagine Dragons",
+          "group": "main"
+        },
+        {
+          "id": 4025,
+          "song": "I Miss the Misery",
+          "artist": "Halestorm",
+          "group": "main"
+        },
+        {
+          "id": 4065,
+          "song": "I Will Follow",
+          "artist": "U2",
+          "group": "main"
+        },
+        {
+          "id": 4058,
+          "song": "The Impression That I Get",
+          "artist": "The Mighty Mighty Bosstones",
+          "group": "main"
+        },
+        {
+          "id": 4026,
+          "song": "Kick It Out",
+          "artist": "Heart",
+          "group": "main"
+        },
+        {
+          "id": 4016,
+          "song": "Knock Em Down",
+          "artist": "Duck & Cover",
+          "group": "main"
+        },
+        {
+          "id": 4029,
+          "song": "Lazaretto",
+          "artist": "Jack White",
+          "group": "main"
+        },
+        {
+          "id": 4048,
+          "song": "Light the Fuse",
+          "artist": "Slydigs",
+          "group": "main"
+        },
+        {
+          "id": 4060,
+          "song": "Light Up the Night",
+          "artist": "The Protomen",
+          "group": "main"
+        },
+        {
+          "id": 4051,
+          "song": "Little Miss Can't Be Wrong",
+          "artist": "Spin Doctors",
+          "group": "main"
+        },
+        {
+          "id": 4034,
+          "song": "Little White Church",
+          "artist": "Little Big Town",
+          "group": "main"
+        },
+        {
+          "id": 4011,
+          "song": "Mainstream Kid",
+          "artist": "Brandi Carlile",
+          "group": "main"
+        },
+        {
+          "id": 4015,
+          "song": "Metropolis—Part I: The Miracle and the Sleeper",
+          "artist": "Dream Theater",
+          "group": "main"
+        },
+        {
+          "id": 4055,
+          "song": "Milwaukee",
+          "artist": "The Both",
+          "group": "main"
+        },
+        {
+          "id": 4040,
+          "song": "Miracle Man",
+          "artist": "Ozzy Osbourne",
+          "group": "main"
+        },
+        {
+          "id": 4042,
+          "song": "My God Is the Sun",
+          "artist": "Queens of the Stone Age",
+          "group": "main"
+        },
+        {
+          "id": 4047,
+          "song": "No One Like You (2011 Re-record)",
+          "artist": "Scorpions",
+          "group": "main"
+        },
+        {
+          "id": 4043,
+          "song": "The One I Love",
+          "artist": "R.E.M.",
+          "group": "main"
+        },
+        {
+          "id": 4066,
+          "song": "Panama",
+          "artist": "Van Halen",
+          "group": "main"
+        },
+        {
+          "id": 4045,
+          "song": "A Passage to Bangkok",
+          "artist": "Rush",
+          "group": "main"
+        },
+        {
+          "id": 4063,
+          "song": "Pistol Whipped",
+          "artist": "Tijuana Sweetheart",
+          "group": "main"
+        },
+        {
+          "id": 4014,
+          "song": "Prayer",
+          "artist": "Disturbed",
+          "group": "main"
+        },
+        {
+          "id": 4030,
+          "song": "Recession",
+          "artist": "Jeff Allen ft. Noelle LeBlanc and Naoko Takamoto",
+          "group": "main"
+        },
+        {
+          "id": 4044,
+          "song": "Rock and Roll, Hoochie Koo",
+          "artist": "Rick Derringer",
+          "group": "main"
+        },
+        {
+          "id": 4062,
+          "song": "The Seeker",
+          "artist": "The Who",
+          "group": "main"
+        },
+        {
+          "id": 4012,
+          "song": "Short Skirt/Long Jacket",
+          "artist": "Cake",
+          "group": "main"
+        },
+        {
+          "id": 4057,
+          "song": "Somebody Told Me",
+          "artist": "The Killers",
+          "group": "main"
+        },
+        {
+          "id": 4053,
+          "song": "Spiders",
+          "artist": "System of a Down",
+          "group": "main"
+        },
+        {
+          "id": 4010,
+          "song": "Start a Band",
+          "artist": "Brad Paisley ft. Keith Urban",
+          "group": "main"
+        },
+        {
+          "id": 4041,
+          "song": "Still Into You",
+          "artist": "Paramore",
+          "group": "main"
+        },
+        {
+          "id": 4050,
+          "song": "Superunknown",
+          "artist": "Soundgarden",
+          "group": "main"
+        },
+        {
+          "id": 4018,
+          "song": "Suspicious Minds",
+          "artist": "Elvis Presley",
+          "group": "main"
+        },
+        {
+          "id": 4037,
+          "song": "That Smell",
+          "artist": "Lynyrd Skynyrd",
+          "group": "main"
+        },
+        {
+          "id": 4024,
+          "song": "Tongue Tied",
+          "artist": "Grouplove",
+          "group": "main"
+        },
+        {
+          "id": 4006,
+          "song": "Toys in the Attic",
+          "artist": "Aerosmith",
+          "group": "main"
+        },
+        {
+          "id": 4036,
+          "song": "Turn it Around",
+          "artist": "Lucius",
+          "group": "main"
+        },
+        {
+          "id": 4038,
+          "song": "Uptown Funk",
+          "artist": "Mark Ronson ft. Bruno Mars",
+          "group": "main"
+        },
+        {
+          "id": 4013,
+          "song": "V-Bomb",
+          "artist": "Dark Wheels",
+          "group": "main"
+        },
+        {
+          "id": 4009,
+          "song": "Violent Shiver",
+          "artist": "Benjamin Booker",
+          "group": "main"
+        },
+        {
+          "id": 4046,
+          "song": "The Warrior",
+          "artist": "Scandal",
+          "group": "main"
+        },
+        {
+          "id": 4005,
+          "song": "What's Up?",
+          "artist": "4 Non Blondes",
+          "group": "main"
+        },
+        {
+          "id": 4039,
+          "song": "The Wolf",
+          "artist": "Mumford & Sons",
+          "group": "main"
+        },
+        {
+          "id": 4020,
+          "song": "You Make Loving Fun",
+          "artist": "Fleetwood Mac",
+          "group": "main"
+        },
+        {
+          "id": 4059,
+          "song": "Your Love",
+          "artist": "The Outfield",
+          "group": "main"
+        }
+      ]
+    },
+    "BLITZ": {
+      "title": "Rock Band Blitz",
+      "source": "https://en.wikipedia.org/wiki/Rock_Band_Blitz",
+      "songs": [
+        {
+          "id": 3051,
+          "song": "A Little Less Sixteen Candles, a Little More Touch Me",
+          "artist": "Fall Out Boy",
+          "group": "main"
+        },
+        {
+          "id": 3057,
+          "song": "Always",
+          "artist": "Blink-182",
+          "group": "main"
+        },
+        {
+          "id": 3035,
+          "song": "Bang Your Head (Metal Health)",
+          "artist": "Quiet Riot",
+          "group": "main"
+        },
+        {
+          "id": 3034,
+          "song": "Cult of Personality",
+          "artist": "Living Colour",
+          "group": "main"
+        },
+        {
+          "id": 2972,
+          "song": "Death on Two Legs (Dedicated To...)",
+          "artist": "Queen",
+          "group": "main"
+        },
+        {
+          "id": 3060,
+          "song": "Diamond Eyes (Boom-Lay Boom-Lay Boom)",
+          "artist": "Shinedown",
+          "group": "main"
+        },
+        {
+          "id": 128,
+          "song": "Give It Away",
+          "artist": "Red Hot Chili Peppers",
+          "group": "main"
+        },
+        {
+          "id": 3020,
+          "song": "I'm Still Standing",
+          "artist": "Elton John",
+          "group": "main"
+        },
+        {
+          "id": 3030,
+          "song": "Jessie's Girl",
+          "artist": "Rick Springfield",
+          "group": "main"
+        },
+        {
+          "id": 3061,
+          "song": "Jungle Boogie",
+          "artist": "Kool & the Gang",
+          "group": "main"
+        },
+        {
+          "id": 3056,
+          "song": "Kids in the Street",
+          "artist": "All-American Rejects",
+          "group": "main"
+        },
+        {
+          "id": 3029,
+          "song": "Moves Like Jagger",
+          "artist": "Maroon 5 feat. Christina Aguilera",
+          "group": "main"
+        },
+        {
+          "id": 3043,
+          "song": "Once Bitten, Twice Shy",
+          "artist": "Great White",
+          "group": "main"
+        },
+        {
+          "id": 2970,
+          "song": "One Week",
+          "artist": "Barenaked Ladies",
+          "group": "main"
+        },
+        {
+          "id": 3028,
+          "song": "Pumped Up Kicks",
+          "artist": "Foster the People",
+          "group": "main"
+        },
+        {
+          "id": 3027,
+          "song": "Raise Your Glass",
+          "artist": "P!nk",
+          "group": "main"
+        },
+        {
+          "id": 3050,
+          "song": "Shine",
+          "artist": "Collective Soul",
+          "group": "main"
+        },
+        {
+          "id": 3062,
+          "song": "Shout",
+          "artist": "Tears for Fears",
+          "group": "main"
+        },
+        {
+          "id": 3023,
+          "song": "Sing",
+          "artist": "My Chemical Romance",
+          "group": "main"
+        },
+        {
+          "id": 3044,
+          "song": "So Far Away",
+          "artist": "Avenged Sevenfold",
+          "group": "main"
+        },
+        {
+          "id": 134,
+          "song": "Spoonman",
+          "artist": "Soundgarden",
+          "group": "main"
+        },
+        {
+          "id": 3033,
+          "song": "Stronger (What Doesn't Kill You)",
+          "artist": "Kelly Clarkson",
+          "group": "main"
+        },
+        {
+          "id": 2971,
+          "song": "These Days",
+          "artist": "Foo Fighters",
+          "group": "main"
+        },
+        {
+          "id": 3026,
+          "song": "We Are Young",
+          "artist": "fun. feat. Janelle Monáe",
+          "group": "main"
+        },
+        {
+          "id": 3042,
+          "song": "The Wicker Man",
+          "artist": "Iron Maiden",
+          "group": "main"
+        }
+      ]
+    },
+    "UNPLUGGED": {
+      "title": "Rock Band Unplugged",
+      "source": "https://en.wikipedia.org/wiki/Rock_Band_Unplugged",
+      "songs": [
+        {
+          "id": 211,
+          "song": "3's & 7's",
+          "artist": "Queens of the Stone Age",
+          "group": "main"
+        },
+        {
+          "id": 860,
+          "song": "ABC",
+          "artist": "Jackson 5",
+          "group": "main"
+        },
+        {
+          "id": 119,
+          "song": "Ace of Spades '08",
+          "artist": "Motörhead",
+          "group": "main"
+        },
+        {
+          "id": 124,
+          "song": "Alive",
+          "artist": "Pearl Jam",
+          "group": "main"
+        },
+        {
+          "id": 103,
+          "song": "Aqualung",
+          "artist": "Jethro Tull",
+          "group": "main"
+        },
+        {
+          "id": 226,
+          "song": "Buddy Holly",
+          "artist": "Weezer",
+          "group": "main"
+        },
+        {
+          "id": 108,
+          "song": "Carry On Wayward Son",
+          "artist": "Kansas",
+          "group": "main"
+        },
+        {
+          "id": 140,
+          "song": "Chop Suey!",
+          "artist": "System of a Down",
+          "group": "main"
+        },
+        {
+          "id": 152,
+          "song": "Come Out and Play (Keep Em Separated)",
+          "artist": "The Offspring",
+          "group": "main"
+        },
+        {
+          "id": 114,
+          "song": "De-Luxe",
+          "artist": "Lush",
+          "group": "main"
+        },
+        {
+          "id": 120,
+          "song": "Drain You",
+          "artist": "Nirvana",
+          "group": "main"
+        },
+        {
+          "id": 98,
+          "song": "Everlong",
+          "artist": "Foo Fighters",
+          "group": "main"
+        },
+        {
+          "id": 118,
+          "song": "Float On",
+          "artist": "Modest Mouse",
+          "group": "main"
+        },
+        {
+          "id": 859,
+          "song": "Gasoline",
+          "artist": "Audioslave",
+          "group": "main"
+        },
+        {
+          "id": 506,
+          "song": "Holiday in Cambodia",
+          "artist": "Dead Kennedys",
+          "group": "main"
+        },
+        {
+          "id": 132,
+          "song": "I Was Wrong",
+          "artist": "Social Distortion",
+          "group": "main"
+        },
+        {
+          "id": 463,
+          "song": "The Killing Jar",
+          "artist": "Siouxsie and the Banshees",
+          "group": "main"
+        },
+        {
+          "id": 857,
+          "song": "Kryptonite",
+          "artist": "3 Doors Down",
+          "group": "main"
+        },
+        {
+          "id": 523,
+          "song": "Laid To Rest",
+          "artist": "Lamb of God",
+          "group": "main"
+        },
+        {
+          "id": 851,
+          "song": "Less Talk More Rokk",
+          "artist": "Freezepop",
+          "group": "main"
+        },
+        {
+          "id": 88,
+          "song": "Livin' on a Prayer",
+          "artist": "Bon Jovi",
+          "group": "main"
+        },
+        {
+          "id": 279,
+          "song": "Message in a Bottle",
+          "artist": "The Police",
+          "group": "main"
+        },
+        {
+          "id": 104,
+          "song": "The Middle",
+          "artist": "Jimmy Eat World",
+          "group": "main"
+        },
+        {
+          "id": 858,
+          "song": "Miss Murder",
+          "artist": "AFI",
+          "group": "main"
+        },
+        {
+          "id": 269,
+          "song": "More than a Feeling",
+          "artist": "Boston",
+          "group": "main"
+        },
+        {
+          "id": 229,
+          "song": "Move Along",
+          "artist": "All-American Rejects",
+          "group": "main"
+        },
+        {
+          "id": 515,
+          "song": "Mr. Brightside",
+          "artist": "The Killers",
+          "group": "main"
+        },
+        {
+          "id": 113,
+          "song": "My Own Worst Enemy",
+          "artist": "Lit",
+          "group": "main"
+        },
+        {
+          "id": 110,
+          "song": "Our Truth",
+          "artist": "Lacuna Coil",
+          "group": "main"
+        },
+        {
+          "id": 107,
+          "song": "Painkiller",
+          "artist": "Judas Priest",
+          "group": "main"
+        },
+        {
+          "id": 255,
+          "song": "The Perfect Drug",
+          "artist": "Nine Inch Nails",
+          "group": "main"
+        },
+        {
+          "id": 156,
+          "song": "Pinball Wizard",
+          "artist": "The Who",
+          "group": "main"
+        },
+        {
+          "id": 868,
+          "song": "Rock Your Socks",
+          "artist": "Tenacious D",
+          "group": "main"
+        },
+        {
+          "id": 904,
+          "song": "Show Me the Way",
+          "artist": "Black Tide",
+          "group": "main"
+        },
+        {
+          "id": 134,
+          "song": "Spoonman",
+          "artist": "Soundgarden",
+          "group": "main"
+        },
+        {
+          "id": 154,
+          "song": "Today",
+          "artist": "The Smashing Pumpkins",
+          "group": "main"
+        },
+        {
+          "id": 130,
+          "song": "The Trees (Vault Edition)",
+          "artist": "Rush",
+          "group": "main"
+        },
+        {
+          "id": 905,
+          "song": "What's My Age Again?",
+          "artist": "Blink-182",
+          "group": "main"
+        },
+        {
+          "id": 150,
+          "song": "Where'd You Go?",
+          "artist": "The Mighty Mighty Bosstones",
+          "group": "main"
+        },
+        {
+          "id": 85,
+          "song": "White Wedding, Part 1",
+          "artist": "Billy Idol",
+          "group": "main"
+        },
+        {
+          "id": 885,
+          "song": "Would?",
+          "artist": "Alice in Chains",
+          "group": "main"
+        }
+      ]
+    }
+  }
+}

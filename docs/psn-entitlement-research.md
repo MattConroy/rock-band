@@ -120,12 +120,9 @@ Catalogue-wide coverage of the derivable name index (independent of any dump):
    packs are counted as failed songs. Regex fix.
 3. **Block interpolation** — within a contiguous alphabetical block, positions
    for *unowned* songs can be filled in. This is the only known route to
-   entries for songs no dump contains. **Blocker:** it needs each game's true
-   on-disc tracklist, and the catalogue's `source` field cannot supply it —
-   `source` records where a song *originated*, so the RB2 block mixes songs
-   tagged `RB2`, `RELOADED`, and `UNPLUGGED`. Per-game tracklists are public
-   (Wikipedia has complete on-disc lists); fetching them needs network access
-   this environment did not have.
+   entries for songs no dump contains. **The tracklist blocker is cleared** (see
+   below); what remains is the interpolation itself, which needs a dump to
+   establish each block's counter range.
 4. **Wire it into the app.** `PsnService.FetchSongsAsync()` still POSTs an npsso
    to the gateway Worker and deserializes into `SongLibrary` (`{songs:[...]}`),
    but the gateway returns `{items:[{code,id,type}]}` — mismatched shapes, so it
@@ -135,14 +132,61 @@ Catalogue-wide coverage of the derivable name index (independent of any dump):
 
 ---
 
+## On-disc tracklists — the block-interpolation input
+
+Fetched and committed: `tools/data/disc-tracklists.json`, produced by
+`tools/fetch-disc-tracklists.mjs` from Wikipedia's per-game song-list articles.
+**489 tracks across 9 discs, every one resolved to exactly one catalogue song.**
+
+| Game | Disc tracks | Tagged with that `source` | Tracks whose `source` differs |
+|---|---|---|---|
+| RB1 | 58 | 50 | 8 |
+| RB2 | 84 | 53 | **31** |
+| RB3 | 83 | 83 | 0 |
+| LEGO | 45 | 44 | 1 |
+| TBRB | 44 | 73 | 0 |
+| GDRB | 44 | 44 | 0 |
+| RB4 | 65 | 65 | 0 |
+| BLITZ | 25 | 25 | 0 |
+| UNPLUGGED | 41 | 98 | 1 |
+
+This confirms and quantifies why `source` could never have supplied disc
+membership: **41 of 489** on-disc tracks are tagged with some other game. The RB2
+disc breaks down as `RB2` 53, `UNPLUGGED` 22, `RELOADED` 7, `BLITZ` 2 — the exact
+mixing predicted above. A neat single illustration: "Seven" by Vagiant is on the
+RB1 disc but carries `source: RELOADED`, and the band is in the catalogue under
+its later name, Tijuana Sweetheart.
+
+Two counting traps worth knowing before trusting any figure here:
+
+- **Tracks ≠ songs.** A medley is one playable track with one catalogue entry,
+  but Wikipedia's prose counts its halves separately. Green Day's disc is 44
+  tracks / "47 songs"; The Beatles' is 44 / "45".
+- **`source` totals ≠ disc size** in *both* directions. TBRB shows 73 because
+  that count includes its DLC, not because the disc holds 73.
+
+### Still to do for interpolation
+
+The tracklists are the static half. The other half needs a dump: each game's
+counter block has to be located (RB1 2416–2459, RB2 2014–2111, LEGO 1918–1939,
+RB3 2307–2386 from the last dump), the disc list sorted by that game's sort key
+(title for RB1, artist for RB2 and LEGO), and positions assigned across the
+block — including the slots for songs the dump does not contain, which is the
+whole point.
+
 ## Environment notes
 
-Network egress was heavily restricted during this research:
+Network egress is **no longer** as restricted as it was during the original
+research. Re-verified 2026-08-16:
 
-- **Worked:** `raw.githubusercontent.com`, `registry.npmjs.org`, PyPI,
-  crates.io, Go proxy. Individual GitHub files are fetchable by path.
-- **Blocked:** `en.wikipedia.org`, `store.playstation.com`, `codeload.github.com`,
-  `github.com`, `api.github.com` (outside the session's own repo).
+- **Now works:** `en.wikipedia.org` article fetches, both `/wiki/<page>` and
+  `/w/index.php?title=<page>&action=raw`. The raw route is what the tracklist
+  tool uses — parsing wikitext is far steadier than scraping rendered HTML.
+- **Still blocked:** `en.wikipedia.org/w/api.php` and `/api/rest_v1/…` both
+  return **HTTP 429** regardless of `User-Agent`. Only the two routes above are
+  usable, so don't reach for the MediaWiki API.
+- Previously recorded as blocked and **not** re-tested: `store.playstation.com`,
+  `codeload.github.com`, `github.com`, `api.github.com`.
 - `WebSearch` works (server-side) while `WebFetch`/`curl` are proxied. Search
   results therefore **cannot be verified** — this is exactly how the phantom
   `rbdb.io` lead got through. Treat unverifiable search summaries with suspicion.
@@ -152,6 +196,9 @@ Network egress was heavily restricted during this research:
 ## Reproducing
 
 ```bash
+# Refresh the on-disc tracklists from Wikipedia (needs network; output committed)
+node tools/fetch-disc-tracklists.mjs
+
 # Regenerate the static database from one or more real dumps
 node tools/generate-entitlement-db.mjs entitlements-raw.json [more...]
 ```

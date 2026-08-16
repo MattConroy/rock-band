@@ -39,6 +39,47 @@ grants. A pack's contents are a fact about what Harmonix sold, so this is
 hand-maintained; add an entry when a dump turns up a pack code that isn't
 covered.
 
+## `fetch-disc-tracklists.mjs`
+
+Fetches every game's true **on-disc tracklist** from Wikipedia and writes
+`tools/data/disc-tracklists.json`.
+
+```bash
+node tools/fetch-disc-tracklists.mjs
+```
+
+Needs network access; the output is committed so nothing else does. This is a
+maintainer input to the entitlement database, not an app asset — it stays under
+`tools/data/` rather than `wwwroot/` because the browser never needs it.
+
+### Why the catalogue can't supply this
+
+`catalogue.json`'s `source` field records where a song **originated**, which is
+not the same question as which disc it shipped on. Measured against the fetched
+lists, **41 of 489 on-disc tracks** carry a `source` other than the game whose
+disc they are on. The Rock Band 2 disc is the worst case — its 84 tracks are
+tagged:
+
+| `source` | tracks |
+|---|---|
+| `RB2` | 53 |
+| `UNPLUGGED` | 22 |
+| `RELOADED` | 7 |
+| `BLITZ` | 2 |
+
+Block interpolation needs the disc list, so it needs this file.
+
+### Validation
+
+The script fails rather than writing a partial file. Every game has an expected
+track count taken from its article, and every track must resolve to exactly one
+`catalogue.json` song — all 489 currently do. If Wikipedia reshapes a table, fix
+the parser or add an alias; don't lower an expectation.
+
+Note that a **track** is not always a **song**: a medley ships as one playable
+track and gets one catalogue entry, while the article prose counts its halves
+separately. That is why Green Day's disc is 44 tracks here and "47 songs" there.
+
 ## `psn-rockband.ps1` / `psn-names.ps1`
 
 Local PowerShell scripts for pulling your own entitlements (`psn-rockband.ps1`)
