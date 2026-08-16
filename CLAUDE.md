@@ -71,3 +71,8 @@ Two settled decisions:
 
 The single input that cannot be reconstructed is a real PSN entitlement dump.
 `tools/psn-rockband.ps1` produces one locally; dumps are gitignored.
+
+Disc membership is a *separate fact* from the catalogue's `source` field, which
+records where a song originated — 41 of 489 on-disc tracks disagree. The true
+per-game tracklists live in `tools/data/disc-tracklists.json`, refreshed by
+`tools/fetch-disc-tracklists.mjs`. Don't infer a disc's contents from `source`.
