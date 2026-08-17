@@ -31,7 +31,7 @@ public partial class Catalogue
     {
         new("Year", "Year", s => s.Year?.ToString()),
         new("Genre", "Genre", s => s.Genre),
-        new("Source", "Source", s => SourceCatalog.Name(s.Source), s => SourceCatalog.Description(s.Source)),
+        new("Source", "Source", s => SourceCatalog.Names(s.Sources), s => SourceCatalog.Descriptions(s.Sources)),
     };
 
     private List<CatalogueSong> _all = new();
@@ -61,7 +61,9 @@ public partial class Catalogue
     {
         _all = (await Catalog.GetSongsAsync()).ToList();
         _genres = _all.Where(s => !string.IsNullOrEmpty(s.Genre)).Select(s => s.Genre!).Distinct().OrderBy(g => g).ToList();
-        _sources = _all.Where(s => !string.IsNullOrEmpty(s.Source)).Select(s => s.Source!).Distinct().OrderBy(SourceCatalog.Name).ToList();
+        // Every source a song lists, not just its origin, so the dropdown can
+        // offer a game whose whole tracklist is songs that originated elsewhere.
+        _sources = _all.SelectMany(s => s.Sources).Distinct().OrderBy(SourceCatalog.Name).ToList();
         ApplyFilters();
     }
 

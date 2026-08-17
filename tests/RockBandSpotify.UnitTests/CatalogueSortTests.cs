@@ -7,10 +7,10 @@ public class CatalogueSortTests
 {
     private static readonly List<CatalogueSong> Songs = new()
     {
-        new() { Id = 1, Song = "Believer", Artist = "Imagine Dragons", Year = 2017, Genre = "Alternative", Source = "RB4_DLC" },
-        new() { Id = 2, Song = "Africa", Artist = "Toto", Year = 1982, Genre = "Pop-Rock", Source = "RB4_DLC" },
-        new() { Id = 3, Song = "africa", Artist = "Weezer", Year = null, Genre = "Alternative", Source = "RB1" },
-        new() { Id = 4, Song = "Paranoid", Artist = "Black Sabbath", Year = 1970, Genre = "Metal", Source = "RB1" },
+        new() { Id = 1, Song = "Believer", Artist = "Imagine Dragons", Year = 2017, Genre = "Alternative", Sources = ["RB4_DLC"] },
+        new() { Id = 2, Song = "Africa", Artist = "Toto", Year = 1982, Genre = "Pop-Rock", Sources = ["RB4_DLC"] },
+        new() { Id = 3, Song = "africa", Artist = "Weezer", Year = null, Genre = "Alternative", Sources = ["RB1"] },
+        new() { Id = 4, Song = "Paranoid", Artist = "Black Sabbath", Year = 1970, Genre = "Metal", Sources = ["RB1"] },
     };
 
     private static List<CatalogueSong> Apply(string? column, SortDirection direction)
@@ -54,6 +54,59 @@ public class CatalogueSortTests
         // "Rock Band 1" (RB1) sorts before "Rock Band 4 DLC" (RB4_DLC) by name.
         var result = Apply("Source", SortDirection.Ascending).Select(s => s.Id).ToList();
         Assert.Equal(new[] { 3, 4, 1, 2 }, result);
+    }
+
+    [Fact]
+    public void Source_groups_by_origin_before_other_sources()
+    {
+        // Both RB2 songs stay together and ahead of the RB4 one, even though
+        // "Rock Band 2 · Rock Band Unplugged" would sort after "Rock Band 4 DLC"
+        // on cell text alone.
+        var songs = new List<CatalogueSong>
+        {
+            new() { Id = 1, Song = "Zzz", Artist = "A", Sources = ["RB4_DLC"] },
+            new() { Id = 2, Song = "Everlong", Artist = "Foo Fighters", Sources = ["RB2", "UNPLUGGED"] },
+            new() { Id = 3, Song = "Aaa", Artist = "B", Sources = ["RB2"] },
+        };
+        var result = CatalogueSort.Apply(songs, "Source", SortDirection.Ascending).Select(s => s.Id);
+        Assert.Equal(new[] { 3, 2, 1 }, result);
+    }
+
+    [Fact]
+    public void Source_keeps_a_games_songs_together_ahead_of_its_DLC()
+    {
+        // The regression element-wise comparison exists to prevent: on joined cell
+        // text, "Rock Band 2 DLC" sorts between "Rock Band 2" and
+        // "Rock Band 2 · Rock Band Unplugged", splitting the Rock Band 2 group.
+        var songs = new List<CatalogueSong>
+        {
+            new() { Id = 1, Song = "A", Artist = "A", Sources = ["RB2_DLC"] },
+            new() { Id = 2, Song = "B", Artist = "B", Sources = ["RB2", "UNPLUGGED"] },
+            new() { Id = 3, Song = "C", Artist = "C", Sources = ["RB2"] },
+        };
+        var result = CatalogueSort.Apply(songs, "Source", SortDirection.Ascending).Select(s => s.Id);
+        Assert.Equal(new[] { 3, 2, 1 }, result);
+    }
+
+    [Fact]
+    public void Source_orders_within_an_origin_group_by_the_visible_cell_text()
+    {
+        // All four share an origin, so only the extra sources distinguish them.
+        // They must come out in the order the cell renders, not input order.
+        var songs = new List<CatalogueSong>
+        {
+            new() { Id = 1, Song = "A", Artist = "A", Sources = ["RB2", "UNPLUGGED"] },
+            new() { Id = 2, Song = "B", Artist = "B", Sources = ["RB2"] },
+            new() { Id = 3, Song = "C", Artist = "C", Sources = ["RB2", "BLITZ"] },
+            new() { Id = 4, Song = "D", Artist = "D", Sources = ["RB2"] },
+        };
+        var result = CatalogueSort.Apply(songs, "Source", SortDirection.Ascending).ToList();
+
+        // "Rock Band 2" < "Rock Band 2 · Rock Band Blitz" < "… · Rock Band Unplugged"
+        Assert.Equal(new[] { 2, 4, 3, 1 }, result.Select(s => s.Id));
+        // and the rendered column is genuinely non-decreasing
+        var cells = result.Select(s => SourceCatalog.Names(s.Sources)).ToList();
+        Assert.Equal(cells.OrderBy(c => c, StringComparer.OrdinalIgnoreCase), cells);
     }
 
     [Fact]
