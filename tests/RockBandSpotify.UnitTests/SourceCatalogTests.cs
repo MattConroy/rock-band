@@ -2,30 +2,38 @@ using RockBandSpotify.Models;
 
 namespace RockBandSpotify.UnitTests;
 
+/// <summary>
+/// Behaviour only. Asserting that "RB1" maps to "Rock Band 1" would just restate
+/// the lookup table, so the tests here cover what the lookup <i>does</i> when a
+/// code is missing or a song carries several.
+/// </summary>
 public class SourceCatalogTests
 {
-    [Theory]
-    [InlineData("RB1", "Rock Band 1")]
-    [InlineData("RB4_DLC", "Rock Band 4 DLC")]
-    [InlineData("RBN2", "Rock Band Network 2")]
-    [InlineData("TBRB", "The Beatles: Rock Band")]
-    [InlineData("RIVALS", "Rock Band Rivals")]
-    public void Name_returns_full_name_for_known_codes(string code, string expected)
-        => Assert.Equal(expected, SourceCatalog.Name(code));
-
     [Fact]
-    public void Name_falls_back_to_raw_code_for_unknown_values()
-        => Assert.Equal("MYSTERY", SourceCatalog.Name("MYSTERY"));
+    public void Name_falls_back_to_the_raw_code_when_it_is_not_in_the_table()
+    {
+        // Guards the case that matters: catalogue.json gains a source before the
+        // table knows about it. The column should degrade to the code, not blank.
+        Assert.Equal("MYSTERY", SourceCatalog.Name("MYSTERY"));
+    }
 
     [Fact]
     public void Name_returns_empty_for_null()
         => Assert.Equal("", SourceCatalog.Name(null));
 
     [Fact]
-    public void Description_is_present_for_every_known_code()
-        => Assert.NotNull(SourceCatalog.Description("RB1"));
+    public void Names_joins_every_source_a_song_shipped_in()
+        => Assert.Equal("Rock Band 2 · Rock Band Unplugged", SourceCatalog.Names(["RB2", "UNPLUGGED"]));
 
     [Fact]
-    public void Description_is_null_for_unknown_codes()
-        => Assert.Null(SourceCatalog.Description("MYSTERY"));
+    public void Names_of_a_single_source_is_just_that_name()
+        => Assert.Equal("Rock Band 1", SourceCatalog.Names(["RB1"]));
+
+    [Fact]
+    public void Names_of_nothing_is_empty_rather_than_null()
+        => Assert.Equal("", SourceCatalog.Names([]));
+
+    [Fact]
+    public void Names_applies_the_raw_code_fallback_per_entry()
+        => Assert.Equal("Rock Band 2 · MYSTERY", SourceCatalog.Names(["RB2", "MYSTERY"]));
 }

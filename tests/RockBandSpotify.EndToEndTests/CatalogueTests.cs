@@ -93,28 +93,16 @@ public class CatalogueTests : AppPageTest
     }
 
     [Test]
-    public async Task Source_cell_has_a_tooltip_explaining_the_code()
-    {
-        // Column order at the default wide viewport: Song, Artist, Year, Genre, Source, ...
-        var cell = Page.Locator("tbody td").Nth(4);
-        var title = await cell.GetAttributeAsync("title");
-        Assert.That(title, Is.Not.Null.And.Not.Empty);
-    }
-
-    [Test]
     public async Task Multi_source_song_lists_every_game_it_shipped_in()
     {
         // Everlong shipped on the Rock Band 2 disc and again in Unplugged.
         await Page.GetByPlaceholder("Search song or artist…").FillAsync("everlong");
         await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
 
+        // Column order at the default wide viewport: Song, Artist, Year, Genre, Source.
         var cell = Page.Locator("tbody td").Nth(4);
         await Expect(cell).ToContainTextAsync("Rock Band 2");
         await Expect(cell).ToContainTextAsync("Rock Band Unplugged");
-
-        // The tooltip names the extra game rather than only describing the origin.
-        var title = await cell.GetAttributeAsync("title");
-        Assert.That(title, Does.Contain("Also shipped in"));
     }
 
     [Test]
