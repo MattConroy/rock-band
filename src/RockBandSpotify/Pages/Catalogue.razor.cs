@@ -20,18 +20,17 @@ public partial class Catalogue
     private const string ColumnsStorageKey = "rb_catalogue_columns";
 
     /// <summary>One optional (non-Song/Artist) column: its storage key, header
-    /// label, cell value, and an optional tooltip for the cell.</summary>
+    /// label, and cell value.</summary>
     private sealed record ColumnDef(
         string Key,
         string Label,
-        Func<CatalogueSong, string?> Value,
-        Func<CatalogueSong, string?>? Title = null);
+        Func<CatalogueSong, string?> Value);
 
     private static readonly ColumnDef[] OptionalColumns =
     {
         new("Year", "Year", s => s.Year?.ToString()),
         new("Genre", "Genre", s => s.Genre),
-        new("Source", "Source", s => SourceCatalog.Names(s.Sources), s => SourceCatalog.Descriptions(s.Sources)),
+        new("Source", "Source", s => SourceCatalog.Names(s.Sources)),
     };
 
     private List<CatalogueSong> _all = new();
