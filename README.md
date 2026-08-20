@@ -95,6 +95,22 @@ cd gateway && npx wrangler dev                 # http://localhost:8787
 
 Point `Psn.GatewayUrl` at `http://localhost:8787` for local testing.
 
+## Data sources
+
+`src/RockBandSpotify/wwwroot/data/catalogue.json` is the one committed dataset.
+Its `psnIds` field — PlayStation Store content codes — is compiled from the
+public song list published by [rb4.app](https://rb4.app), whose entries link to
+each song's Store page. Thanks to them for maintaining it.
+
+Only the content code is stored (the last segment of a PSN product id), because
+it is the region-independent part: a US listing and a European entitlement for
+the same song differ in their prefix but agree on that segment.
+
+Roughly 47% of the catalogue has no code, and that is a property of the store
+rather than a gap in the data — delisted Rock Band Network songs, delisted DLC,
+Beatles content, and songs that only ever shipped on a disc have no Store page
+to have an id on.
+
 ## Caveats & honesty
 
 - **The token paste is unavoidable.** We're not the official PlayStation app, so
