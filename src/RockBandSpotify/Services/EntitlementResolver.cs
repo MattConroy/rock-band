@@ -2,8 +2,8 @@ using RockBandSpotify.Models;
 
 namespace RockBandSpotify.Services;
 
-/// <param name="Matched">Codes that are a known store id, with the song they identify.</param>
-/// <param name="Unmatched">Codes not in the catalogue.</param>
+/// <param name="Matched">Songs the codes grant, in the order the codes name them.</param>
+/// <param name="Unmatched">Codes that grant nothing in the catalogue.</param>
 public sealed record OwnedSongs(
     IReadOnlyList<CatalogueSong> Matched,
     IReadOnlyList<string> Unmatched);
@@ -16,6 +16,12 @@ public sealed record OwnedSongs(
 /// A plain string comparison, deliberately. The codes are the same identifiers
 /// the catalogue already stores, so there is nothing to infer.
 /// </para>
+/// <para>
+/// One code can grant many songs: a disc export's songs have no store listings
+/// of their own, so every one of them carries the export's code. The reverse
+/// holds too — a song sold both standalone and in a pack carries both codes —
+/// so each side of the comparison is deduplicated.
+/// </para>
 /// </summary>
 public static class EntitlementResolver
 {
@@ -23,10 +29,14 @@ public static class EntitlementResolver
         IEnumerable<string> codes,
         IReadOnlyList<CatalogueSong> catalogue)
     {
-        var byPsnId = new Dictionary<string, CatalogueSong>(StringComparer.OrdinalIgnoreCase);
+        var byPsnId = new Dictionary<string, List<CatalogueSong>>(StringComparer.OrdinalIgnoreCase);
         foreach (var song in catalogue)
             foreach (var id in song.PsnIds)
-                byPsnId.TryAdd(id, song);
+            {
+                if (!byPsnId.TryGetValue(id, out var granted))
+                    byPsnId[id] = granted = [];
+                granted.Add(song);
+            }
 
         var matched = new List<CatalogueSong>();
         var unmatched = new List<string>();
@@ -37,10 +47,10 @@ public static class EntitlementResolver
         {
             if (string.IsNullOrWhiteSpace(code) || !seenCodes.Add(code)) continue;
 
-            if (byPsnId.TryGetValue(code, out var song))
+            if (byPsnId.TryGetValue(code, out var granted))
             {
-                // Two codes can name the same song — standalone and in a pack.
-                if (seenSongs.Add(song.Id)) matched.Add(song);
+                foreach (var song in granted)
+                    if (seenSongs.Add(song.Id)) matched.Add(song);
             }
             else
             {
