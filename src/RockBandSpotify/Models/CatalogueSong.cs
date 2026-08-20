@@ -48,6 +48,24 @@ public class CatalogueSong
     [JsonIgnore]
     public string? Primary => Sources.Count > 0 ? Sources[0] : null;
 
+    /// <summary>
+    /// PlayStation Store content codes for this song — the last segment of a PSN
+    /// product id, e.g. <c>RBPHOTOGRCCF04AD</c>.
+    /// <para>
+    /// Region-independent: a US listing reads <c>UP0006-…-RBPHOTOGRCCF04AD</c> and
+    /// a European account's entitlement reads <c>EP0006-…-RBPHOTOGRCCF04AD</c>, so
+    /// only this segment is stored and it matches either.
+    /// </para>
+    /// <para>
+    /// A list because one song can be sold more than once — standalone and inside
+    /// a pack are different products. Empty for the 47% of the catalogue with no
+    /// store presence: delisted Rock Band Network songs, delisted DLC, Beatles
+    /// content, and songs that only ever shipped on a disc.
+    /// </para>
+    /// </summary>
+    [JsonPropertyName("psnIds")]
+    public List<string> PsnIds { get; set; } = [];
+
     [JsonPropertyName("releaseDate")]
     public DateOnly? ReleaseDate { get; set; }
 }
