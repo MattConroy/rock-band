@@ -19,12 +19,14 @@ public class PsnService
     private readonly HttpClient _http;
     private readonly IJSRuntime _js;
     private readonly PsnConfig _config;
+    private readonly CatalogueService _catalogue;
 
-    public PsnService(HttpClient http, IJSRuntime js, PsnConfig config)
+    public PsnService(HttpClient http, IJSRuntime js, PsnConfig config, CatalogueService catalogue)
     {
         _http = http;
         _js = js;
         _config = config;
+        _catalogue = catalogue;
     }
 
     public bool IsGatewayConfigured => _config.IsConfigured;
@@ -90,8 +92,28 @@ public class PsnService
                 ?? $"Gateway returned {(int)response.StatusCode}.");
         }
 
-        var library = await response.Content.ReadFromJsonAsync<SongLibrary>()
-                      ?? new SongLibrary();
+        // The gateway reports content codes, not names — deliberately, so it never
+        // needs the catalogue. Turning them into songs is a straight comparison
+        // against the store ids the catalogue already holds.
+        var owned = await response.Content.ReadFromJsonAsync<PsnEntitlementsResponse>()
+                    ?? new PsnEntitlementsResponse();
+
+        var catalogue = await _catalogue.GetSongsAsync();
+        var resolved = EntitlementResolver.Resolve(owned.Items.Select(i => i.Code), catalogue);
+
+        var library = new SongLibrary
+        {
+            GeneratedAt = owned.GeneratedAt,
+            Source = owned.Source,
+            Songs = resolved.Matched
+                .Select(song => new RockBandSong
+                {
+                    Title = song.Song,
+                    Artist = song.Artist,
+                    ProductId = song.PsnIds.FirstOrDefault(),
+                })
+                .ToList(),
+        };
         library = Deduplicate(library)!;
 
         await SetItemAsync(SongsKey, JsonSerializer.Serialize(library));
