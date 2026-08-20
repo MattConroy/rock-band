@@ -57,10 +57,15 @@ public class CatalogueSong
     /// only this segment is stored and it matches either.
     /// </para>
     /// <para>
-    /// A list because one song can be sold more than once — standalone and inside
-    /// a pack are different products. Empty for the 47% of the catalogue with no
-    /// store presence: delisted Rock Band Network songs, delisted DLC, Beatles
-    /// content, and songs that only ever shipped on a disc.
+    /// Every code that grants this song, not only its own listing. Standalone and
+    /// in-pack are different products; a song with no listing of its own carries
+    /// whatever does grant it, which for an older disc is its game's export
+    /// (<c>RBRB1DISCEXP2462</c> on all 47 exportable Rock Band 1 tracks) and for a
+    /// game that was never exported is the game itself
+    /// (<c>ROCKBAND4PS4000E</c> on all 65 Rock Band 4 tracks).
+    /// Empty for songs no product grants: delisted Rock Band Network songs,
+    /// delisted DLC, Beatles content, and the handful of disc tracks whose licence
+    /// kept them out of the export.
     /// </para>
     /// </summary>
     [JsonPropertyName("psnIds")]

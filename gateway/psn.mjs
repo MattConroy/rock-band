@@ -99,25 +99,35 @@ const titleOf = (s) => {
 };
 const contentOf = (s) => (s || "").split("-").slice(2).join("-");
 
-const BUNDLE_RE =
-  /DISCEXP|EXPO|TRACKP|BONUS|BLITZ0|EXPANSION|LRBX|ANNPACK|ANNSONG|RLPBONUS|WEEK\d|S\d+PASS|ROCKBAND1|HMXBAND|UNPLUGG|FAILURE|GUITARGS|SHIRTBGR|000000000|ROCKBAND4PS4/;
-
 // Returns unique owned Rock Band items: { code, id, type } where type is
-// "song" (individual), "disc" (on-disc PROCKBAND) or "bundle" (export/pack).
+// "song" (an individual track), "disc" (an on-disc PROCKBAND entitlement) or
+// "bundle" (a pack or disc export).
+//
+// PSN grants a pack's contents as one entitlement per song, each carrying that
+// song's own content code, so a pack needs no special handling to be matched.
+// A disc export is the exception: its songs never had store listings of their
+// own, so the export product's code is the only identifier they have. That
+// product is often absent from the entitlement list entirely, appearing only as
+// the productId of the rows it granted — hence it is emitted as an item too.
 export function ownedRockBandSongs(entitlements) {
+  const owned = entitlements.filter(
+    (e) => RB_TITLES.has(titleOf(e.id)) || RB_TITLES.has(titleOf(e.productId || e.id)),
+  );
+
+  // A product is a bundle because it granted an entitlement other than itself,
+  // not because of any pattern in its name.
+  const bundles = new Map();
+  for (const e of owned) {
+    const product = contentOf(e.productId);
+    if (product && product !== contentOf(e.id)) bundles.set(product, e.productId);
+  }
+
   const byCode = new Map();
-  for (const e of entitlements) {
-    const it = titleOf(e.id);
-    const pt = titleOf(e.productId || e.id);
-    if (!(RB_TITLES.has(it) || RB_TITLES.has(pt))) continue;
-    const code = contentOf(e.id) || contentOf(e.productId);
+  for (const [code, id] of bundles) byCode.set(code, { code, id, type: "bundle" });
+  for (const e of owned) {
+    const code = contentOf(e.id);
     if (!code || byCode.has(code)) continue;
-    let type;
-    if (/^PROC/.test(code)) type = "disc";
-    else if (BUNDLE_RE.test(code)) type = "bundle";
-    else if (/^X?RB/.test(code)) type = "song";
-    else continue; // non-RB false positive
-    byCode.set(code, { code, id: e.id, type });
+    byCode.set(code, { code, id: e.id, type: /^PROC/.test(code) ? "disc" : "song" });
   }
   return [...byCode.values()];
 }
