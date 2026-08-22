@@ -1,7 +1,7 @@
 @* Step 3: kick off matching and show progress. *@
 
 <StepCard Number="3" Title="Match to Spotify tracks">
-    <p class="rb-muted">Searches Spotify for each song. Low-confidence matches are unchecked by default — review them before syncing.</p>
+    <p class="rb-muted">Most songs have a known Spotify track and need no searching. Anything matched by guesswork is unchecked when confidence is low — review those before syncing.</p>
     <button class="rb-btn" @onclick="OnMatch" disabled="@(!CanMatch || Matching)">
         @(Matching ? "Matching…" : "Match songs")
     </button>
@@ -13,10 +13,14 @@
                 <div class="progress-bar" style="width:@(ProgressPct)%"></div>
             </div>
             <p class="rb-sub tally">
-                @ProgressDone / @ProgressTotal searched
+                @ProgressDone / @ProgressTotal songs
                 @if (Matches.Count > 0)
                 {
                     <span>· @MatchedCount matched · @NeedsReviewCount need review · @NoResultCount no result</span>
+                    @if (SkippedCount > 0)
+                    {
+                        <span> · @SkippedCount not searched</span>
+                    }
                 }
             </p>
         </div>
@@ -35,4 +39,5 @@
     private int MatchedCount => Matches.Count(m => m.Status == MatchStatus.Matched);
     private int NoResultCount => Matches.Count(m => m.Status == MatchStatus.NoResults);
     private int NeedsReviewCount => Matches.Count(m => m.Status == MatchStatus.Matched && m.Confidence < 0.5);
+    private int SkippedCount => Matches.Count(m => m.Status == MatchStatus.Skipped);
 }

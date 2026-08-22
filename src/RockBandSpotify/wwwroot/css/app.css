@@ -178,6 +178,7 @@ body {
 .rb-pill { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
 .rb-pill-ok { background: rgba(29, 185, 84, 0.18); color: #3ddc73; }
 .rb-pill-warn { background: rgba(255, 157, 46, 0.18); color: #ffb85c; }
+.rb-pill-muted { background: rgba(148, 163, 184, 0.18); color: var(--rb-muted); }
 .rb-pill-bad { background: rgba(220, 53, 69, 0.2); color: #ff7a86; }
 
 /* Alerts */

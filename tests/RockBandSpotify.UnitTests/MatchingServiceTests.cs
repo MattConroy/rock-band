@@ -41,13 +41,17 @@ public class MatchingServiceTests
     private static CatalogueSong Song(string title, string artist, string? spotifyId = null) =>
         new() { Song = title, Artist = artist, SpotifyId = spotifyId };
 
+    /// <summary>Searching is off by default, so tests that exercise it opt in.</summary>
+    private static MatchingService Matcher(ITrackLookup api, bool search = true) =>
+        new(api, new SpotifyConfig { SearchForMissingTracks = search });
+
     [Fact]
     public async Task A_song_with_a_known_id_is_never_searched()
     {
         var track = Track("abc", "Believer", "Imagine Dragons");
         var api = new FakeLookup { Known = { ["abc"] = track } };
 
-        var results = await new MatchingService(api).MatchAllAsync(
+        var results = await Matcher(api).MatchAllAsync(
             [Song("Believer", "Imagine Dragons", "abc")]);
 
         Assert.Empty(api.Searched);
@@ -61,7 +65,7 @@ public class MatchingServiceTests
     {
         var api = new FakeLookup { Known = { ["abc"] = Track("abc", "Believer", "Imagine Dragons") } };
 
-        var match = Assert.Single(await new MatchingService(api)
+        var match = Assert.Single(await Matcher(api)
             .MatchAllAsync([Song("Believer", "Imagine Dragons", "abc")]));
 
         // Nothing was guessed, so there is no doubt to express and nothing for a
@@ -76,7 +80,7 @@ public class MatchingServiceTests
     {
         var api = new FakeLookup { SearchResult = [Track("xyz", "Believer", "Imagine Dragons")] };
 
-        var match = Assert.Single(await new MatchingService(api)
+        var match = Assert.Single(await Matcher(api)
             .MatchAllAsync([Song("Believer", "Imagine Dragons")]));
 
         Assert.Equal(["Believer"], api.Searched);
@@ -91,7 +95,7 @@ public class MatchingServiceTests
         // song has to reach the search path anyway.
         var api = new FakeLookup { SearchResult = [Track("xyz", "Believer", "Imagine Dragons")] };
 
-        var match = Assert.Single(await new MatchingService(api)
+        var match = Assert.Single(await Matcher(api)
             .MatchAllAsync([Song("Believer", "Imagine Dragons", "gone")]));
 
         Assert.Equal(["Believer"], api.Searched);
@@ -107,7 +111,7 @@ public class MatchingServiceTests
             SearchResult = [Track("xyz", "Believer", "Imagine Dragons")],
         };
 
-        var results = await new MatchingService(api).MatchAllAsync(
+        var results = await Matcher(api).MatchAllAsync(
             [Song("Believer", "Imagine Dragons", "abc"), Song("Africa", "Toto", "def")]);
 
         Assert.Equal(2, api.Searched.Count);
@@ -118,7 +122,7 @@ public class MatchingServiceTests
     public async Task Ids_are_looked_up_once_for_the_whole_library()
     {
         var api = new FakeLookup();
-        await new MatchingService(api).MatchAllAsync(
+        await Matcher(api).MatchAllAsync(
             [Song("A", "X", "id1"), Song("B", "Y", "id2"), Song("C", "Z")]);
 
         // One batched call carrying both ids, rather than a request per song.
@@ -131,7 +135,7 @@ public class MatchingServiceTests
         var api = new FakeLookup { Known = { ["abc"] = Track("abc", "A", "X") } };
         var seen = new List<int>();
 
-        await new MatchingService(api).MatchAllAsync(
+        await Matcher(api).MatchAllAsync(
             [Song("A", "X", "abc"), Song("B", "Y")],
             (done, total) => { seen.Add(done); Assert.Equal(2, total); return Task.CompletedTask; });
 
@@ -139,11 +143,40 @@ public class MatchingServiceTests
     }
 
     [Fact]
+    public async Task With_searching_off_an_unknown_song_is_left_alone()
+    {
+        var api = new FakeLookup { SearchResult = [Track("xyz", "Believer", "Imagine Dragons")] };
+
+        var match = Assert.Single(await Matcher(api, search: false)
+            .MatchAllAsync([Song("Believer", "Imagine Dragons")]));
+
+        Assert.Empty(api.Searched);
+        Assert.Equal(MatchStatus.Skipped, match.Status);
+        Assert.False(match.Include);
+        Assert.Null(match.Selected);
+    }
+
+    [Fact]
+    public async Task Switching_searching_off_does_not_affect_known_songs()
+    {
+        var track = Track("abc", "Believer", "Imagine Dragons");
+        var api = new FakeLookup { Known = { ["abc"] = track } };
+
+        var results = await Matcher(api, search: false).MatchAllAsync(
+            [Song("Believer", "Imagine Dragons", "abc"), Song("Africa", "Toto")]);
+
+        Assert.Empty(api.Searched);
+        Assert.Equal(MatchStatus.Matched, results[0].Status);
+        Assert.Same(track, results[0].Selected);
+        Assert.Equal(MatchStatus.Skipped, results[1].Status);
+    }
+
+    [Fact]
     public async Task A_search_that_finds_nothing_is_left_out()
     {
         var api = new FakeLookup { SearchResult = [] };
 
-        var match = Assert.Single(await new MatchingService(api)
+        var match = Assert.Single(await Matcher(api)
             .MatchAllAsync([Song("Obscure B-Side", "Nobody")]));
 
         Assert.Equal(MatchStatus.NoResults, match.Status);

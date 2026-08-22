@@ -8,18 +8,24 @@ namespace RockBandSpotify.Services;
 /// <para>
 /// Most songs need no searching. The catalogue knows which Spotify track they
 /// are, so those are fetched by id — fifty per request — and there is nothing to
-/// score, because nothing was guessed. Only the remainder are searched by name
-/// and scored, which is where covers, live cuts and remasters can mislead and a
-/// person has to look.
+/// score, because nothing was guessed.
+/// </para>
+/// <para>
+/// The remainder are searched by name and scored only if
+/// <see cref="SpotifyConfig.SearchForMissingTracks"/> allows it; otherwise they
+/// are left alone. Searching is where covers, live cuts and remasters mislead,
+/// and where a long library burns through a rate limit.
 /// </para>
 /// </summary>
 public class MatchingService
 {
     private readonly ITrackLookup _api;
+    private readonly SpotifyConfig _config;
 
-    public MatchingService(ITrackLookup api)
+    public MatchingService(ITrackLookup api, SpotifyConfig config)
     {
         _api = api;
+        _config = config;
     }
 
     /// <summary>
@@ -42,8 +48,10 @@ public class MatchingService
 
             if (song.SpotifyId is not null && known.TryGetValue(song.SpotifyId, out var track))
                 Accept(match, track);
-            else
+            else if (_config.SearchForMissingTracks)
                 await SearchAndScoreAsync(song, match);
+            else
+                Skip(match);
 
             results.Add(match);
             if (onProgress is not null)
@@ -80,6 +88,16 @@ public class MatchingService
         match.Confidence = 1;
         match.Status = MatchStatus.Matched;
         match.Include = true;
+    }
+
+    /// <summary>
+    /// Left alone: the catalogue has no track for this song and searching is
+    /// switched off, so nothing was asked of Spotify and nothing is claimed.
+    /// </summary>
+    private static void Skip(SongMatch match)
+    {
+        match.Status = MatchStatus.Skipped;
+        match.Include = false;
     }
 
     private async Task SearchAndScoreAsync(CatalogueSong song, SongMatch match)
