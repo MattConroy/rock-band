@@ -391,8 +391,11 @@ public class CatalogueTests : AppPageTest
         await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
         await Expect(Page.Locator("tbody")).ToContainTextAsync("Believer");
         await Expect(Page.Locator("tbody")).ToContainTextAsync("Everlong");
-        // The option reads as a library, not as jargon.
-        await Expect(Page.GetByLabel("Ownership").Locator("option").Nth(1)).ToHaveTextAsync("In my library");
+        // Short labels that echo the column header, and a first option that
+        // honestly describes what it shows — the whole catalogue, not a
+        // purchase history.
+        var options = await Page.GetByLabel("Ownership").Locator("option").AllInnerTextsAsync();
+        Assert.That(options, Is.EqualTo(new[] { "All songs", "Owned", "Unowned" }));
 
         await Page.GetByLabel("Ownership").SelectOptionAsync("NotOwned");
         await Expect(Page.GetByText("4951 shown")).ToBeVisibleAsync();
