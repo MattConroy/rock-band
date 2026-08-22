@@ -277,11 +277,68 @@ public class CatalogueTests : AppPageTest
 
         await Page.GetByPlaceholder("Search song or artist…").FillAsync("believer");
         await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
-        await Expect(Page.Locator("tbody tr").First.Locator(".owned-tick")).ToBeVisibleAsync();
+        await Expect(Page.Locator("tbody tr").First.Locator("td.col-owned .owned-tick")).ToBeVisibleAsync();
 
         await Page.GetByPlaceholder("Search song or artist…").FillAsync("everlong");
         await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
         await Expect(Page.Locator("tbody tr").First.Locator(".owned-tick")).ToHaveCountAsync(0);
+    }
+
+    [Test]
+    public async Task Ownership_is_its_own_column_once_a_library_exists()
+    {
+        var before = await Page.Locator("th").AllInnerTextsAsync();
+        Assert.That(before, Is.EqualTo(new[] { "SONG", "ARTIST", "YEAR", "GENRE", "SOURCE" }));
+
+        await SeedOwned(4411);
+
+        var after = await Page.Locator("th").AllInnerTextsAsync();
+        Assert.That(after, Is.EqualTo(new[] { "OWN", "SONG", "ARTIST", "YEAR", "GENRE", "SOURCE" }));
+
+        // The tick sits in its own cell, not crammed in front of the title.
+        await Page.GetByPlaceholder("Search song or artist…").FillAsync("believer");
+        await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
+        var song = await Page.Locator("tbody tr").First.Locator("td.col-song").InnerTextAsync();
+        Assert.That(song.Trim(), Is.EqualTo("Believer"));
+    }
+
+    [Test]
+    public async Task Sorting_by_ownership_brings_your_library_to_the_top()
+    {
+        await SeedOwned(4411, 98); // Believer, Everlong
+
+        await Page.Locator("th.col-owned button").ClickAsync();
+        await Expect(Page.Locator("th.col-owned")).ToHaveAttributeAsync("aria-sort", "ascending");
+
+        // The first two rows are the owned ones, in some order.
+        var top = await Page.Locator("tbody tr").Nth(0).Locator("td.col-song").InnerTextAsync();
+        var second = await Page.Locator("tbody tr").Nth(1).Locator("td.col-song").InnerTextAsync();
+        Assert.That(new[] { top.Trim(), second.Trim() }, Is.EquivalentTo(new[] { "Believer", "Everlong" }));
+
+        var third = Page.Locator("tbody tr").Nth(2).Locator(".owned-tick");
+        await Expect(third).ToHaveCountAsync(0);
+    }
+
+    [Test]
+    public async Task Filter_controls_stay_inside_the_card_on_a_phone()
+    {
+        await SeedOwned(4411);
+        await Page.SetViewportSizeAsync(390, 780); // iPhone-ish
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
+
+        // Every select has to sit within the card, not hang off its edge.
+        var cardRight = (await Page.Locator(".rb-card").First.BoundingBoxAsync())!.X
+                        + (await Page.Locator(".rb-card").First.BoundingBoxAsync())!.Width;
+        foreach (var sel in await Page.Locator(".select-group .rb-select").AllAsync())
+        {
+            var box = (await sel.BoundingBoxAsync())!;
+            Assert.That(box.X + box.Width, Is.LessThanOrEqualTo(cardRight + 1),
+                "a filter control is overflowing the card on a narrow viewport");
+        }
+
+        var pageScrollsSideways = await Page.EvaluateAsync<bool>(
+            "document.documentElement.scrollWidth > document.documentElement.clientWidth + 1");
+        Assert.That(pageScrollsSideways, Is.False, "the page should never scroll horizontally");
     }
 
     [Test]
@@ -293,6 +350,8 @@ public class CatalogueTests : AppPageTest
         await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
         await Expect(Page.Locator("tbody")).ToContainTextAsync("Believer");
         await Expect(Page.Locator("tbody")).ToContainTextAsync("Everlong");
+        // The option reads as a library, not as jargon.
+        await Expect(Page.GetByLabel("Ownership").Locator("option").Nth(1)).ToHaveTextAsync("In my library");
 
         await Page.GetByLabel("Ownership").SelectOptionAsync("NotOwned");
         await Expect(Page.GetByText("4951 shown")).ToBeVisibleAsync();
