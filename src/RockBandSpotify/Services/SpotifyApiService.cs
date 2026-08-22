@@ -7,7 +7,7 @@ using RockBandSpotify.Models;
 namespace RockBandSpotify.Services;
 
 /// <summary>Thin wrapper over the Spotify Web API endpoints this app needs.</summary>
-public class SpotifyApiService
+public class SpotifyApiService : ITrackLookup
 {
     private const string ApiBase = "https://api.spotify.com/v1";
 
