@@ -1,0 +1,113 @@
+@implements IDisposable
+@inject ConnectionState State
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+@* The two connections, always on screen. Each shows how far along it is and
+   presses through to the next useful thing: sign in, fetch or sync, and once
+   there is something to show, show it. *@
+<div class="conn-buttons">
+    @if (State.IsPsnConfigured)
+    {
+        <button type="button" class="conn-btn @StatusClass(State.Psn)"
+                title="@PsnTitle" aria-label="@PsnTitle"
+                disabled="@State.PsnBusy" @onclick="PressPsnAsync">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                <path fill="currentColor" d="M9.5 3.5v14.2l3 .9V7.2c0-.6.3-.9.8-.8 1.6.4 2.6 1.9 2.6 4 0 2.2-.9 3.1-2.3 2.6v2.4c3.4 1 5.5-.8 5.5-4.7 0-3.6-1.9-6-6-7.1L9.5 3.5zM6.6 19.6c-1.6-.5-2.2-1.3-1.6-2 .5-.5 1.5-.9 3-1.3v-1.6c-3.4.6-5.5 1.9-5.5 3.3 0 1.3 1.6 2.2 4.6 2.5v-.9zm11.9-3.3c-1.3-.5-2.9-.5-4.4-.1l-.4.1v1.2l2.3-.8c.9-.3 1.9-.3 2.4 0 .5.3.2.7-.7 1l-4 1.4v1.2l5.3-1.9c1.1-.4 1.6-.9 1.6-1.5 0-.3-.4-.5-2.1-.6z"/>
+            </svg>
+            <span class="conn-dot"></span>
+        </button>
+    }
+
+    @if (State.IsSpotifyConfigured)
+    {
+        <button type="button" class="conn-btn @StatusClass(State.Spotify)"
+                title="@SpotifyTitle" aria-label="@SpotifyTitle"
+                disabled="@State.SpotifyBusy" @onclick="PressSpotifyAsync">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.6 14.4a.8.8 0 0 1-1.1.3c-3-1.8-6.7-2.2-11.1-1.2a.8.8 0 1 1-.3-1.5c4.8-1.1 8.9-.6 12.2 1.4.4.2.5.7.3 1zm1.2-2.7a1 1 0 0 1-1.3.3c-3.4-2.1-8.6-2.7-12.6-1.5a1 1 0 1 1-.6-1.9c4.6-1.4 10.3-.7 14.2 1.7.5.3.6.9.3 1.4zm.1-2.8C14 8.6 7.7 8.4 4.2 9.5a1.2 1.2 0 0 1-.7-2.3c4-1.2 11-1 15.4 1.6a1.2 1.2 0 0 1-1 2.1z"/>
+            </svg>
+            <span class="conn-dot"></span>
+        </button>
+    }
+</div>
+
+@if (_showPsnDialog)
+{
+    <PsnSignInDialog OnConnect="ConnectPsnAsync" OnCancel="() => _showPsnDialog = false" Error="@State.Error" />
+}
+
+@code {
+    private bool _showPsnDialog;
+
+    protected override async Task OnInitializedAsync()
+    {
+        State.Changed += OnStateChanged;
+        await State.RefreshAsync();
+    }
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => State.Changed -= OnStateChanged;
+
+    private static string StatusClass(ConnectionStatus status) => status switch
+    {
+        ConnectionStatus.Synced => "conn-synced",
+        ConnectionStatus.Connected => "conn-connected",
+        _ => "conn-disconnected",
+    };
+
+    private string PsnTitle => State.PsnBusy ? "Fetching your PlayStation library…" : State.Psn switch
+    {
+        ConnectionStatus.Synced => $"PlayStation · {State.OwnedCount} songs owned. Show only these.",
+        ConnectionStatus.Connected => "PlayStation · connected. Fetch your songs.",
+        _ => "PlayStation · not connected. Sign in.",
+    };
+
+    private string SpotifyTitle => State.SpotifyBusy ? "Syncing your playlist…" : State.Spotify switch
+    {
+        ConnectionStatus.Synced => "Spotify · playlist synced. Open it.",
+        ConnectionStatus.Connected => "Spotify · signed in. Sync your playlist.",
+        _ => "Spotify · not connected. Sign in.",
+    };
+
+    private async Task PressPsnAsync()
+    {
+        switch (State.Psn)
+        {
+            case ConnectionStatus.Disconnected:
+                _showPsnDialog = true;
+                break;
+            case ConnectionStatus.Connected:
+                await State.FetchPsnAsync();
+                break;
+            case ConnectionStatus.Synced:
+                // Narrow the catalogue to what the account owns. Carried in the
+                // address so it survives a reload and can be shared.
+                Nav.NavigateTo(Nav.GetUriWithQueryParameter("owned", "1"));
+                break;
+        }
+    }
+
+    private async Task ConnectPsnAsync(string npsso)
+    {
+        _showPsnDialog = false;
+        await State.ConnectPsnAsync(npsso);
+    }
+
+    private async Task PressSpotifyAsync()
+    {
+        switch (State.Spotify)
+        {
+            case ConnectionStatus.Disconnected:
+                await State.SignInToSpotifyAsync();
+                break;
+            case ConnectionStatus.Connected:
+                await State.SyncSpotifyAsync();
+                break;
+            case ConnectionStatus.Synced when State.PlaylistUrl is not null:
+                await JS.InvokeVoidAsync("rbSpotify.openInNewTab", State.PlaylistUrl);
+                break;
+        }
+    }
+}

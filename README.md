@@ -13,8 +13,12 @@ Live at **<https://mattconroy.github.io/rock-band/>**.
 - **See what you own** — connect PlayStation once and the catalogue gains an
   ownership column, so you can narrow it to the songs in your library.
 - **Build a playlist** — connect Spotify and sync your owned songs into a
-  playlist. Matches are shown for review first, and re-running only adds what is
-  missing.
+  playlist. Re-running only adds what is missing.
+
+Both connections live in the two buttons at the top right, which show how far
+along each one is. Pressing a button does the next useful thing: sign in, then
+fetch or sync, and once that is done, show the result — the owned songs for
+PlayStation, the playlist for Spotify.
 
 ## Running it
 
@@ -42,9 +46,9 @@ Connecting Spotify or PlayStation needs the setup below.
 
 The same section has `SearchForMissingTracks`, off by default. Most songs already
 carry the Spotify track they are, and those are always used. The setting only
-governs the rest: leave it off and they're listed as *not searched*; turn it on
+governs the rest: leave it off and they're left out of the playlist; turn it on
 and the app searches Spotify by name for each one, which costs a request per song
-and produces a guess worth reviewing.
+and produces a guess rather than a certainty.
 
 ### Connecting PlayStation
 
@@ -60,9 +64,9 @@ npx wrangler deploy --var ALLOWED_ORIGIN:https://<you>.github.io
 Put the Worker URL it prints into `appsettings.json` under `Psn.GatewayUrl`. See
 [`gateway/README.md`](gateway/README.md) for more.
 
-In the app, **Connect** → *Open PlayStation login*, sign in, then copy the `npsso`
-value the page shows and paste it in. It is cached in your browser and lasts about
-two months.
+In the app, press the PlayStation button → *Open PlayStation login*, sign in, then
+copy the `npsso` value the page shows and paste it in. It is cached in your browser
+and lasts about two months.
 
 ## Deploying your own
 

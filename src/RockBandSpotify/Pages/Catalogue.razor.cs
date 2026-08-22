@@ -15,6 +15,13 @@ namespace RockBandSpotify.Pages;
 /// </summary>
 public partial class Catalogue
 {
+    /// <summary>
+    /// Set by the header's PlayStation button once a library has been fetched.
+    /// Carried in the address so the view survives a reload and can be shared.
+    /// </summary>
+    [SupplyParameterFromQuery(Name = "owned")]
+    private string? OwnedQuery { get; set; }
+
     [Inject] private CatalogueService Catalog { get; set; } = default!;
     [Inject] private OwnedLibrary Owned { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
@@ -113,10 +120,21 @@ public partial class Catalogue
         _visibleColumns.UnionWith(LoadColumnPreference() ?? DefaultColumnsForViewport());
     }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        var wanted = OwnedQuery == "1" ? OwnedFilter.Owned : OwnedFilter.Any;
+        if (_all.Count > 0 && wanted != _owned)
+        {
+            _owned = wanted;
+            ApplyFilters();
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         _all = (await Catalog.GetSongsAsync()).ToList();
         _ownedIds = await Owned.LoadIdsAsync();
+        if (OwnedQuery == "1") _owned = OwnedFilter.Owned;
         _genres = _all.Where(s => !string.IsNullOrEmpty(s.Genre)).Select(s => s.Genre!).Distinct().OrderBy(g => g).ToList();
         // Every source a song lists, not just its origin, so the dropdown can
         // offer a game whose whole tracklist is songs that originated elsewhere.

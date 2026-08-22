@@ -13,12 +13,18 @@ public class SpotifyConnectCallbackTests : AppPageTest
     [Test]
     public async Task Returns_to_where_login_was_initiated()
     {
-        await Page.GotoAsync("/connect");
-        await Page.EvaluateAsync("localStorage.setItem('rb_pkce_return_path', 'connect')");
+        // Login now starts from the header, so it can be triggered from any
+        // page — including one narrowed by a query string, which has to come
+        // back intact.
+        await Page.GotoAsync("/catalogue");
+        await Page.EvaluateAsync(
+            "localStorage.setItem('rb_owned_songs', JSON.stringify({ generatedAt: null, songIds: [4411, 98] }))");
+        await Page.EvaluateAsync("localStorage.setItem('rb_pkce_return_path', 'catalogue?owned=1')");
 
         await Page.GotoAsync("/spotify-connect?code=fake&state=fake");
 
-        await Expect(Page.GetByRole(AriaRole.Heading, new() { Name = "Connect Spotify" })).ToBeVisibleAsync();
+        await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
+        Assert.That(Page.Url, Does.Contain("owned=1"));
     }
 
     [Test]

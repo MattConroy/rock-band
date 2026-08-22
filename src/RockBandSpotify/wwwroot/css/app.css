@@ -200,3 +200,73 @@ body {
     color: var(--rb-text);
     max-width: 320px;
 }
+
+/* Connection buttons ------------------------------------------------------
+   One per service, always in the header. The dot carries the state: hollow
+   when disconnected, filled once signed in, and the service's own colour
+   once there is something to show. */
+.conn-buttons { display: flex; gap: 0.4rem; align-items: center; }
+
+.conn-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: #1a2231;
+    color: #7d8794;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+}
+
+.conn-btn:hover:not(:disabled) { background: #223349; }
+.conn-btn:disabled { cursor: progress; opacity: 0.6; }
+
+.conn-dot {
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.conn-disconnected .conn-dot { border: 1.5px solid #7d8794; }
+.conn-connected { color: #c7cbd1; }
+.conn-connected .conn-dot { background: #ffb85c; }
+.conn-synced { color: var(--rb-text); }
+.conn-synced .conn-dot { background: #3ddc73; }
+
+/* Modal -------------------------------------------------------------------
+   Used for the PlayStation token, which is the one thing a person has to
+   fetch and paste by hand. */
+.dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 50;
+}
+
+.dialog {
+    background: var(--rb-card);
+    border: 1px solid var(--rb-border);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    padding: 1.25rem;
+    width: 100%;
+    max-width: 420px;
+}
+
+.dialog h2 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+.dialog-steps { margin: 0.75rem 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+.dialog-input { width: 100%; box-sizing: border-box; }
+.dialog-actions { margin-top: 1rem; }
