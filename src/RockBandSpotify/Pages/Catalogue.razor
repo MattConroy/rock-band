@@ -35,9 +35,9 @@
             @if (HasOwnedLibrary)
             {
                 <select class="rb-select" @onchange="OnOwnedChanged" aria-label="Ownership">
-                    <option value="Any" selected="@(_owned == OwnedFilter.Any)">Owned and not</option>
-                    <option value="Owned" selected="@(_owned == OwnedFilter.Owned)">Owned only</option>
-                    <option value="NotOwned" selected="@(_owned == OwnedFilter.NotOwned)">Not owned</option>
+                    <option value="Any" selected="@(_owned == OwnedFilter.Any)">All songs</option>
+                    <option value="Owned" selected="@(_owned == OwnedFilter.Owned)">In my library</option>
+                    <option value="NotOwned" selected="@(_owned == OwnedFilter.NotOwned)">Not in my library</option>
                 </select>
             }
         </div>
@@ -81,12 +81,20 @@
             <table class="catalogue-table">
                 <thead>
                     <tr>
-                        <th aria-sort='@AriaSort("Song")'>
+                        @if (HasOwnedLibrary)
+                        {
+                            <th class="col-owned" aria-sort='@AriaSort("Owned")'>
+                                <button type="button" class="th-sort-btn" @onclick='() => ToggleSort("Owned")'>
+                                    Own<span class="sort-indicator">@SortIndicator("Owned")</span>
+                                </button>
+                            </th>
+                        }
+                        <th class="col-song" aria-sort='@AriaSort("Song")'>
                             <button type="button" class="th-sort-btn" @onclick='() => ToggleSort("Song")'>
                                 Song<span class="sort-indicator">@SortIndicator("Song")</span>
                             </button>
                         </th>
-                        <th aria-sort='@AriaSort("Artist")'>
+                        <th class="col-artist" aria-sort='@AriaSort("Artist")'>
                             <button type="button" class="th-sort-btn" @onclick='() => ToggleSort("Artist")'>
                                 Artist<span class="sort-indicator">@SortIndicator("Artist")</span>
                             </button>
@@ -112,14 +120,17 @@
                     @foreach (var s in _filtered)
                     {
                         <tr>
-                            <td>
-                                @if (_ownedIds.Contains(s.Id))
-                                {
-                                    <span class="owned-tick" title="You own this song" aria-label="owned">&#10003;</span>
-                                }
-                                @s.Song
-                            </td>
-                            <td>@s.Artist</td>
+                            @if (HasOwnedLibrary)
+                            {
+                                <td class="col-owned">
+                                    @if (_ownedIds.Contains(s.Id))
+                                    {
+                                        <span class="owned-tick" title="In your library" aria-label="owned">&#10003;</span>
+                                    }
+                                </td>
+                            }
+                            <td class="col-song">@s.Song</td>
+                            <td class="col-artist">@s.Artist</td>
                             @foreach (var col in OptionalColumns)
                             {
                                 if (_visibleColumns.Contains(col.Key))

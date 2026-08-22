@@ -110,6 +110,27 @@ public class CatalogueSortTests
     }
 
     [Fact]
+    public void Owned_ascending_puts_the_owned_songs_first()
+    {
+        // Ascending on an ownership column means "show me mine", not the plain
+        // false-before-true order a boolean would give.
+        var result = CatalogueSort.Apply(Songs, "Owned", SortDirection.Ascending, new HashSet<int> { 3, 4 });
+        Assert.Equal(new[] { 3, 4, 1, 2 }, result.Select(s => s.Id));
+    }
+
+    [Fact]
+    public void Owned_descending_puts_them_last()
+    {
+        var result = CatalogueSort.Apply(Songs, "Owned", SortDirection.Descending, new HashSet<int> { 3, 4 });
+        Assert.Equal(new[] { 1, 2, 3, 4 }, result.Select(s => s.Id));
+    }
+
+    [Fact]
+    public void Owned_sort_without_a_library_leaves_the_order_alone()
+        => Assert.Equal(new[] { 1, 2, 3, 4 },
+            CatalogueSort.Apply(Songs, "Owned", SortDirection.Ascending).Select(s => s.Id));
+
+    [Fact]
     public void Unknown_column_throws()
         => Assert.Throws<ArgumentOutOfRangeException>(() => Apply("NotAColumn", SortDirection.Ascending));
 }

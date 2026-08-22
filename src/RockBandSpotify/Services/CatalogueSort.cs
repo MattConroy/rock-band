@@ -10,7 +10,11 @@ public enum SortDirection { None, Ascending, Descending }
 /// </summary>
 public static class CatalogueSort
 {
-    public static List<CatalogueSong> Apply(IEnumerable<CatalogueSong> songs, string? column, SortDirection direction)
+    public static List<CatalogueSong> Apply(
+        IEnumerable<CatalogueSong> songs,
+        string? column,
+        SortDirection direction,
+        IReadOnlySet<int>? ownedIds = null)
     {
         if (column is null || direction == SortDirection.None)
             return songs.ToList();
@@ -31,6 +35,12 @@ public static class CatalogueSort
             "Genre" => asc
                 ? songs.OrderBy(s => s.Genre, StringComparer.OrdinalIgnoreCase)
                 : songs.OrderByDescending(s => s.Genre, StringComparer.OrdinalIgnoreCase),
+            // Ascending puts owned at the top, which is the way round anyone
+            // tapping an ownership column wants it — the plain boolean order
+            // would bury their library under four thousand songs they lack.
+            "Owned" => asc
+                ? songs.OrderByDescending(s => ownedIds is not null && ownedIds.Contains(s.Id))
+                : songs.OrderBy(s => ownedIds is not null && ownedIds.Contains(s.Id)),
             "Source" => asc
                 ? songs.OrderBy(s => s, SourceOrder.Instance)
                 : songs.OrderByDescending(s => s, SourceOrder.Instance),

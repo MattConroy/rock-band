@@ -163,7 +163,7 @@ public partial class Catalogue
     private void ApplyFilters()
         => _filtered = CatalogueSort.Apply(
             CatalogueFilter.Apply(_all, _search, _genre, _source, _owned, _ownedIds),
-            _sortColumn, _sortDirection);
+            _sortColumn, _sortDirection, _ownedIds);
 
     // Tap cycle: unsorted -> ascending -> descending -> unsorted. Tapping a
     // different column starts it fresh at ascending.

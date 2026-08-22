@@ -40,17 +40,21 @@
 
 .search-clear:hover { color: var(--rb-text); }
 
-/* Genre and era belong together — keep them as one flex item so they wrap
-   as a pair instead of splitting across lines independently. */
+/* The selects wrap among themselves rather than being one unbreakable row:
+   with three of them a phone has nowhere to put ~500px of controls, and
+   nowrap sent the last one off the edge of the card. They shrink to a width
+   that still shows a truncated label before they wrap to a second line. */
 .select-group {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 0.5rem;
-    flex-shrink: 0;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .select-group .rb-select {
-    min-width: 0;
+    flex: 1 1 auto;
+    min-width: 7rem;
     max-width: 160px;
 }
 
@@ -187,11 +191,53 @@
     font-size: 0.82rem;
 }
 
-.catalogue-table th:nth-child(1),
-.catalogue-table td:nth-child(1) { width: 30%; }
+.catalogue-table th.col-owned,
+.catalogue-table td.col-owned {
+    width: 3.4rem;
+    text-align: center;
+}
 
-.catalogue-table th:nth-child(2),
-.catalogue-table td:nth-child(2) { width: 22%; }
+.catalogue-table th.col-song,
+.catalogue-table td.col-song { width: 30%; }
+
+.catalogue-table th.col-artist,
+.catalogue-table td.col-artist { width: 22%; }
+
+/* The header cell is a full-width button, so centring the column means
+   centring inside it rather than on the cell. */
+.catalogue-table th.col-owned .th-sort-btn {
+    justify-content: center;
+    padding-left: 0.15rem;
+    padding-right: 0.15rem;
+}
+
+.owned-tick {
+    color: var(--rb-accent);
+    font-weight: 700;
+}
+
+/* Narrow screens show only Own, Song and Artist by default. With every
+   visible column declaring a width, table-layout: fixed spreads the leftover
+   across all of them proportionally — which inflated the tick column to a
+   third of the screen. Leaving Artist unsized gives that slack somewhere to
+   go, so Own stays the width of a tick. */
+@media (max-width: 640px) {
+    /* Two selects to a row rather than three stacked: the 160px desktop cap
+       is a few pixels too wide to pair up on a phone. */
+    .select-group .rb-select {
+        flex: 1 1 45%;
+        max-width: none;
+    }
+
+    .catalogue-table th.col-owned,
+    .catalogue-table td.col-owned { width: 2.6rem; }
+
+    .catalogue-table th.col-song,
+    .catalogue-table td.col-song { width: 45%; }
+
+    .catalogue-table th.col-artist,
+    .catalogue-table td.col-artist { width: auto; }
+}
 
 .catalogue-table td {
     text-align: left;
