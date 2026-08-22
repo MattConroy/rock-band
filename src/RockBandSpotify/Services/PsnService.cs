@@ -107,8 +107,10 @@ public class PsnService
         return library;
     }
 
-    /// <summary>Calls the gateway's debug endpoint and returns the raw JSON text
-    /// (entitlement count, extracted names, and a few sample entries) for tuning.</summary>
+    /// <summary>
+    /// The gateway's debug endpoint, pretty-printed: the raw entitlement codes
+    /// an account holds, for working out why an owned song isn't showing.
+    /// </summary>
     public async Task<string> FetchRawDebugAsync()
     {
         var npsso = await GetItemAsync(TokenKey);

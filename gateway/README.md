@@ -45,3 +45,16 @@ wrangler deploy --var ALLOWED_ORIGIN:https://<your-username>.github.io
 cd gateway
 wrangler dev      # serves http://localhost:8787
 ```
+
+## Checking your entitlements without deploying
+
+`test-local.mjs` runs the same PSN calls the Worker makes, on your own machine,
+so your `npsso` never leaves it:
+
+```bash
+PSN_NPSSO=<your-64-char-token> node test-local.mjs
+```
+
+It prints how many entitlements the account holds and which Rock Band items the
+Worker would return, and writes the full raw list to `psn-raw.json` (gitignored)
+for digging through.

@@ -30,8 +30,7 @@ public class CatalogueSong
     /// <para>
     /// Nearly always one entry; 32 songs shipped in more than one game, so
     /// Everlong is <c>["RB2", "UNPLUGGED"]</c>. Index 0 is the mainline game, or
-    /// the origin when no mainline shipped it — use <see cref="Primary"/> rather
-    /// than indexing directly.
+    /// the origin when no mainline shipped it.
     /// </para>
     /// <para>
     /// This is membership, not playability: exports let most songs be played in
@@ -40,13 +39,6 @@ public class CatalogueSong
     /// </summary>
     [JsonPropertyName("sources")]
     public List<string> Sources { get; set; } = [];
-
-    /// <summary>
-    /// The song's mainline game, or its origin when no mainline shipped it.
-    /// Null only if it somehow has no sources at all.
-    /// </summary>
-    [JsonIgnore]
-    public string? Primary => Sources.Count > 0 ? Sources[0] : null;
 
     /// <summary>
     /// PlayStation Store content codes for this song — the last segment of a PSN

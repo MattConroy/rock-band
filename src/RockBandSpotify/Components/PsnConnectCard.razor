@@ -35,7 +35,7 @@
 
         <details class="debug-box">
             <summary>Debug: raw entitlements</summary>
-            <p class="rb-sub">If songs are missing, this shows how PlayStation names your content, so the filter can be tuned.</p>
+            <p class="rb-sub">The content codes PlayStation reports for your account. Useful when a song you own is missing: it will be a code the catalogue has no id for.</p>
             <button class="rb-btn rb-btn-secondary" @onclick="OnLoadRaw" disabled="@LoadingRaw">
                 @(LoadingRaw ? "Loading…" : "Load raw entitlements")
             </button>
