@@ -22,6 +22,10 @@ public class RockBandSong
     [JsonPropertyName("productId")]
     public string? ProductId { get; set; }
 
+    /// <summary>The song's known Spotify track id, when the catalogue has one.</summary>
+    [JsonPropertyName("spotifyTrackId")]
+    public string? SpotifyTrackId { get; set; }
+
     /// <summary>ISO date this entry was purchased/added, when available.</summary>
     [JsonPropertyName("purchasedAt")]
     public string? PurchasedAt { get; set; }
