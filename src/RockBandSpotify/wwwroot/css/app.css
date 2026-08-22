@@ -192,6 +192,11 @@ body {
 .rb-muted { color: var(--rb-muted); font-size: 0.9rem; }
 .rb-sub { color: var(--rb-muted); font-size: 0.8rem; }
 .rb-row-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.rb-select:focus-visible {
+    outline: 2px solid var(--rb-accent);
+    outline-offset: 1px;
+}
+
 .rb-select {
     padding: 0.3rem 0.4rem;
     border-radius: 6px;
@@ -327,7 +332,88 @@ body {
 
 .conn-error-dismiss:hover { opacity: 1; }
 
-.dialog h2 { margin: 0 0 0.5rem; font-size: 1.05rem; }
-.dialog-steps { margin: 0.75rem 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.75rem; }
-.dialog-input { width: 100%; box-sizing: border-box; }
-.dialog-actions { margin-top: 1rem; }
+.dialog-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.dialog h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    flex: 1 1 auto;
+}
+
+.dialog-close {
+    flex: none;
+    margin: -0.25rem -0.25rem 0 0;
+    padding: 0.25rem 0.4rem;
+    border: none;
+    background: none;
+    color: var(--rb-muted);
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.dialog-close:hover { color: var(--rb-text); background: #223349; }
+
+.dialog-intro { margin: 0.4rem 0 0; }
+
+/* Each step is a labelled row with its control on the next line at full
+   width. Numbering them through a list put the marker beside a 40px-tall
+   control, which left the digit floating against its top edge. */
+.dialog-step { margin-top: 1.1rem; }
+
+.dialog-step-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.45rem;
+    font-size: 0.85rem;
+    color: var(--rb-text);
+}
+
+.dialog-step-num {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background: #223349;
+    color: var(--rb-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.dialog-step-control {
+    display: block;
+    width: 100%;
+    /* .rb-select caps itself at 320px for the catalogue's filter row; in here
+       the control should fill the dialog like the button above it. */
+    max-width: none;
+    box-sizing: border-box;
+    text-align: center;
+    text-decoration: none;
+}
+
+.dialog-input {
+    text-align: left;
+    padding: 0.55rem 0.6rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.dialog-note { margin: 0.4rem 0 0; font-size: 0.75rem; line-height: 1.35; }
+.dialog-note-ok { color: #5fd48a; }
+
+.dialog-error { margin: 1rem 0 0; }
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1.4rem;
+}
