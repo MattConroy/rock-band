@@ -1,152 +1,103 @@
 # Rock Band → Spotify
 
-Build a **Spotify playlist** from your owned **Rock Band DLC** — a
-[Blazor WebAssembly](https://learn.microsoft.com/aspnet/core/blazor/) app served
-from **GitHub Pages**, with a tiny stateless gateway for the PlayStation side.
+Browse the Rock Band song catalogue, mark which songs you own on PlayStation, and
+build a Spotify playlist from them.
 
-Each visitor logs in with **their own** Spotify and PlayStation accounts.
+Live at **<https://mattconroy.github.io/rock-band/>**.
 
-## How it works
+## What it does
 
-The Spotify half runs entirely in your browser (its API is CORS-enabled, and it
-uses PKCE so no secret is needed). The PlayStation half **can't** run in the
-browser — PSN doesn't send CORS headers, so browsers refuse to read its responses.
-So PSN calls go through a **stateless gateway** (a Cloudflare Worker) that relays
-your request server-side and stores nothing.
+- **Browse 4,953 songs** — every Rock Band song across the discs, the DLC, the
+  spin-offs and the Rock Band Network. Search by title or artist, filter by genre
+  or by the game a song came from, sort any column. No login needed.
+- **See what you own** — connect PlayStation once and the catalogue gains an
+  ownership column, so you can narrow it to the songs in your library.
+- **Build a playlist** — connect Spotify and sync your owned songs into a
+  playlist. Matches are shown for review first, and re-running only adds what is
+  missing.
 
+## Running it
+
+You need the [.NET 10 SDK](https://dotnet.microsoft.com/download). Node 22 is only
+needed if you want to work on the PlayStation gateway.
+
+```bash
+git clone https://github.com/MattConroy/rock-band.git
+cd rock-band/src/RockBandSpotify
+dotnet run
 ```
-┌──────────────────────────── your browser ───────────────────────────┐
-│  Blazor WASM app (GitHub Pages, static)                              │
-│                                                                      │
-│   Spotify  ──── PKCE login, search, playlist ────►  api.spotify.com  │
-│   (direct; Spotify allows browser calls)                            │
-│                                                                      │
-│   PlayStation ── paste npsso once ──► your Worker ──► PSN API         │
-│                 (cached in localStorage)   │ stateless, stores nothing│
-│                 ◄──────── song list ───────┘                         │
-└──────────────────────────────────────────────────────────────────────┘
-```
 
-## Repository layout
+That serves the app at <http://localhost:5010>. The catalogue works immediately.
+Connecting Spotify or PlayStation needs the setup below.
 
-| Path | What it is |
-|------|------------|
-| `src/RockBandSpotify/` | The Blazor WASM app — song catalogue, Spotify matching, PSN connect flow |
-| `src/RockBandSpotify/wwwroot/data/catalogue.json` | Every Rock Band song, with the ids that identify it on each store |
-| `gateway/` | The stateless Cloudflare Worker that relays PSN calls (`worker.js`) |
-| `tests/RockBandSpotify.UnitTests/` | xUnit tests for the filtering, sorting, matching and resolving logic |
-| `tests/RockBandSpotify.EndToEndTests/` | Playwright tests that drive the app in a real browser |
-| `.github/workflows/Build.yml` | Builds, then runs both test suites and a gateway syntax check |
-| `.github/workflows/Publish.yml` | Deploys the app to GitHub Pages and the Worker to Cloudflare |
+### Connecting Spotify
 
-## Setup
+1. Create an app in the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+2. Add a Redirect URI. The match is exact, so a trailing slash makes it a
+   different URI, and Spotify no longer accepts `localhost` as a host:
+   - local: `http://127.0.0.1:5010/spotify-connect`
+   - deployed: `https://<you>.github.io/<repo>/spotify-connect`
+3. Put the **Client ID** in `src/RockBandSpotify/wwwroot/appsettings.json`. There
+   is no client secret — the app uses PKCE, and the Client ID is safe to commit.
 
-### 1. Deploy the gateway (free, no credit card)
+### Connecting PlayStation
+
+PlayStation's API refuses browser requests, so those calls go through a small
+Cloudflare Worker you deploy yourself. It is free and stores nothing.
 
 ```bash
 cd gateway
 npx wrangler login
-npx wrangler deploy --var ALLOWED_ORIGIN:https://<your-username>.github.io
+npx wrangler deploy --var ALLOWED_ORIGIN:https://<you>.github.io
 ```
 
-Copy the printed Worker URL (e.g. `https://rockband-psn-gateway.<you>.workers.dev`).
-See [`gateway/README.md`](gateway/README.md) for details and filter tuning.
+Put the Worker URL it prints into `appsettings.json` under `Psn.GatewayUrl`. See
+[`gateway/README.md`](gateway/README.md) for more.
 
-### 2. Create a Spotify app
+In the app, **Connect** → *Open PlayStation login*, sign in, then copy the `npsso`
+value the page shows and paste it in. It is cached in your browser and lasts about
+two months.
 
-1. [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) → **Create app**.
-2. Add Redirect URI: `https://<you>.github.io/<repo>/spotify-connect`. The match
-   is exact — a trailing slash makes it a different URI. For local development
-   add `https://127.0.0.1:5001/spotify-connect` as well; Spotify no longer
-   accepts `localhost` as a redirect host.
-3. Copy the **Client ID** (no secret needed — PKCE).
+## Deploying your own
 
-### 3. Configure the app
+Push to the default branch. The **Publish** workflow builds the app to GitHub
+Pages and deploys the Worker to Cloudflare.
 
-Edit [`src/RockBandSpotify/wwwroot/appsettings.json`](src/RockBandSpotify/wwwroot/appsettings.json):
+It needs two things set up once:
 
-```json
-{
-  "Spotify": { "ClientId": "your-spotify-client-id" },
-  "Psn":     { "GatewayUrl": "https://rockband-psn-gateway.you.workers.dev" }
-}
-```
+- **Settings → Pages → Build and deployment → Source = GitHub Actions**
+- A `CLOUDFLARE_API_TOKEN` repository secret with the *Edit Cloudflare Workers*
+  permission
 
-Both values are safe to commit — neither is sensitive (the Client ID is public by
-design; PKCE uses no client secret).
-
-### 4. Enable GitHub Pages
-
-**Settings → Pages → Build and deployment → Source = GitHub Actions**, then push to
-the default branch (or run the **Publish** workflow by hand).
-
-### 5. Use it
-
-The catalogue is the landing page and needs no login at all: every Rock Band song,
-searchable and filterable by genre and by the game it came from. Connecting
-PlayStation adds an ownership column so you can filter it down to what you have.
-
-To build a playlist:
-
-1. **Connect Spotify** — logs into your Spotify (PKCE).
-2. **Connect PlayStation** — click *Open PlayStation login*, sign in, copy the
-   `npsso` value it shows, paste it in. It's cached in your browser and lasts
-   ~2 months, so you rarely repeat this.
-3. **Match songs** — review the matches (low-confidence ones are unchecked).
-4. **Sync** — creates/updates one playlist. Re-runs only add what's missing.
-
-## Running locally
+## Tests
 
 ```bash
-# App
-cd src/RockBandSpotify && dotnet run          # https://localhost:5001
-
-# Gateway
-cd gateway && npx wrangler dev                 # http://localhost:8787
+dotnet test tests/RockBandSpotify.UnitTests
 ```
 
-Point `Psn.GatewayUrl` at `http://localhost:8787` for local testing.
+The browser tests drive a real Chromium, so it has to be installed once, and the
+app has to be running:
 
-## The catalogue
+```bash
+dotnet build tests/RockBandSpotify.EndToEndTests
+pwsh tests/RockBandSpotify.EndToEndTests/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
 
-`src/RockBandSpotify/wwwroot/data/catalogue.json` is the one committed dataset:
-4,953 songs, each with the game or games it shipped in and the ids that identify
-it elsewhere.
+dotnet run --project src/RockBandSpotify &
+dotnet test tests/RockBandSpotify.EndToEndTests
+```
 
-| Field | Coverage | What it is |
-|-------|----------|------------|
-| `psnIds` | 2,961 | PlayStation Store content codes that grant the song |
-| `spotifyId` | 3,401 | The Spotify track the song is |
+## Worth knowing
 
-Much of it is compiled from the public song list published by
-[rb4.app](https://rb4.app), whose entries link to each song's Store page. Thanks
-to them for maintaining it.
+- **The PlayStation token paste can't be avoided.** This isn't the official
+  PlayStation app, so it can't capture Sony's login redirect. One sign-in and one
+  paste, every couple of months.
+- **PlayStation's API is unofficial** and automating it is against Sony's terms.
+  Fine as a personal tool; keep your Worker's `ALLOWED_ORIGIN` locked to your own
+  site rather than opening it to strangers.
+- **Nothing is stored on a server.** Your tokens live in your own browser and pass
+  through the Worker without being logged or saved.
 
-**`psnIds` stores only the content code** — the last segment of a PSN product id
-— because that is the region-independent part: a US listing and a European
-entitlement for the same song differ in their prefix but agree on that segment.
-A song can have several, because a code can be a single purchase, a pack, or a
-whole game: every track on the Rock Band 3 disc carries that disc's export code,
-since those songs never had store pages of their own.
+## Credits
 
-The songs without ids are mostly not a gap in the data but a property of the
-stores. Nearly two thirds of the catalogue is Rock Band Network — user-authored
-tracks by unsigned bands, long delisted, many never released anywhere else.
-Excluding those and the Beatles content, 2,784 of 2,957 songs have a PlayStation
-id. The rest are the handful of disc tracks whose licences kept them out of every
-export, and the AC/DC track pack, which had no store release at all.
-
-## Caveats & honesty
-
-- **The token paste is unavoidable.** We're not the official PlayStation app, so
-  we can't capture Sony's login redirect or read its cookie. Best we can do is
-  one click to log in + one paste, cached for ~2 months.
-- **The PSN API is unofficial** and against Sony's ToS to automate — fine for a
-  personal tool; don't put it in front of strangers. Keep the Worker's
-  `ALLOWED_ORIGIN` locked to your site.
-- **Nothing is stored server-side.** Your npsso lives only in your own browser's
-  localStorage and passes through the Worker transiently, never logged or saved.
-- **Matching is fuzzy** where the catalogue has no Spotify id for a song. The app
-  searches by title and artist and scores the candidates, which covers, live cuts
-  and remasters can all confuse — so you review the matches before syncing, and
-  low-confidence ones start unchecked.
+Catalogue data is compiled in part from the public song list published by
+[rb4.app](https://rb4.app). Thanks to them for maintaining it.
