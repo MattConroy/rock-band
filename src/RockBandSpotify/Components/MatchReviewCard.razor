@@ -48,6 +48,10 @@
                             {
                                 <span class="rb-pill rb-pill-bad">No results</span>
                             }
+                            else if (m.Status == MatchStatus.Skipped)
+                            {
+                                <span class="rb-pill rb-pill-muted" title="No Spotify track is recorded for this song, and searching for one is switched off.">Not searched</span>
+                            }
                             else if (m.Status == MatchStatus.Error)
                             {
                                 <span class="rb-pill rb-pill-bad" title="@m.Error">Error</span>
