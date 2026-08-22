@@ -224,17 +224,40 @@ body {
 }
 
 .conn-btn:hover:not(:disabled) { background: #223349; }
-.conn-btn:disabled { cursor: progress; opacity: 0.6; }
+.conn-btn:disabled { cursor: progress; }
+.conn-btn:focus-visible { outline: 2px solid var(--rb-accent); outline-offset: 2px; }
+
+/* Fetching and syncing both take long enough that silence reads as a dead
+   button, and a phone has no cursor to change. The icon fades and the dot
+   becomes a spinner. */
+.conn-busy svg { opacity: 0.45; }
+.conn-busy .conn-dot {
+    background: none;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    border-top-color: var(--rb-accent);
+    animation: conn-spin 0.7s linear infinite;
+}
+
+@keyframes conn-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .conn-busy .conn-dot { animation-duration: 2.4s; }
+}
 
 .conn-dot {
     position: absolute;
-    right: 4px;
-    bottom: 4px;
+    right: 3px;
+    bottom: 3px;
     width: 8px;
     height: 8px;
     border-radius: 50%;
     box-sizing: border-box;
+    /* Punched out of the icon behind it, so the dot reads as a badge rather
+       than as part of the logo. */
+    box-shadow: 0 0 0 2px #1a2231;
 }
+
+.conn-btn:hover:not(:disabled) .conn-dot { box-shadow: 0 0 0 2px #223349; }
 
 .conn-disconnected .conn-dot { border: 1.5px solid #7d8794; }
 .conn-connected { color: #c7cbd1; }
@@ -265,6 +288,44 @@ body {
     width: 100%;
     max-width: 420px;
 }
+
+/* Anything that goes wrong outside the dialog needs somewhere to land, or a
+   failed press is indistinguishable from a button that does nothing. */
+.conn-error {
+    position: fixed;
+    top: 4.2rem;
+    right: 1rem;
+    left: 1rem;
+    max-width: 26rem;
+    margin-left: auto;
+    z-index: 40;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: 10px;
+    background: #3a1720;
+    border: 1px solid #7c2d3f;
+    color: #ffd9e0;
+    font-size: 0.85rem;
+    line-height: 1.35;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.conn-error-dismiss {
+    flex: none;
+    margin-left: auto;
+    padding: 0 0.2rem;
+    border: none;
+    background: none;
+    color: inherit;
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.75;
+}
+
+.conn-error-dismiss:hover { opacity: 1; }
 
 .dialog h2 { margin: 0 0 0.5rem; font-size: 1.05rem; }
 .dialog-steps { margin: 0.75rem 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.75rem; }

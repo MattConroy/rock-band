@@ -97,7 +97,17 @@ public class ConnectionState
     /// <summary>Stores the pasted token and immediately fetches, so one paste is enough.</summary>
     public async Task ConnectPsnAsync(string npsso)
     {
-        await _psn.SaveTokenAsync(npsso);
+        try
+        {
+            await _psn.SaveTokenAsync(npsso);
+        }
+        catch (Exception ex)
+        {
+            Error = $"Couldn't save the token: {ex.Message}";
+            Notify();
+            return;
+        }
+
         Psn = ConnectionStatus.Connected;
         Notify();
         await FetchPsnAsync();
@@ -136,7 +146,24 @@ public class ConnectionState
         Notify();
     }
 
-    public Task SignInToSpotifyAsync() => _auth.BeginLoginAsync();
+    /// <summary>
+    /// Sends the browser off to Spotify. Wrapped because a failure here — a
+    /// redirect URI the app isn't registered for, storage the browser won't
+    /// write — otherwise leaves the press looking like it did nothing.
+    /// </summary>
+    public async Task SignInToSpotifyAsync()
+    {
+        Error = null;
+        try
+        {
+            await _auth.BeginLoginAsync();
+        }
+        catch (Exception ex)
+        {
+            Error = $"Couldn't start the Spotify sign-in: {ex.Message}";
+            Notify();
+        }
+    }
 
     /// <summary>
     /// Matches the owned songs and writes them to the playlist. Both halves in
