@@ -334,7 +334,7 @@ public class CatalogueTests : AppPageTest
         await SeedOwned(4411);
 
         var after = await Page.Locator("th").AllInnerTextsAsync();
-        Assert.That(after, Is.EqualTo(new[] { "OWN", "SONG", "ARTIST", "YEAR", "GENRE", "SOURCE" }));
+        Assert.That(after, Is.EqualTo(new[] { "\u2713", "SONG", "ARTIST", "YEAR", "GENRE", "SOURCE" }));
 
         // The tick sits in its own cell, not crammed in front of the title.
         await Page.GetByPlaceholder("Search song or artist…").FillAsync("believer");
@@ -358,6 +358,52 @@ public class CatalogueTests : AppPageTest
 
         var third = Page.Locator("tbody tr").Nth(2).Locator(".owned-tick");
         await Expect(third).ToHaveCountAsync(0);
+    }
+
+    [Test]
+    public async Task Every_column_stays_readable_on_a_phone_by_scrolling_the_grid()
+    {
+        await SeedOwned(4411);
+        await Page.EvaluateAsync(
+            "() => localStorage.setItem('rb_catalogue_columns', JSON.stringify(['Year','Genre','Source','Released']))");
+        await Page.SetViewportSizeAsync(390, 780);
+        await Page.ReloadAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
+
+        // Six columns cannot fit 390px legibly, so the grid is wider than its
+        // container and scrolls — rather than squeezing Source to one
+        // character per line.
+        var wide = await Page.EvalOnSelectorAsync<bool>(
+            "#rb-table-body", "el => el.scrollWidth > el.clientWidth + 1");
+        Assert.That(wide, Is.True, "the grid should scroll sideways rather than crush its columns");
+
+        // The header is a separate table, so it has to follow.
+        await Page.EvalOnSelectorAsync("#rb-table-body", "el => el.scrollLeft = 400");
+        await Page.WaitForTimeoutAsync(200);
+        var headerLeft = await Page.EvalOnSelectorAsync<int>("#rb-table-header", "el => el.scrollLeft");
+        Assert.That(headerLeft, Is.EqualTo(400), "the header must track the body's horizontal scroll");
+
+        // The page itself still must not scroll sideways.
+        var pageScrolls = await Page.EvaluateAsync<bool>(
+            "document.documentElement.scrollWidth > document.documentElement.clientWidth + 1");
+        Assert.That(pageScrolls, Is.False);
+    }
+
+    [Test]
+    public async Task Song_gives_up_width_as_columns_are_added()
+    {
+        // Song is the unsized column, so it absorbs the slack and is the one
+        // that gives way — the bug was it holding a fixed share while the
+        // others were crushed.
+        await Page.GetByPlaceholder("Search song or artist…").FillAsync("believer");
+        await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
+        var before = (await Page.Locator("tbody td.col-song").First.BoundingBoxAsync())!.Width;
+
+        await Page.GetByLabel("Choose columns").ClickAsync();
+        await Page.GetByRole(AriaRole.Checkbox, new() { Name = "Released" }).CheckAsync();
+
+        var after = (await Page.Locator("tbody td.col-song").First.BoundingBoxAsync())!.Width;
+        Assert.That(after, Is.LessThan(before), "Song should shrink to make room for a new column");
     }
 
     [Test]

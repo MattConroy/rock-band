@@ -138,6 +138,10 @@
     overflow: hidden;
 }
 
+/* Both tables carry the same min-width, so they stay the same width as each
+   other while the body scrolls sideways underneath the header. */
+.catalogue-table { min-width: 100%; }
+
 /* scrollbar-color / the ::-webkit-scrollbar-* rules give the scrollbar
    thumb a light color that's visible against the dark theme (the default
    is themed off an assumed light page otherwise). */
@@ -191,17 +195,31 @@
     font-size: 0.82rem;
 }
 
+/* Every column but Song declares a width, and Song deliberately does not.
+   Under table-layout: fixed an unsized column takes whatever is left, so
+   Song is the one that gives way as columns are added — the reverse of
+   holding Song at a fixed share while Year, Genre and Source wrapped a
+   character per line. */
 .catalogue-table th.col-owned,
 .catalogue-table td.col-owned {
-    width: 3.4rem;
+    width: 2.2rem;
     text-align: center;
 }
 
-.catalogue-table th.col-song,
-.catalogue-table td.col-song { width: 30%; }
-
 .catalogue-table th.col-artist,
 .catalogue-table td.col-artist { width: 22%; }
+
+.catalogue-table th.col-year,
+.catalogue-table td.col-year { width: 3.5rem; }
+
+.catalogue-table th.col-genre,
+.catalogue-table td.col-genre { width: 6.5rem; }
+
+.catalogue-table th.col-source,
+.catalogue-table td.col-source { width: 11rem; }
+
+.catalogue-table th.col-released,
+.catalogue-table td.col-released { width: 6.5rem; }
 
 /* The header cell is a full-width button, so centring the column means
    centring inside it rather than on the cell. */
@@ -230,13 +248,12 @@
     }
 
     .catalogue-table th.col-owned,
-    .catalogue-table td.col-owned { width: 2.6rem; }
+    .catalogue-table td.col-owned { width: 2rem; }
 
-    .catalogue-table th.col-song,
-    .catalogue-table td.col-song { width: 45%; }
-
+    /* Song takes whatever is left, so Artist's share is what decides the
+       split between them. 22% of a phone leaves Aerosmith hyphenated. */
     .catalogue-table th.col-artist,
-    .catalogue-table td.col-artist { width: auto; }
+    .catalogue-table td.col-artist { width: 40%; }
 }
 
 .catalogue-table td {

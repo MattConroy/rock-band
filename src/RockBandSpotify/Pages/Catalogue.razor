@@ -77,15 +77,19 @@
     </div>
 
     <div class="table-wrap">
-        <div class="table-header-wrap">
-            <table class="catalogue-table">
+        <div class="table-header-wrap" id="rb-table-header">
+            <table class="catalogue-table" style="@TableMinWidth">
                 <thead>
                     <tr>
                         @if (HasOwnedLibrary)
                         {
+                            @* A tick rather than a word: the column is one
+                               glyph wide, and "OWN" could not fit beside a
+                               sort arrow without clipping. *@
                             <th class="col-owned" aria-sort='@AriaSort("Owned")'>
-                                <button type="button" class="th-sort-btn" @onclick='() => ToggleSort("Owned")'>
-                                    Own<span class="sort-indicator">@SortIndicator("Owned")</span>
+                                <button type="button" class="th-sort-btn" title="Owned"
+                                        aria-label="Sort by owned" @onclick='() => ToggleSort("Owned")'>
+                                    &#10003;<span class="sort-indicator">@SortIndicator("Owned")</span>
                                 </button>
                             </th>
                         }
@@ -103,7 +107,7 @@
                         {
                             if (_visibleColumns.Contains(col.Key))
                             {
-                                <th aria-sort="@AriaSort(col.Key)">
+                                <th class="col-@col.Key.ToLowerInvariant()" aria-sort="@AriaSort(col.Key)">
                                     <button type="button" class="th-sort-btn" @onclick="() => ToggleSort(col.Key)">
                                         @col.Label<span class="sort-indicator">@SortIndicator(col.Key)</span>
                                     </button>
@@ -114,8 +118,8 @@
                 </thead>
             </table>
         </div>
-        <div class="table-body-wrap">
-            <table class="catalogue-table">
+        <div class="table-body-wrap" id="rb-table-body">
+            <table class="catalogue-table" style="@TableMinWidth">
                 <tbody>
                     @foreach (var s in _filtered)
                     {
@@ -135,7 +139,7 @@
                             {
                                 if (_visibleColumns.Contains(col.Key))
                                 {
-                                    <td>@col.Value(s)</td>
+                                    <td class="col-@col.Key.ToLowerInvariant()">@col.Value(s)</td>
                                 }
                             }
                         </tr>
