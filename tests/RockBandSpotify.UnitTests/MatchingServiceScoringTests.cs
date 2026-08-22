@@ -5,7 +5,7 @@ namespace RockBandSpotify.UnitTests;
 
 public class MatchingServiceScoringTests
 {
-    private static RockBandSong Song(string title, string artist) => new() { Title = title, Artist = artist };
+    private static CatalogueSong Song(string title, string artist) => new() { Song = title, Artist = artist };
 
     private static SpotifyTrack Track(string name, params string[] artists) => new()
     {

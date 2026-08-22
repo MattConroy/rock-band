@@ -14,7 +14,6 @@ namespace RockBandSpotify.Services;
 public class PsnService
 {
     private const string TokenKey = "rb_psn_npsso";
-    private const string SongsKey = "rb_psn_songs";
 
     private readonly HttpClient _http;
     private readonly IJSRuntime _js;
@@ -45,24 +44,15 @@ public class PsnService
     public async Task DisconnectAsync()
     {
         await RemoveItemAsync(TokenKey);
-        await RemoveItemAsync(SongsKey);
         await _owned.ClearAsync();
     }
 
-    /// <summary>Returns the last successfully-fetched song list from localStorage, if any.</summary>
+    /// <summary>The last fetched library, rebuilt from the stored ids, or null if there isn't one.</summary>
     public async Task<SongLibrary?> GetCachedSongsAsync()
     {
-        var raw = await GetItemAsync(SongsKey);
-        if (string.IsNullOrEmpty(raw))
-            return null;
-        try
-        {
-            return Deduplicate(JsonSerializer.Deserialize<SongLibrary>(raw));
-        }
-        catch
-        {
-            return null;
-        }
+        var stored = await _owned.LoadAsync();
+        if (stored is null || stored.SongIds.Count == 0) return null;
+        return await RehydrateAsync(stored);
     }
 
     /// <summary>
@@ -107,22 +97,13 @@ public class PsnService
         var library = new SongLibrary
         {
             GeneratedAt = owned.GeneratedAt,
-            Source = owned.Source,
-            Songs = resolved.Matched
-                .Select(song => new RockBandSong
-                {
-                    Title = song.Song,
-                    Artist = song.Artist,
-                    ProductId = song.PsnIds.FirstOrDefault(),
-                })
-                .ToList(),
+            SongIds = resolved.Matched.Select(s => s.Id).ToList(),
+            Songs = resolved.Matched.OrderBy(s => s.Artist).ThenBy(s => s.Song).ToList(),
         };
-        library = Deduplicate(library)!;
 
-        await SetItemAsync(SongsKey, JsonSerializer.Serialize(library));
-        // The catalogue page marks and filters from this, so it never has to
-        // call PlayStation itself.
-        await _owned.SaveAsync(resolved.Matched.Select(s => s.Id));
+        // One stored list, read by both the catalogue page's ownership column
+        // and the matching flow, so neither has to ask PlayStation again.
+        await _owned.SaveAsync(library);
         return library;
     }
 
@@ -162,17 +143,16 @@ public class PsnService
         return null;
     }
 
-    private static SongLibrary? Deduplicate(SongLibrary? library)
+    private async Task<SongLibrary> RehydrateAsync(SongLibrary stored)
     {
-        if (library is null)
-            return null;
-        var seen = new HashSet<string>();
-        library.Songs = library.Songs
-            .Where(s => !string.IsNullOrWhiteSpace(s.Title) && seen.Add(s.Key))
-            .OrderBy(s => s.Artist)
-            .ThenBy(s => s.Title)
+        var catalogue = await _catalogue.GetSongsAsync();
+        var byId = catalogue.ToDictionary(s => s.Id);
+        stored.Songs = stored.SongIds
+            .Where(byId.ContainsKey)
+            .Select(id => byId[id])
+            .OrderBy(s => s.Artist).ThenBy(s => s.Song)
             .ToList();
-        return library;
+        return stored;
     }
 
     private async Task<string?> GetItemAsync(string key)

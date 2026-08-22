@@ -116,7 +116,7 @@ public partial class Catalogue
     protected override async Task OnInitializedAsync()
     {
         _all = (await Catalog.GetSongsAsync()).ToList();
-        _ownedIds = await Owned.LoadAsync();
+        _ownedIds = await Owned.LoadIdsAsync();
         _genres = _all.Where(s => !string.IsNullOrEmpty(s.Genre)).Select(s => s.Genre!).Distinct().OrderBy(g => g).ToList();
         // Every source a song lists, not just its origin, so the dropdown can
         // offer a game whose whole tracklist is songs that originated elsewhere.
