@@ -1,8 +1,8 @@
 @* PlayStation can't hand the app a token the way Spotify can, so this is the
    one place a person has to fetch and paste one themselves. Two steps, each
    with its control on its own line so neither is crowded, and the paste is
-   acknowledged on screen — a silent field gives no clue that the whole
-   {"npsso":"…"} line was understood. *@
+   checked as it is typed — a truncated copy is otherwise indistinguishable
+   from an expired token once PlayStation rejects it. *@
 
 <div class="dialog-backdrop" @onclick="OnCancel">
     <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="psn-dialog-title"
@@ -32,16 +32,38 @@
                 <span class="dialog-step-num">2</span>
                 <span>Paste what that page shows</span>
             </div>
-            <input class="rb-select dialog-step-control dialog-input" type="password"
-                   autocomplete="off" spellcheck="false"
-                   placeholder="npsso value, or the whole line"
-                   value="@_pasted"
-                   @oninput="OnInput" />
-            <p class="dialog-note @(_recognised is null ? "rb-sub" : "dialog-note-ok")">
-                @(_recognised is null
-                    ? "Either the whole {\"npsso\":\"…\"} line or just the value between the quotes."
-                    : $"Recognised a {_recognised.Length}-character token.")
-            </p>
+
+            <div class="field-wrap">
+                <input class="rb-select dialog-step-control dialog-input @FieldClass"
+                       type="password" autocomplete="off" spellcheck="false"
+                       placeholder="npsso value, or the whole line"
+                       aria-describedby="npsso-note"
+                       aria-invalid="@(_check.State == NpssoState.Invalid)"
+                       value="@_pasted"
+                       @oninput="OnInput" />
+
+                @if (_check.State is not NpssoState.Empty)
+                {
+                    <span class="field-mark @FieldClass" aria-hidden="true">
+                        @if (_check.IsValid)
+                        {
+                            <svg viewBox="0 0 16 16" width="16" height="16">
+                                <path fill="none" stroke="currentColor" stroke-width="2.2"
+                                      stroke-linecap="round" stroke-linejoin="round" d="M3 8.5l3.2 3.2L13 4.8" />
+                            </svg>
+                        }
+                        else
+                        {
+                            <svg viewBox="0 0 16 16" width="16" height="16">
+                                <path fill="none" stroke="currentColor" stroke-width="2.2"
+                                      stroke-linecap="round" d="M4 4l8 8M12 4l-8 8" />
+                            </svg>
+                        }
+                    </span>
+                }
+            </div>
+
+            <p id="npsso-note" class="dialog-note @NoteClass" aria-live="polite">@_check.Message</p>
         </div>
 
         @if (!string.IsNullOrEmpty(Error))
@@ -51,7 +73,7 @@
 
         <div class="dialog-actions">
             <button class="rb-btn rb-btn-secondary" @onclick="OnCancel">Cancel</button>
-            <button class="rb-btn" disabled="@(_recognised is null)" @onclick="Connect">Connect</button>
+            <button class="rb-btn" disabled="@(!_check.IsValid)" @onclick="Connect">Connect</button>
         </div>
     </div>
 </div>
@@ -62,17 +84,31 @@
     [Parameter] public string? Error { get; set; }
 
     private string _pasted = string.Empty;
-    private string? _recognised;
+    private NpssoCheck _check = NpssoToken.Check(null);
+
+    private string FieldClass => _check.State switch
+    {
+        NpssoState.Valid => "field-ok",
+        NpssoState.Invalid => "field-bad",
+        _ => string.Empty,
+    };
+
+    private string NoteClass => _check.State switch
+    {
+        NpssoState.Valid => "dialog-note-ok",
+        NpssoState.Invalid => "dialog-note-bad",
+        _ => "rb-sub",
+    };
 
     private void OnInput(ChangeEventArgs e)
     {
         _pasted = e.Value?.ToString() ?? string.Empty;
-        _recognised = NpssoToken.Extract(_pasted);
+        _check = NpssoToken.Check(_pasted);
     }
 
     private async Task Connect()
     {
-        if (_recognised is not null) await OnConnect.InvokeAsync(_recognised);
+        if (_check.Token is not null) await OnConnect.InvokeAsync(_check.Token);
     }
 
     private async Task OnKeyDown(KeyboardEventArgs e)
@@ -80,5 +116,4 @@
         if (e.Key == "Enter") await Connect();
         else if (e.Key == "Escape") await OnCancel.InvokeAsync();
     }
-
 }
