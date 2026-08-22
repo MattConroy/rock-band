@@ -23,14 +23,27 @@ public partial class Catalogue
 
     /// <summary>One optional (non-Song/Artist) column: its storage key, header
     /// label, and cell value.</summary>
-    /// <param name="MinRem">What the column needs before its text starts
-    /// wrapping a word per line — the grid scrolls sideways rather than
-    /// squeezing every column past this.</param>
+    /// <param name="Rem">The column's width. Every column declares one and
+    /// none is left to take "the rest": under table-layout: fixed an unsized
+    /// column absorbs the whole shortfall, which is how Song ended up 72px
+    /// wide beside a 187px Artist. Surplus on a wide screen is shared out
+    /// proportionally instead, which keeps the relative sizes.</param>
     private sealed record ColumnDef(
         string Key,
         string Label,
         Func<CatalogueSong, string?> Value,
-        double MinRem);
+        double Rem);
+
+    // Widths live here rather than in the stylesheet so that the table's
+    // minimum width is always the sum of exactly what is on screen. Split
+    // across two files they drift, and the arithmetic silently stops
+    // describing the layout.
+    private const double OwnedRem = 2;
+    private const double SongRem = 11;
+    private const double ArtistRem = 8;
+
+    private static string Width(double rem) =>
+        $"width:{rem.ToString(CultureInfo.InvariantCulture)}rem";
 
     private static readonly ColumnDef[] OptionalColumns =
     {
@@ -65,19 +78,19 @@ public partial class Catalogue
     private bool _showColumnPicker;
 
     /// <summary>
-    /// How wide the grid needs to be for its visible columns to stay readable.
-    /// A phone showing every column can't fit them all — the honest answer
-    /// there is to let the body scroll sideways, not to crush Source down to
-    /// one character per line.
+    /// The grid never shrinks below the sum of its visible columns; a phone
+    /// showing every one of them can't fit them all, and the honest answer is
+    /// to scroll sideways rather than crush Source to a character per line.
+    /// The default three still fit a 390px screen with room to spare.
     /// </summary>
     private string TableMinWidth
     {
         get
         {
-            var rem = 9.0 + 7.0; // song and artist, at their narrowest useful
-            if (HasOwnedLibrary) rem += 2.2;
+            var rem = SongRem + ArtistRem;
+            if (HasOwnedLibrary) rem += OwnedRem;
             foreach (var col in OptionalColumns)
-                if (_visibleColumns.Contains(col.Key)) rem += col.MinRem;
+                if (_visibleColumns.Contains(col.Key)) rem += col.Rem;
             return $"min-width:{rem.ToString(CultureInfo.InvariantCulture)}rem";
         }
     }

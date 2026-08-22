@@ -86,19 +86,19 @@
                             @* A tick rather than a word: the column is one
                                glyph wide, and "OWN" could not fit beside a
                                sort arrow without clipping. *@
-                            <th class="col-owned" aria-sort='@AriaSort("Owned")'>
+                            <th class="col-owned" style="@Width(OwnedRem)" aria-sort='@AriaSort("Owned")'>
                                 <button type="button" class="th-sort-btn" title="Owned"
                                         aria-label="Sort by owned" @onclick='() => ToggleSort("Owned")'>
                                     &#10003;<span class="sort-indicator">@SortIndicator("Owned")</span>
                                 </button>
                             </th>
                         }
-                        <th class="col-song" aria-sort='@AriaSort("Song")'>
+                        <th class="col-song" style="@Width(SongRem)" aria-sort='@AriaSort("Song")'>
                             <button type="button" class="th-sort-btn" @onclick='() => ToggleSort("Song")'>
                                 Song<span class="sort-indicator">@SortIndicator("Song")</span>
                             </button>
                         </th>
-                        <th class="col-artist" aria-sort='@AriaSort("Artist")'>
+                        <th class="col-artist" style="@Width(ArtistRem)" aria-sort='@AriaSort("Artist")'>
                             <button type="button" class="th-sort-btn" @onclick='() => ToggleSort("Artist")'>
                                 Artist<span class="sort-indicator">@SortIndicator("Artist")</span>
                             </button>
@@ -107,7 +107,7 @@
                         {
                             if (_visibleColumns.Contains(col.Key))
                             {
-                                <th class="col-@col.Key.ToLowerInvariant()" aria-sort="@AriaSort(col.Key)">
+                                <th class="col-@col.Key.ToLowerInvariant()" style="@Width(col.Rem)" aria-sort="@AriaSort(col.Key)">
                                     <button type="button" class="th-sort-btn" @onclick="() => ToggleSort(col.Key)">
                                         @col.Label<span class="sort-indicator">@SortIndicator(col.Key)</span>
                                     </button>
@@ -126,20 +126,20 @@
                         <tr>
                             @if (HasOwnedLibrary)
                             {
-                                <td class="col-owned">
+                                <td class="col-owned" style="@Width(OwnedRem)">
                                     @if (_ownedIds.Contains(s.Id))
                                     {
                                         <span class="owned-tick" title="In your library" aria-label="owned">&#10003;</span>
                                     }
                                 </td>
                             }
-                            <td class="col-song">@s.Song</td>
-                            <td class="col-artist">@s.Artist</td>
+                            <td class="col-song" style="@Width(SongRem)">@s.Song</td>
+                            <td class="col-artist" style="@Width(ArtistRem)">@s.Artist</td>
                             @foreach (var col in OptionalColumns)
                             {
                                 if (_visibleColumns.Contains(col.Key))
                                 {
-                                    <td class="col-@col.Key.ToLowerInvariant()">@col.Value(s)</td>
+                                    <td class="col-@col.Key.ToLowerInvariant()" style="@Width(col.Rem)">@col.Value(s)</td>
                                 }
                             }
                         </tr>
