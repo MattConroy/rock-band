@@ -108,6 +108,46 @@ public class ConnectionButtonTests : AppPageTest
     }
 
     [Test]
+    public async Task A_failure_is_shown_in_the_header_and_can_be_dismissed()
+    {
+        // A rejected npsso is the most common real failure. It used to be
+        // stored and never rendered, which made a failed press look exactly
+        // like a button that did nothing.
+        await Page.RouteAsync("**rockband-psn-gateway**", route => route.FulfillAsync(new()
+        {
+            Status = 401,
+            ContentType = "application/json",
+            Body = "{\"error\":\"npsso rejected by PlayStation\"}",
+        }));
+
+        await Psn.ClickAsync();
+        await Page.GetByPlaceholder("Paste the npsso value").FillAsync("stale-token");
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Connect", Exact = true }).ClickAsync();
+
+        await Expect(Page.Locator(".conn-error")).ToContainTextAsync("npsso rejected by PlayStation");
+
+        await Page.Locator(".conn-error-dismiss").ClickAsync();
+        await Expect(Page.Locator(".conn-error")).ToHaveCountAsync(0);
+    }
+
+    [Test]
+    public async Task Both_buttons_stay_on_screen_on_a_narrow_phone()
+    {
+        // The title is the only header item allowed to give up room; letting
+        // it push the buttons past the right edge would strand them.
+        await Page.SetViewportSizeAsync(320, 700);
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
+
+        foreach (var button in await Page.Locator(".conn-btn").AllAsync())
+        {
+            var box = await button.BoundingBoxAsync();
+            Assert.That(box, Is.Not.Null);
+            Assert.That(box!.X, Is.GreaterThanOrEqualTo(0));
+            Assert.That(box.X + box.Width, Is.LessThanOrEqualTo(320));
+        }
+    }
+
+    [Test]
     public async Task No_console_errors_from_the_header()
     {
         var errors = new List<string>();

@@ -29,16 +29,25 @@
     gap: 0.6rem;
 }
 
-.app-logo { font-size: 1.5rem; }
+.app-logo { font-size: 1.5rem; flex: none; }
+
+/* The title is the only part that may give up room. Without min-width:0 a
+   flex item refuses to shrink below its text, which on a narrow phone pushes
+   the connection buttons off the right edge. */
 .app-title {
     font-weight: 800;
     font-size: 1.05rem;
     letter-spacing: 0.6px;
     text-transform: uppercase;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-/* The connection buttons sit where the nav links used to, hard right. */
-.app-header-inner :deep(.conn-buttons) { margin-left: auto; }
+/* The connection buttons sit where the nav links used to, hard right, and
+   never shrink or wrap — they are the only controls in the header. */
+.app-header-inner :deep(.conn-buttons) { margin-left: auto; flex: none; }
 
 .app-main {
     max-width: 1100px;
