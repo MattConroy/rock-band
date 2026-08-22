@@ -20,6 +20,20 @@ window.rbSpotify = {
     },
     getViewportWidth: function () {
         return window.innerWidth;
+    },
+
+    // The catalogue's header and body are separate tables in separate
+    // scrolling elements, so the header has to be told to follow when the
+    // body scrolls sideways — otherwise the labels sit over the wrong
+    // columns the moment a phone scrolls to reach Source.
+    syncTableScroll: function (headerId, bodyId) {
+        var header = document.getElementById(headerId);
+        var body = document.getElementById(bodyId);
+        if (!header || !body || body.dataset.scrollSynced) return;
+        body.dataset.scrollSynced = "1";
+        body.addEventListener("scroll", function () {
+            header.scrollLeft = body.scrollLeft;
+        }, { passive: true });
     }
 };
 

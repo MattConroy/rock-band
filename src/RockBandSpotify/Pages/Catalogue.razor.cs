@@ -23,20 +23,24 @@ public partial class Catalogue
 
     /// <summary>One optional (non-Song/Artist) column: its storage key, header
     /// label, and cell value.</summary>
+    /// <param name="MinRem">What the column needs before its text starts
+    /// wrapping a word per line — the grid scrolls sideways rather than
+    /// squeezing every column past this.</param>
     private sealed record ColumnDef(
         string Key,
         string Label,
-        Func<CatalogueSong, string?> Value);
+        Func<CatalogueSong, string?> Value,
+        double MinRem);
 
     private static readonly ColumnDef[] OptionalColumns =
     {
-        new("Year", "Year", s => s.Year?.ToString()),
-        new("Genre", "Genre", s => s.Genre),
-        new("Source", "Source", s => SourceCatalog.Names(s.Sources)),
+        new("Year", "Year", s => s.Year?.ToString(), 3.5),
+        new("Genre", "Genre", s => s.Genre, 6.5),
+        new("Source", "Source", s => SourceCatalog.Names(s.Sources), 11),
         // When it came to Rock Band, as opposed to Year, which is when the
         // song came out. Invariant so the rendering doesn't shift with the
         // browser's locale.
-        new("Released", "Released", s => s.ReleaseDate?.ToString("d MMM yyyy", CultureInfo.InvariantCulture)),
+        new("Released", "Released", s => s.ReleaseDate?.ToString("d MMM yyyy", CultureInfo.InvariantCulture), 6.5),
     };
 
     private List<CatalogueSong> _all = new();
@@ -60,8 +64,36 @@ public partial class Catalogue
     private readonly HashSet<string> _visibleColumns = new();
     private bool _showColumnPicker;
 
+    /// <summary>
+    /// How wide the grid needs to be for its visible columns to stay readable.
+    /// A phone showing every column can't fit them all — the honest answer
+    /// there is to let the body scroll sideways, not to crush Source down to
+    /// one character per line.
+    /// </summary>
+    private string TableMinWidth
+    {
+        get
+        {
+            var rem = 9.0 + 7.0; // song and artist, at their narrowest useful
+            if (HasOwnedLibrary) rem += 2.2;
+            foreach (var col in OptionalColumns)
+                if (_visibleColumns.Contains(col.Key)) rem += col.MinRem;
+            return $"min-width:{rem.ToString(CultureInfo.InvariantCulture)}rem";
+        }
+    }
+
     private bool HasFilters => _search.Length > 0 || _genre.Length > 0 || _source.Length > 0
                                || _owned != OwnedFilter.Any;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        try
+        {
+            await JS.InvokeVoidAsync("rbSpotify.syncTableScroll", "rb-table-header", "rb-table-body");
+        }
+        catch { /* pre-rendering or non-WASM host: the header just won't follow */ }
+    }
 
     protected override void OnInitialized()
     {
