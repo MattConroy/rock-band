@@ -299,7 +299,8 @@ public class CatalogueTests : AppPageTest
     private async Task SeedOwned(params int[] songIds)
     {
         await Page.EvaluateAsync(
-            "ids => localStorage.setItem('rb_owned_song_ids', JSON.stringify(ids))", songIds);
+            "ids => localStorage.setItem('rb_owned_songs', JSON.stringify({ generatedAt: null, songIds: ids }))",
+            songIds);
         await Page.ReloadAsync();
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
     }

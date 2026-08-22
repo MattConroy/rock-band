@@ -6,7 +6,7 @@ public class SongMatchTests
 {
     private static SongMatch Match(MatchStatus status, bool include, SpotifyTrack? selected) => new()
     {
-        Song = new RockBandSong { Title = "Believer", Artist = "Imagine Dragons" },
+        Song = new CatalogueSong { Song = "Believer", Artist = "Imagine Dragons" },
         Status = status,
         Include = include,
         Selected = selected,

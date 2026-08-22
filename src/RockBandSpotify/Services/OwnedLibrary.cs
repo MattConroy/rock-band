@@ -1,49 +1,57 @@
 using System.Text.Json;
 using Microsoft.JSInterop;
+using RockBandSpotify.Models;
 
 namespace RockBandSpotify.Services;
 
 /// <summary>
-/// Which catalogue songs this browser's owner holds, kept in localStorage as a
-/// set of <see cref="Models.CatalogueSong.Id"/>.
+/// Remembers which catalogue songs this browser's owner holds, so PlayStation
+/// is asked once rather than on every visit.
 ///
 /// <para>
-/// Stored as ids rather than titles because the PSN resolve step already knows
-/// exactly which catalogue rows an account's entitlements name — re-deriving
-/// that from titles later would only lose information. It also means the
-/// catalogue page can mark and filter without talking to PlayStation at all:
-/// the fetch happens once, and every later visit reads the set back.
+/// Stored as <see cref="Models.CatalogueSong.Id"/> values rather than titles,
+/// because resolving entitlements already establishes exactly which catalogue
+/// rows an account owns; re-deriving that from titles later would only lose
+/// information. Both the catalogue's ownership column and the Spotify matching
+/// flow read this same list.
 /// </para>
 /// </summary>
 public class OwnedLibrary
 {
-    private const string StorageKey = "rb_owned_song_ids";
+    private const string StorageKey = "rb_owned_songs";
 
     private readonly IJSRuntime _js;
 
     public OwnedLibrary(IJSRuntime js) => _js = js;
 
-    /// <summary>The owned song ids, or an empty set when nothing has been fetched.</summary>
-    public async Task<HashSet<int>> LoadAsync()
+    /// <summary>The stored library, or null when nothing has been fetched.</summary>
+    public async Task<SongLibrary?> LoadAsync()
     {
         try
         {
             var raw = await _js.InvokeAsync<string?>("rbSpotify.getItem", StorageKey);
-            if (string.IsNullOrEmpty(raw)) return [];
-            return JsonSerializer.Deserialize<HashSet<int>>(raw) ?? [];
+            if (string.IsNullOrEmpty(raw)) return null;
+            return JsonSerializer.Deserialize<SongLibrary>(raw);
         }
         catch
         {
-            // localStorage unavailable, or a value written by an older build.
-            return [];
+            // Unavailable storage, or a value written by an older build.
+            return null;
         }
     }
 
-    public async Task SaveAsync(IEnumerable<int> songIds)
+    /// <summary>Just the owned ids — what the catalogue page needs to mark rows.</summary>
+    public async Task<HashSet<int>> LoadIdsAsync()
+    {
+        var library = await LoadAsync();
+        return library is null ? [] : [.. library.SongIds];
+    }
+
+    public async Task SaveAsync(SongLibrary library)
     {
         try
         {
-            await _js.InvokeVoidAsync("rbSpotify.setItem", StorageKey, JsonSerializer.Serialize(songIds));
+            await _js.InvokeVoidAsync("rbSpotify.setItem", StorageKey, JsonSerializer.Serialize(library));
         }
         catch { /* the list just won't survive a reload */ }
     }

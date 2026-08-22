@@ -20,7 +20,7 @@ public class MatchingService
     /// UI can update. Runs sequentially to stay well within Spotify rate limits.
     /// </summary>
     public async Task<List<SongMatch>> MatchAllAsync(
-        IEnumerable<RockBandSong> songs,
+        IEnumerable<CatalogueSong> songs,
         Func<int, int, Task>? onProgress = null)
     {
         var list = songs.ToList();
@@ -31,7 +31,7 @@ public class MatchingService
             var match = new SongMatch { Song = list[i] };
             try
             {
-                var candidates = await _api.SearchTracksAsync(list[i].Title, list[i].Artist);
+                var candidates = await _api.SearchTracksAsync(list[i].Song, list[i].Artist);
                 match.Candidates = candidates;
                 if (candidates.Count == 0)
                 {
@@ -69,9 +69,9 @@ public class MatchingService
     }
 
     /// <summary>Cheap 0..1 similarity from normalized title + artist overlap.</summary>
-    internal static double Score(RockBandSong song, SpotifyTrack track)
+    internal static double Score(CatalogueSong song, SpotifyTrack track)
     {
-        var titleScore = Similarity(Normalize(song.Title), Normalize(track.Name));
+        var titleScore = Similarity(Normalize(song.Song), Normalize(track.Name));
         var artistScore = track.Artists
             .Select(a => Similarity(Normalize(song.Artist), Normalize(a.Name)))
             .DefaultIfEmpty(0)

@@ -10,12 +10,12 @@ public enum MatchStatus
 }
 
 /// <summary>
-/// Pairs an owned Rock Band song with its candidate Spotify tracks and the
+/// Pairs an owned catalogue song with its candidate Spotify tracks and the
 /// user's chosen track. Drives the review table before syncing.
 /// </summary>
 public class SongMatch
 {
-    public required RockBandSong Song { get; init; }
+    public required CatalogueSong Song { get; init; }
 
     public MatchStatus Status { get; set; } = MatchStatus.Pending;
 
