@@ -7,10 +7,10 @@ public class CatalogueSortTests
 {
     private static readonly List<CatalogueSong> Songs = new()
     {
-        new() { Id = 1, Song = "Believer", Artist = "Imagine Dragons", Year = 2017, Genre = "Alternative", Sources = ["RB4_DLC"] },
-        new() { Id = 2, Song = "Africa", Artist = "Toto", Year = 1982, Genre = "Pop-Rock", Sources = ["RB4_DLC"] },
-        new() { Id = 3, Song = "africa", Artist = "Weezer", Year = null, Genre = "Alternative", Sources = ["RB1"] },
-        new() { Id = 4, Song = "Paranoid", Artist = "Black Sabbath", Year = 1970, Genre = "Metal", Sources = ["RB1"] },
+        new() { Id = 1, Song = "Believer", Artist = "Imagine Dragons", Year = 2017, Genre = "Alternative", Sources = ["RB4_DLC"], ReleaseDate = new DateOnly(2015, 10, 6) },
+        new() { Id = 2, Song = "Africa", Artist = "Toto", Year = 1982, Genre = "Pop-Rock", Sources = ["RB4_DLC"], ReleaseDate = new DateOnly(2016, 3, 8) },
+        new() { Id = 3, Song = "africa", Artist = "Weezer", Year = null, Genre = "Alternative", Sources = ["RB1"], ReleaseDate = null },
+        new() { Id = 4, Song = "Paranoid", Artist = "Black Sabbath", Year = 1970, Genre = "Metal", Sources = ["RB1"], ReleaseDate = new DateOnly(2007, 11, 20) },
     };
 
     private static List<CatalogueSong> Apply(string? column, SortDirection direction)
@@ -107,6 +107,25 @@ public class CatalogueSortTests
         // and the rendered column is genuinely non-decreasing
         var cells = result.Select(s => SourceCatalog.Names(s.Sources)).ToList();
         Assert.Equal(cells.OrderBy(c => c, StringComparer.OrdinalIgnoreCase), cells);
+    }
+
+    [Fact]
+    public void Released_ascending_is_oldest_first_with_unknowns_at_the_top()
+        => Assert.Equal(new[] { 3, 4, 1, 2 }, Apply("Released", SortDirection.Ascending).Select(s => s.Id));
+
+    [Fact]
+    public void Released_descending_is_newest_first()
+        => Assert.Equal(new[] { 2, 1, 4, 3 }, Apply("Released", SortDirection.Descending).Select(s => s.Id));
+
+    [Fact]
+    public void Released_is_the_Rock_Band_date_not_the_songs_own_year()
+    {
+        // Believer is a 2017 song the fixture dates to Rock Band 4's 2015
+        // launch, and Africa a 1982 one that arrived in 2016 — so ordering by
+        // when the song came out and by when it reached Rock Band differ.
+        var byYear = Apply("Year", SortDirection.Ascending).Select(s => s.Id);
+        var byRelease = Apply("Released", SortDirection.Ascending).Select(s => s.Id);
+        Assert.NotEqual(byYear, byRelease);
     }
 
     [Fact]

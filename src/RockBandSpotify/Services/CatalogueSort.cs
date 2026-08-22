@@ -32,6 +32,9 @@ public static class CatalogueSort
             "Year" => asc
                 ? songs.OrderBy(s => s.Year)
                 : songs.OrderByDescending(s => s.Year),
+            "Released" => asc
+                ? songs.OrderBy(s => s.ReleaseDate)
+                : songs.OrderByDescending(s => s.ReleaseDate),
             "Genre" => asc
                 ? songs.OrderBy(s => s.Genre, StringComparer.OrdinalIgnoreCase)
                 : songs.OrderByDescending(s => s.Genre, StringComparer.OrdinalIgnoreCase),

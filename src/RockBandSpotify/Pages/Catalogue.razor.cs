@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
@@ -32,6 +33,10 @@ public partial class Catalogue
         new("Year", "Year", s => s.Year?.ToString()),
         new("Genre", "Genre", s => s.Genre),
         new("Source", "Source", s => SourceCatalog.Names(s.Sources)),
+        // When it came to Rock Band, as opposed to Year, which is when the
+        // song came out. Invariant so the rendering doesn't shift with the
+        // browser's locale.
+        new("Released", "Released", s => s.ReleaseDate?.ToString("d MMM yyyy", CultureInfo.InvariantCulture)),
     };
 
     private List<CatalogueSong> _all = new();
