@@ -30,6 +30,16 @@
                     <option value="@src" selected="@(src == _source)">@SourceCatalog.Name(src)</option>
                 }
             </select>
+
+            @* Nothing to compare against until PlayStation has been fetched once. *@
+            @if (HasOwnedLibrary)
+            {
+                <select class="rb-select" @onchange="OnOwnedChanged" aria-label="Ownership">
+                    <option value="Any" selected="@(_owned == OwnedFilter.Any)">Owned and not</option>
+                    <option value="Owned" selected="@(_owned == OwnedFilter.Owned)">Owned only</option>
+                    <option value="NotOwned" selected="@(_owned == OwnedFilter.NotOwned)">Not owned</option>
+                </select>
+            }
         </div>
 
         @if (HasFilters)
@@ -102,7 +112,13 @@
                     @foreach (var s in _filtered)
                     {
                         <tr>
-                            <td>@s.Song</td>
+                            <td>
+                                @if (_ownedIds.Contains(s.Id))
+                                {
+                                    <span class="owned-tick" title="You own this song" aria-label="owned">&#10003;</span>
+                                }
+                                @s.Song
+                            </td>
                             <td>@s.Artist</td>
                             @foreach (var col in OptionalColumns)
                             {

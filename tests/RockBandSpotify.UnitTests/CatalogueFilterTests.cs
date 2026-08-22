@@ -18,6 +18,12 @@ public class CatalogueFilterTests
     private static List<CatalogueSong> Apply(string search = "", string genre = "", string source = "")
         => CatalogueFilter.Apply(Songs, search, genre, source);
 
+    // Believer and Paranoid are the owned ones.
+    private static readonly HashSet<int> Owned = [1, 4];
+
+    private static List<CatalogueSong> ApplyOwned(OwnedFilter owned, IReadOnlySet<int>? ids = null, string search = "")
+        => CatalogueFilter.Apply(Songs, search, "", "", owned, ids ?? Owned);
+
     [Fact]
     public void No_filters_returns_everything()
         => Assert.Equal(5, Apply().Count);
@@ -53,6 +59,32 @@ public class CatalogueFilterTests
     [Fact]
     public void Source_filter_ignores_a_game_the_song_only_resembles()
         => Assert.Empty(Apply(source: "RB3"));
+
+    [Fact]
+    public void Owned_filter_keeps_only_the_owned_songs()
+        => Assert.Equal(new[] { 1, 4 }, ApplyOwned(OwnedFilter.Owned).Select(s => s.Id));
+
+    [Fact]
+    public void Not_owned_filter_keeps_only_the_rest()
+        => Assert.Equal(new[] { 2, 3, 5 }, ApplyOwned(OwnedFilter.NotOwned).Select(s => s.Id));
+
+    [Fact]
+    public void Any_returns_everything_regardless_of_ownership()
+        => Assert.Equal(5, ApplyOwned(OwnedFilter.Any).Count);
+
+    [Fact]
+    public void An_empty_owned_set_never_hides_the_catalogue()
+    {
+        // Nothing fetched from PlayStation yet: "owned only" would otherwise
+        // show a blank grid, which reads as a broken page rather than an
+        // unanswered question.
+        Assert.Equal(5, ApplyOwned(OwnedFilter.Owned, new HashSet<int>()).Count);
+        Assert.Equal(5, ApplyOwned(OwnedFilter.NotOwned, new HashSet<int>()).Count);
+    }
+
+    [Fact]
+    public void Ownership_combines_with_the_other_filters()
+        => Assert.Equal(new[] { 1 }, ApplyOwned(OwnedFilter.Owned, search: "believ").Select(s => s.Id));
 
     [Fact]
     public void Filters_combine_with_AND()

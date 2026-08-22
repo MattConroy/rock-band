@@ -199,3 +199,11 @@ body {
     color: var(--rb-text);
     max-width: 320px;
 }
+
+/* Ownership marker in the catalogue's Song column. Sized and spaced so a
+   ticked row and an unticked one keep the same text baseline. */
+.owned-tick {
+    color: var(--rb-accent, #1db954);
+    font-size: 0.85em;
+    margin-right: 0.35em;
+}
