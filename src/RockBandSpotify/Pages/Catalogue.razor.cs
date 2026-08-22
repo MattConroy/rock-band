@@ -15,6 +15,7 @@ namespace RockBandSpotify.Pages;
 public partial class Catalogue
 {
     [Inject] private CatalogueService Catalog { get; set; } = default!;
+    [Inject] private OwnedLibrary Owned { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
     private const string ColumnsStorageKey = "rb_catalogue_columns";
@@ -42,6 +43,11 @@ public partial class Catalogue
     private string _search = "";
     private string _genre = "";
     private string _source = "";
+    private OwnedFilter _owned = OwnedFilter.Any;
+
+    // Empty until PlayStation has been connected and fetched at least once.
+    private HashSet<int> _ownedIds = new();
+    private bool HasOwnedLibrary => _ownedIds.Count > 0;
 
     private string? _sortColumn;
     private SortDirection _sortDirection = SortDirection.None;
@@ -49,7 +55,8 @@ public partial class Catalogue
     private readonly HashSet<string> _visibleColumns = new();
     private bool _showColumnPicker;
 
-    private bool HasFilters => _search.Length > 0 || _genre.Length > 0 || _source.Length > 0;
+    private bool HasFilters => _search.Length > 0 || _genre.Length > 0 || _source.Length > 0
+                               || _owned != OwnedFilter.Any;
 
     protected override void OnInitialized()
     {
@@ -59,6 +66,7 @@ public partial class Catalogue
     protected override async Task OnInitializedAsync()
     {
         _all = (await Catalog.GetSongsAsync()).ToList();
+        _ownedIds = await Owned.LoadAsync();
         _genres = _all.Where(s => !string.IsNullOrEmpty(s.Genre)).Select(s => s.Genre!).Distinct().OrderBy(g => g).ToList();
         // Every source a song lists, not just its origin, so the dropdown can
         // offer a game whose whole tracklist is songs that originated elsewhere.
@@ -133,9 +141,16 @@ public partial class Catalogue
         ApplyFilters();
     }
 
+    private void OnOwnedChanged(ChangeEventArgs e)
+    {
+        _owned = Enum.TryParse<OwnedFilter>(e.Value?.ToString(), out var v) ? v : OwnedFilter.Any;
+        ApplyFilters();
+    }
+
     private void ClearFilters()
     {
         _search = ""; _genre = ""; _source = "";
+        _owned = OwnedFilter.Any;
         ApplyFilters();
     }
 
@@ -146,7 +161,9 @@ public partial class Catalogue
     }
 
     private void ApplyFilters()
-        => _filtered = CatalogueSort.Apply(CatalogueFilter.Apply(_all, _search, _genre, _source), _sortColumn, _sortDirection);
+        => _filtered = CatalogueSort.Apply(
+            CatalogueFilter.Apply(_all, _search, _genre, _source, _owned, _ownedIds),
+            _sortColumn, _sortDirection);
 
     // Tap cycle: unsorted -> ascending -> descending -> unsorted. Tapping a
     // different column starts it fresh at ascending.

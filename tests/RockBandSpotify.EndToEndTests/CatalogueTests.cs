@@ -253,6 +253,80 @@ public class CatalogueTests : AppPageTest
         Assert.That(await songTh.GetAttributeAsync("aria-sort"), Is.Null);
     }
 
+    // The ownership controls only exist once PlayStation has been fetched, so
+    // these seed the stored set the way a real fetch would leave it.
+    private async Task SeedOwned(params int[] songIds)
+    {
+        await Page.EvaluateAsync(
+            "ids => localStorage.setItem('rb_owned_song_ids', JSON.stringify(ids))", songIds);
+        await Page.ReloadAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
+    }
+
+    [Test]
+    public async Task No_ownership_filter_until_a_library_has_been_fetched()
+    {
+        await Expect(Page.GetByLabel("Ownership")).Not.ToBeVisibleAsync();
+        await Expect(Page.Locator(".owned-tick")).ToHaveCountAsync(0);
+    }
+
+    [Test]
+    public async Task Owned_songs_are_ticked_in_the_grid()
+    {
+        await SeedOwned(4411); // Believer — Imagine Dragons
+
+        await Page.GetByPlaceholder("Search song or artist…").FillAsync("believer");
+        await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
+        await Expect(Page.Locator("tbody tr").First.Locator(".owned-tick")).ToBeVisibleAsync();
+
+        await Page.GetByPlaceholder("Search song or artist…").FillAsync("everlong");
+        await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
+        await Expect(Page.Locator("tbody tr").First.Locator(".owned-tick")).ToHaveCountAsync(0);
+    }
+
+    [Test]
+    public async Task Filtering_to_owned_narrows_the_grid_to_the_fetched_library()
+    {
+        await SeedOwned(4411, 98); // Believer, Everlong
+
+        await Page.GetByLabel("Ownership").SelectOptionAsync("Owned");
+        await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
+        await Expect(Page.Locator("tbody")).ToContainTextAsync("Believer");
+        await Expect(Page.Locator("tbody")).ToContainTextAsync("Everlong");
+
+        await Page.GetByLabel("Ownership").SelectOptionAsync("NotOwned");
+        await Expect(Page.GetByText("4951 shown")).ToBeVisibleAsync();
+
+        // Imagine Dragons have other songs in the catalogue, so the artist is
+        // still on screen — it's the owned title that has to be gone.
+        await Page.GetByPlaceholder("Search song or artist…").FillAsync("believer");
+        await Expect(Page.GetByText("0 shown")).ToBeVisibleAsync();
+    }
+
+    [Test]
+    public async Task The_ownership_choice_survives_a_reload_without_refetching()
+    {
+        await SeedOwned(4411, 98);
+        await Page.ReloadAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
+
+        // The library is read back from storage, so the ticks are there with no
+        // PlayStation call in between.
+        await Page.GetByLabel("Ownership").SelectOptionAsync("Owned");
+        await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
+    }
+
+    [Test]
+    public async Task Clear_filters_resets_ownership_too()
+    {
+        await SeedOwned(4411);
+        await Page.GetByLabel("Ownership").SelectOptionAsync("Owned");
+        await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
+
+        await Page.GetByText("Clear filters").ClickAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
+    }
+
     [Test]
     public async Task No_console_errors_while_browsing()
     {

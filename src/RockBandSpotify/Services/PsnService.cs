@@ -20,13 +20,15 @@ public class PsnService
     private readonly IJSRuntime _js;
     private readonly PsnConfig _config;
     private readonly CatalogueService _catalogue;
+    private readonly OwnedLibrary _owned;
 
-    public PsnService(HttpClient http, IJSRuntime js, PsnConfig config, CatalogueService catalogue)
+    public PsnService(HttpClient http, IJSRuntime js, PsnConfig config, CatalogueService catalogue, OwnedLibrary owned)
     {
         _http = http;
         _js = js;
         _config = config;
         _catalogue = catalogue;
+        _owned = owned;
     }
 
     public bool IsGatewayConfigured => _config.IsConfigured;
@@ -44,6 +46,7 @@ public class PsnService
     {
         await RemoveItemAsync(TokenKey);
         await RemoveItemAsync(SongsKey);
+        await _owned.ClearAsync();
     }
 
     /// <summary>Returns the last successfully-fetched song list from localStorage, if any.</summary>
@@ -117,6 +120,9 @@ public class PsnService
         library = Deduplicate(library)!;
 
         await SetItemAsync(SongsKey, JsonSerializer.Serialize(library));
+        // The catalogue page marks and filters from this, so it never has to
+        // call PlayStation itself.
+        await _owned.SaveAsync(resolved.Matched.Select(s => s.Id));
         return library;
     }
 
