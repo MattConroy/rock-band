@@ -9,7 +9,8 @@ namespace RockBandSpotify.UnitTests;
 /// </summary>
 public class NpssoTokenTests
 {
-    private const string Token = "AbCd1234567890TOKENvalue";
+    /// <summary>A token of the length Sony actually issues.</summary>
+    private const string Token = "AbCd1234567890TOKENvalueQwErTyUiOpAsDfGhJkLzXcVbNm0987654321_x-Y";
 
     [Fact]
     public void The_bare_value_is_taken_as_is()
@@ -54,6 +55,75 @@ public class NpssoTokenTests
         // 401 that reads as though the account is at fault.
         Assert.Null(NpssoToken.Extract("{\"npsso\":"));
         Assert.Null(NpssoToken.Extract("npsso value goes here"));
+    }
+
+    [Fact]
+    public void A_token_of_the_right_shape_is_valid()
+    {
+        var check = NpssoToken.Check($"{{\"npsso\":\"{Token}\"}}");
+
+        Assert.Equal(NpssoState.Valid, check.State);
+        Assert.Equal(Token, check.Token);
+        Assert.Contains("64", check.Message);
+    }
+
+    [Fact]
+    public void Nothing_pasted_yet_is_neither_valid_nor_wrong()
+    {
+        // The field starts empty; scolding someone before they have typed is
+        // noise, so this is its own state rather than a failure.
+        var check = NpssoToken.Check("");
+
+        Assert.Equal(NpssoState.Empty, check.State);
+        Assert.Null(check.Token);
+    }
+
+    [Fact]
+    public void A_truncated_copy_says_so_rather_than_being_sent()
+    {
+        // The common failure: half the token selected. Sending it earns a 401
+        // that reads as an expired login, sending people back to sign in again
+        // when the clipboard was the problem.
+        var check = NpssoToken.Check(Token[..40]);
+
+        Assert.Equal(NpssoState.Invalid, check.State);
+        Assert.Null(check.Token);
+        Assert.Contains("40", check.Message);
+        Assert.Contains("64", check.Message);
+    }
+
+    [Fact]
+    public void Something_longer_than_a_token_is_rejected_too()
+    {
+        var check = NpssoToken.Check(Token + "extra");
+
+        Assert.Equal(NpssoState.Invalid, check.State);
+        Assert.Contains("69", check.Message);
+    }
+
+    [Fact]
+    public void Characters_a_token_never_contains_are_rejected()
+    {
+        var check = NpssoToken.Check(new string('!', NpssoToken.TokenLength));
+
+        Assert.Equal(NpssoState.Invalid, check.State);
+        Assert.Contains("characters", check.Message);
+    }
+
+    [Fact]
+    public void The_full_alphabet_a_token_uses_is_accepted()
+    {
+        // URL-safe base64, so the two symbols matter as much as the letters.
+        var token = ("aZ09_-" + new string('x', NpssoToken.TokenLength - 6));
+
+        Assert.Equal(NpssoState.Valid, NpssoToken.Check(token).State);
+    }
+
+    [Fact]
+    public void An_unusable_paste_never_yields_a_token_to_send()
+    {
+        foreach (var pasted in new[] { "", "   ", "short", "npsso value goes here", new string('!', 64) })
+            Assert.Null(NpssoToken.Check(pasted).Token);
     }
 
     [Fact]

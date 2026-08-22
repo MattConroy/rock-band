@@ -65,6 +65,9 @@ public class ConnectionButtonTests : AppPageTest
         await Expect(Page.GetByRole(AriaRole.Dialog)).ToHaveCountAsync(0);
     }
 
+    /// <summary>A token of the length Sony issues, so validation accepts it.</summary>
+    private const string ValidToken = "AbCd1234567890TOKENvalueQwErTyUiOpAsDfGhJkLzXcVbNm0987654321_x-Y";
+
     [Test]
     public async Task The_whole_json_line_can_be_pasted()
     {
@@ -82,15 +85,15 @@ public class ConnectionButtonTests : AppPageTest
         await Expect(connect).ToBeDisabledAsync();
 
         await Page.GetByPlaceholder("npsso value, or the whole line")
-            .FillAsync("{\"npsso\":\"AbCd1234TOKEN\"}");
+            .FillAsync($"{{\"npsso\":\"{ValidToken}\"}}");
 
         // The dialog says what it understood, so a paste is never silent.
-        await Expect(Page.Locator(".dialog-note")).ToContainTextAsync("Recognised a 13-character token");
+        await Expect(Page.Locator(".dialog-note")).ToContainTextAsync("Looks right");
         await Expect(connect).ToBeEnabledAsync();
 
         await connect.ClickAsync();
         await Expect(Page.Locator(".conn-error")).ToBeVisibleAsync();
-        Assert.That(sent, Does.Contain("AbCd1234TOKEN"));
+        Assert.That(sent, Does.Contain(ValidToken));
         Assert.That(sent, Does.Not.Contain("{\\"));
     }
 
@@ -101,6 +104,49 @@ public class ConnectionButtonTests : AppPageTest
         await Page.GetByPlaceholder("npsso value, or the whole line").FillAsync("npsso value goes here");
 
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Connect", Exact = true })).ToBeDisabledAsync();
+    }
+
+    [Test]
+    public async Task The_field_marks_itself_valid_or_not_as_you_type()
+    {
+        await Psn.ClickAsync();
+        var field = Page.GetByPlaceholder("npsso value, or the whole line");
+
+        // Nothing typed yet is neither state — no mark, no coloured outline.
+        await Expect(Page.Locator(".field-mark")).ToHaveCountAsync(0);
+        await Expect(field).Not.ToHaveClassAsync(new System.Text.RegularExpressions.Regex("field-(ok|bad)"));
+
+        await field.FillAsync(ValidToken);
+        await Expect(field).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("field-ok"));
+        await Expect(Page.Locator(".field-mark.field-ok")).ToBeVisibleAsync();
+
+        // Losing a character makes it wrong again, and says why.
+        await field.FillAsync(ValidToken[..40]);
+        await Expect(field).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("field-bad"));
+        await Expect(Page.Locator(".field-mark.field-bad")).ToBeVisibleAsync();
+        await Expect(Page.Locator(".dialog-note")).ToContainTextAsync("this is 40");
+
+        // And clearing it returns to neither state rather than staying red.
+        await field.FillAsync("");
+        await Expect(Page.Locator(".field-mark")).ToHaveCountAsync(0);
+    }
+
+    [Test]
+    public async Task A_truncated_token_is_never_sent_to_the_gateway()
+    {
+        var calls = 0;
+        await Page.RouteAsync("**rockband-psn-gateway**", async route =>
+        {
+            calls++;
+            await route.FulfillAsync(new() { Status = 401, ContentType = "application/json", Body = "{}" });
+        });
+
+        await Psn.ClickAsync();
+        await Page.GetByPlaceholder("npsso value, or the whole line").FillAsync(ValidToken[..40]);
+        await Page.Keyboard.PressAsync("Enter");
+
+        await Expect(Page.Locator(".dialog-note")).ToContainTextAsync("this is 40");
+        Assert.That(calls, Is.Zero, "a token the app knows is malformed should not reach PlayStation");
     }
 
     [Test]
@@ -159,7 +205,7 @@ public class ConnectionButtonTests : AppPageTest
         }));
 
         await Psn.ClickAsync();
-        await Page.GetByPlaceholder("npsso value, or the whole line").FillAsync("stale-token");
+        await Page.GetByPlaceholder("npsso value, or the whole line").FillAsync(ValidToken);
         await Page.GetByRole(AriaRole.Button, new() { Name = "Connect", Exact = true }).ClickAsync();
 
         await Expect(Page.Locator(".conn-error")).ToContainTextAsync("npsso rejected by PlayStation");

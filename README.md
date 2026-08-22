@@ -66,8 +66,9 @@ Put the Worker URL it prints into `appsettings.json` under `Psn.GatewayUrl`. See
 
 In the app, press the PlayStation button → *Open PlayStation login*, sign in, then
 copy what the page shows and paste it in. The whole `{"npsso":"…"}` line is fine —
-so is the bare value, or the `npsso=…` cookie form. It is cached in your browser
-and lasts about two months.
+so is the bare value, or the `npsso=…` cookie form. The field checks the paste as
+you type and won't let a truncated copy through. The token is cached in your
+browser and lasts about two months.
 
 ## Deploying your own
 

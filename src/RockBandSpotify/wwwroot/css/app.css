@@ -402,12 +402,42 @@ body {
 
 .dialog-input {
     text-align: left;
-    padding: 0.55rem 0.6rem;
+    /* Room on the right for the tick or cross. */
+    padding: 0.55rem 2.1rem 0.55rem 0.6rem;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
+/* Validity, shown two ways: the outline for a glance, the mark and the note
+   underneath for what is actually wrong. Colour alone would leave anyone who
+   can't separate red from green with nothing to go on. */
+.field-wrap { position: relative; }
+
+.field-mark {
+    position: absolute;
+    top: 50%;
+    right: 0.6rem;
+    transform: translateY(-50%);
+    display: flex;
+    pointer-events: none;
+}
+
+.field-ok { color: #5fd48a; }
+.field-bad { color: #ff8fa3; }
+
+input.field-ok, input.field-bad { color: var(--rb-text); }
+input.field-ok { border-color: #3ddc73; box-shadow: 0 0 0 1px #3ddc73; }
+input.field-bad { border-color: #e2566f; box-shadow: 0 0 0 1px #e2566f; }
+
+/* While focused the ring is the outline, so it isn't drawn twice — and it
+   takes the validity colour rather than the accent, which otherwise put a
+   blue halo around a red border. */
+input.field-ok:focus-visible, input.field-bad:focus-visible { box-shadow: none; }
+input.field-ok:focus-visible { outline-color: #3ddc73; }
+input.field-bad:focus-visible { outline-color: #e2566f; }
+
 .dialog-note { margin: 0.4rem 0 0; font-size: 0.75rem; line-height: 1.35; }
 .dialog-note-ok { color: #5fd48a; }
+.dialog-note-bad { color: #ff8fa3; }
 
 .dialog-error { margin: 1rem 0 0; }
 
