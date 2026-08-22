@@ -50,7 +50,7 @@ public class ConnectionButtonTests : AppPageTest
         await Psn.ClickAsync();
 
         await Expect(Page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
-        await Expect(Page.GetByPlaceholder("Paste the npsso value")).ToBeVisibleAsync();
+        await Expect(Page.GetByPlaceholder("npsso value, or the whole line")).ToBeVisibleAsync();
         // Nothing can be submitted until something is pasted.
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Connect", Exact = true })).ToBeDisabledAsync();
     }
@@ -63,6 +63,44 @@ public class ConnectionButtonTests : AppPageTest
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Cancel" }).ClickAsync();
         await Expect(Page.GetByRole(AriaRole.Dialog)).ToHaveCountAsync(0);
+    }
+
+    [Test]
+    public async Task The_whole_json_line_can_be_pasted()
+    {
+        // Copying the line off Sony's page is easier than selecting the value
+        // inside the quotes, so that is what most pastes look like.
+        string? sent = null;
+        await Page.RouteAsync("**rockband-psn-gateway**", async route =>
+        {
+            sent = route.Request.PostData;
+            await route.FulfillAsync(new() { Status = 401, ContentType = "application/json", Body = "{}" });
+        });
+
+        await Psn.ClickAsync();
+        var connect = Page.GetByRole(AriaRole.Button, new() { Name = "Connect", Exact = true });
+        await Expect(connect).ToBeDisabledAsync();
+
+        await Page.GetByPlaceholder("npsso value, or the whole line")
+            .FillAsync("{\"npsso\":\"AbCd1234TOKEN\"}");
+
+        // The dialog says what it understood, so a paste is never silent.
+        await Expect(Page.Locator(".dialog-note")).ToContainTextAsync("Recognised a 13-character token");
+        await Expect(connect).ToBeEnabledAsync();
+
+        await connect.ClickAsync();
+        await Expect(Page.Locator(".conn-error")).ToBeVisibleAsync();
+        Assert.That(sent, Does.Contain("AbCd1234TOKEN"));
+        Assert.That(sent, Does.Not.Contain("{\\"));
+    }
+
+    [Test]
+    public async Task A_paste_that_is_not_a_token_cannot_be_submitted()
+    {
+        await Psn.ClickAsync();
+        await Page.GetByPlaceholder("npsso value, or the whole line").FillAsync("npsso value goes here");
+
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Connect", Exact = true })).ToBeDisabledAsync();
     }
 
     [Test]
@@ -121,7 +159,7 @@ public class ConnectionButtonTests : AppPageTest
         }));
 
         await Psn.ClickAsync();
-        await Page.GetByPlaceholder("Paste the npsso value").FillAsync("stale-token");
+        await Page.GetByPlaceholder("npsso value, or the whole line").FillAsync("stale-token");
         await Page.GetByRole(AriaRole.Button, new() { Name = "Connect", Exact = true }).ClickAsync();
 
         await Expect(Page.Locator(".conn-error")).ToContainTextAsync("npsso rejected by PlayStation");
