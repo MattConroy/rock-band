@@ -36,8 +36,8 @@
             {
                 <select class="rb-select" @onchange="OnOwnedChanged" aria-label="Ownership">
                     <option value="Any" selected="@(_owned == OwnedFilter.Any)">All songs</option>
-                    <option value="Owned" selected="@(_owned == OwnedFilter.Owned)">In my library</option>
-                    <option value="NotOwned" selected="@(_owned == OwnedFilter.NotOwned)">Not in my library</option>
+                    <option value="Owned" selected="@(_owned == OwnedFilter.Owned)">Owned</option>
+                    <option value="NotOwned" selected="@(_owned == OwnedFilter.NotOwned)">Unowned</option>
                 </select>
             }
         </div>
