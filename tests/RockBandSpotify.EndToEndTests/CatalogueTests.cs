@@ -70,6 +70,47 @@ public class CatalogueTests : AppPageTest
     }
 
     [Test]
+    public async Task Release_date_is_available_from_the_column_picker()
+    {
+        // Off by default, so the standard view stays four columns wide.
+        var headers = await Page.Locator("th").AllInnerTextsAsync();
+        Assert.That(headers, Does.Not.Contain("RELEASED"));
+
+        await Page.GetByLabel("Choose columns").ClickAsync();
+        await Page.GetByRole(AriaRole.Checkbox, new() { Name = "Released" }).CheckAsync();
+
+        headers = await Page.Locator("th").AllInnerTextsAsync();
+        Assert.That(headers, Is.EqualTo(new[] { "SONG", "ARTIST", "YEAR", "GENRE", "SOURCE", "RELEASED" }));
+
+        await Page.GetByPlaceholder("Search song or artist…").FillAsync("believer");
+        await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
+        // Believer is a 2017 song that reached Rock Band on 2018-03-01, which
+        // is the point of having this column as well as Year.
+        await Expect(Page.Locator("tbody td").Nth(5)).ToHaveTextAsync("1 Mar 2018");
+        await Expect(Page.Locator("tbody td").Nth(2)).ToHaveTextAsync("2017");
+    }
+
+    [Test]
+    public async Task Sorting_by_release_date_differs_from_sorting_by_year()
+    {
+        await Page.GetByLabel("Choose columns").ClickAsync();
+        await Page.GetByRole(AriaRole.Checkbox, new() { Name = "Released" }).CheckAsync();
+        await Page.GetByLabel("Choose columns").ClickAsync();
+
+        var released = Page.Locator("th").Nth(5);
+        await released.Locator("button").ClickAsync();
+        await Expect(released).ToHaveAttributeAsync("aria-sort", "ascending");
+
+        // The catalogue starts with Rock Band 1's launch day.
+        await Expect(Page.Locator("tbody tr").First.Locator("td").Nth(5)).ToHaveTextAsync("20 Nov 2007");
+
+        await released.Locator("button").ClickAsync();
+        await Expect(released).ToHaveAttributeAsync("aria-sort", "descending");
+        var newest = await Page.Locator("tbody tr").First.Locator("td").Nth(5).InnerTextAsync();
+        Assert.That(newest, Does.Contain("202"));
+    }
+
+    [Test]
     public async Task Column_choice_survives_a_reload()
     {
         await Page.GetByLabel("Choose columns").ClickAsync();
