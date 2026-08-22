@@ -85,6 +85,35 @@ public class SpotifyApiService
         return result?.Tracks?.Items ?? new List<SpotifyTrack>();
     }
 
+    /// <summary>
+    /// Looks up tracks by id, fifty at a time — the endpoint's limit.
+    /// <para>
+    /// This is what makes a known id worth having: a library of 850 songs is
+    /// seventeen requests here against 850 searches, and the answer needs no
+    /// scoring because nothing was guessed. Ids Spotify no longer recognises
+    /// come back as nulls and are simply absent from the result.
+    /// </para>
+    /// </summary>
+    public async Task<Dictionary<string, SpotifyTrack>> GetTracksAsync(IReadOnlyList<string> ids)
+    {
+        var found = new Dictionary<string, SpotifyTrack>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var batch in ids.Distinct(StringComparer.OrdinalIgnoreCase).Chunk(50))
+        {
+            var url = $"{ApiBase}/tracks?ids={Uri.EscapeDataString(string.Join(",", batch))}";
+            var request = await AuthorizedRequest(HttpMethod.Get, url);
+            var response = await SendAsync(request);
+            if (!response.IsSuccessStatusCode) continue;
+
+            var page = await response.Content.ReadFromJsonAsync<SpotifyTracksResponse>();
+            foreach (var track in page?.Tracks ?? [])
+                if (track is not null && !string.IsNullOrEmpty(track.Id))
+                    found[track.Id] = track;
+        }
+
+        return found;
+    }
+
     /// <summary>Finds a playlist owned by the user by exact (case-insensitive) name.</summary>
     public async Task<SpotifyPlaylist?> FindPlaylistByNameAsync(string name)
     {

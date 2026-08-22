@@ -71,6 +71,20 @@ public class CatalogueSong
     [JsonPropertyName("psnIds")]
     public List<string> PsnIds { get; set; } = [];
 
+    /// <summary>
+    /// The Spotify track this song is, when we know it — a bare track id such
+    /// as <c>2EqlS6tkEnglzr7tkKAAYD</c>.
+    /// <para>
+    /// Knowing it up front is what lets a library skip Spotify's search
+    /// entirely: a search costs one request per song and returns candidates
+    /// that have to be scored and reviewed, where an id is just the answer.
+    /// Null where no Spotify track was found, which is most of the Rock Band
+    /// Network — unsigned bands, many of whom never released anywhere else.
+    /// </para>
+    /// </summary>
+    [JsonPropertyName("spotifyId")]
+    public string? SpotifyId { get; set; }
+
     [JsonPropertyName("releaseDate")]
     public DateOnly? ReleaseDate { get; set; }
 }
