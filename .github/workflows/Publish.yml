@@ -36,11 +36,29 @@ jobs:
       - name: Publish Blazor WASM
         run: dotnet publish src/RockBandSpotify/RockBandSpotify.csproj -c Release -o dist
 
-      - name: Rewrite base href for project pages
-        # Project pages are served under /<repo>/, so the SPA needs a matching base href.
+      - name: Rewrite base href and stamp asset versions
+        # Project pages are served under /<repo>/, so the SPA needs a matching
+        # base href.
+        #
+        # The version stamp is a cache-buster. Pages serves every file with
+        # max-age=600 and no way to override it, and unlike the _framework
+        # assets these three keep the same URL from one release to the next —
+        # so a browser can pair new markup with ten-minute-old CSS. Adding the
+        # commit makes each release a different URL, which the browser has no
+        # cached copy of.
         run: |
           REPO="${GITHUB_REPOSITORY#*/}"
+          VER="${GITHUB_SHA::7}"
           sed -i "s|<base href=\"/\" />|<base href=\"/$REPO/\" />|g" dist/wwwroot/index.html
+          sed -i \
+            -e "s|href=\"css/app.css\"|href=\"css/app.css?v=$VER\"|" \
+            -e "s|href=\"RockBandSpotify.styles.css\"|href=\"RockBandSpotify.styles.css?v=$VER\"|" \
+            -e "s|src=\"js/interop.js\"|src=\"js/interop.js?v=$VER\"|" \
+            dist/wwwroot/index.html
+          # Fail loudly rather than shipping unstamped assets if the markup
+          # these patterns match ever changes.
+          COUNT=$(grep -c "?v=$VER" dist/wwwroot/index.html || true)
+          [ "$COUNT" -eq 3 ] || { echo "Expected 3 stamped assets, found $COUNT"; exit 1; }
 
       - name: Add SPA fallback and .nojekyll
         run: |
