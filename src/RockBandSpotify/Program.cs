@@ -36,5 +36,6 @@ builder.Services.AddScoped<PsnService>();
 builder.Services.AddScoped<MatchingService>();
 builder.Services.AddScoped<PlaylistSyncService>();
 builder.Services.AddScoped<CatalogueService>();
+builder.Services.AddScoped<ConnectionState>();
 
 await builder.Build().RunAsync();

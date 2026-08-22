@@ -26,6 +26,10 @@ window.rbSpotify = {
     // scrolling elements, so the header has to be told to follow when the
     // body scrolls sideways — otherwise the labels sit over the wrong
     // columns the moment a phone scrolls to reach Source.
+    openInNewTab: function (url) {
+        window.open(url, "_blank", "noopener");
+    },
+
     syncTableScroll: function (headerId, bodyId) {
         var header = document.getElementById(headerId);
         var body = document.getElementById(bodyId);
