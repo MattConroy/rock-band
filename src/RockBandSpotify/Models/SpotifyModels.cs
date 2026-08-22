@@ -53,12 +53,6 @@ public class SpotifyTrack
     [JsonPropertyName("artists")]
     public List<SpotifyArtist> Artists { get; set; } = new();
 
-    [JsonPropertyName("album")]
-    public SpotifyAlbum? Album { get; set; }
-
-    [JsonPropertyName("duration_ms")]
-    public int DurationMs { get; set; }
-
     [JsonIgnore]
     public string ArtistNames => string.Join(", ", Artists.Select(a => a.Name));
 }
@@ -69,23 +63,7 @@ public class SpotifyArtist
     public string Name { get; set; } = "";
 }
 
-public class SpotifyAlbum
-{
-    [JsonPropertyName("name")]
-    public string Name { get; set; } = "";
 
-    [JsonPropertyName("images")]
-    public List<SpotifyImage> Images { get; set; } = new();
-}
-
-public class SpotifyImage
-{
-    [JsonPropertyName("url")]
-    public string Url { get; set; } = "";
-
-    [JsonPropertyName("width")]
-    public int Width { get; set; }
-}
 
 public class SpotifySearchResponse
 {

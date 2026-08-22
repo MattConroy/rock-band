@@ -31,9 +31,13 @@ your request server-side and stores nothing.
 
 | Path | What it is |
 |------|------------|
-| `src/RockBandSpotify/` | The Blazor WASM app (Spotify + matching + the PSN connect flow) |
+| `src/RockBandSpotify/` | The Blazor WASM app — song catalogue, Spotify matching, PSN connect flow |
+| `src/RockBandSpotify/wwwroot/data/catalogue.json` | Every Rock Band song, with the ids that identify it on each store |
 | `gateway/` | The stateless Cloudflare Worker that relays PSN calls (`worker.js`) |
-| `.github/workflows/deploy.yml` | Builds the app and deploys it to GitHub Pages |
+| `tests/RockBandSpotify.UnitTests/` | xUnit tests for the filtering, sorting, matching and resolving logic |
+| `tests/RockBandSpotify.EndToEndTests/` | Playwright tests that drive the app in a real browser |
+| `.github/workflows/Build.yml` | Builds, then runs both test suites and a gateway syntax check |
+| `.github/workflows/Publish.yml` | Deploys the app to GitHub Pages and the Worker to Cloudflare |
 
 ## Setup
 
@@ -51,8 +55,10 @@ See [`gateway/README.md`](gateway/README.md) for details and filter tuning.
 ### 2. Create a Spotify app
 
 1. [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) → **Create app**.
-2. Add Redirect URI: `https://<you>.github.io/<repo>/spotify-connect`
-   (and `https://localhost:5001/spotify-connect` for local dev).
+2. Add Redirect URI: `https://<you>.github.io/<repo>/spotify-connect`. The match
+   is exact — a trailing slash makes it a different URI. For local development
+   add `https://127.0.0.1:5001/spotify-connect` as well; Spotify no longer
+   accepts `localhost` as a redirect host.
 3. Copy the **Client ID** (no secret needed — PKCE).
 
 ### 3. Configure the app
@@ -72,9 +78,15 @@ design; PKCE uses no client secret).
 ### 4. Enable GitHub Pages
 
 **Settings → Pages → Build and deployment → Source = GitHub Actions**, then push to
-the default branch (or run the **Deploy to GitHub Pages** workflow).
+the default branch (or run the **Publish** workflow by hand).
 
 ### 5. Use it
+
+The catalogue is the landing page and needs no login at all: every Rock Band song,
+searchable and filterable by genre and by the game it came from. Connecting
+PlayStation adds an ownership column so you can filter it down to what you have.
+
+To build a playlist:
 
 1. **Connect Spotify** — logs into your Spotify (PKCE).
 2. **Connect PlayStation** — click *Open PlayStation login*, sign in, copy the
@@ -95,21 +107,34 @@ cd gateway && npx wrangler dev                 # http://localhost:8787
 
 Point `Psn.GatewayUrl` at `http://localhost:8787` for local testing.
 
-## Data sources
+## The catalogue
 
-`src/RockBandSpotify/wwwroot/data/catalogue.json` is the one committed dataset.
-Its `psnIds` field — PlayStation Store content codes — is compiled from the
-public song list published by [rb4.app](https://rb4.app), whose entries link to
-each song's Store page. Thanks to them for maintaining it.
+`src/RockBandSpotify/wwwroot/data/catalogue.json` is the one committed dataset:
+4,953 songs, each with the game or games it shipped in and the ids that identify
+it elsewhere.
 
-Only the content code is stored (the last segment of a PSN product id), because
-it is the region-independent part: a US listing and a European entitlement for
-the same song differ in their prefix but agree on that segment.
+| Field | Coverage | What it is |
+|-------|----------|------------|
+| `psnIds` | 2,961 | PlayStation Store content codes that grant the song |
+| `spotifyId` | 3,401 | The Spotify track the song is |
 
-Roughly 47% of the catalogue has no code, and that is a property of the store
-rather than a gap in the data — delisted Rock Band Network songs, delisted DLC,
-Beatles content, and songs that only ever shipped on a disc have no Store page
-to have an id on.
+Much of it is compiled from the public song list published by
+[rb4.app](https://rb4.app), whose entries link to each song's Store page. Thanks
+to them for maintaining it.
+
+**`psnIds` stores only the content code** — the last segment of a PSN product id
+— because that is the region-independent part: a US listing and a European
+entitlement for the same song differ in their prefix but agree on that segment.
+A song can have several, because a code can be a single purchase, a pack, or a
+whole game: every track on the Rock Band 3 disc carries that disc's export code,
+since those songs never had store pages of their own.
+
+The songs without ids are mostly not a gap in the data but a property of the
+stores. Nearly two thirds of the catalogue is Rock Band Network — user-authored
+tracks by unsigned bands, long delisted, many never released anywhere else.
+Excluding those and the Beatles content, 2,784 of 2,957 songs have a PlayStation
+id. The rest are the handful of disc tracks whose licences kept them out of every
+export, and the AC/DC track pack, which had no store release at all.
 
 ## Caveats & honesty
 
@@ -121,5 +146,7 @@ to have an id on.
   `ALLOWED_ORIGIN` locked to your site.
 - **Nothing is stored server-side.** Your npsso lives only in your own browser's
   localStorage and passes through the Worker transiently, never logged or saved.
-- **Matching is fuzzy** (covers, live cuts, remasters), which is why you review
-  matches before syncing.
+- **Matching is fuzzy** where the catalogue has no Spotify id for a song. The app
+  searches by title and artist and scores the candidates, which covers, live cuts
+  and remasters can all confuse — so you review the matches before syncing, and
+  low-confidence ones start unchecked.
