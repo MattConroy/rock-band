@@ -360,8 +360,45 @@ public class CatalogueTests : AppPageTest
         await Expect(third).ToHaveCountAsync(0);
     }
 
+    // Asserting only that the grid scrolls proved worthless: it scrolled
+    // happily while Song was 72px wide beside a 187px Artist. What matters is
+    // that no column is squeezed, in any combination, at any width.
+    [TestCase(390, "[]")]
+    [TestCase(390, "[\"Source\"]")]
+    [TestCase(390, "[\"Year\",\"Genre\",\"Source\",\"Released\"]")]
+    [TestCase(430, "[\"Source\"]")]
+    [TestCase(1280, "[\"Year\",\"Genre\",\"Source\",\"Released\"]")]
+    public async Task No_column_is_squeezed_at_any_width(int viewport, string columns)
+    {
+        await SeedOwned(4411);
+        await Page.EvaluateAsync($"() => localStorage.setItem('rb_catalogue_columns', '{columns}')");
+        await Page.SetViewportSizeAsync(viewport, 800);
+        await Page.ReloadAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
+
+        // The rem widths the component declares, at the app's 16px root.
+        var floors = new Dictionary<string, int>
+        {
+            ["col-owned"] = 32, ["col-song"] = 176, ["col-artist"] = 128,
+            ["col-year"] = 56, ["col-genre"] = 104, ["col-source"] = 176, ["col-released"] = 104,
+        };
+
+        foreach (var cell in await Page.Locator("tbody tr").First.Locator("td").AllAsync())
+        {
+            var cls = (await cell.GetAttributeAsync("class"))!;
+            var width = (await cell.BoundingBoxAsync())!.Width;
+            Assert.That(width, Is.GreaterThanOrEqualTo(floors[cls] - 1),
+                $"{cls} was squeezed to {width}px at {viewport}px with columns {columns}");
+        }
+
+        // Whatever the grid does, the page itself never scrolls sideways.
+        var pageScrolls = await Page.EvaluateAsync<bool>(
+            "document.documentElement.scrollWidth > document.documentElement.clientWidth + 1");
+        Assert.That(pageScrolls, Is.False);
+    }
+
     [Test]
-    public async Task Every_column_stays_readable_on_a_phone_by_scrolling_the_grid()
+    public async Task The_header_follows_when_the_grid_scrolls_sideways()
     {
         await SeedOwned(4411);
         await Page.EvaluateAsync(
@@ -370,31 +407,22 @@ public class CatalogueTests : AppPageTest
         await Page.ReloadAsync();
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
 
-        // Six columns cannot fit 390px legibly, so the grid is wider than its
-        // container and scrolls — rather than squeezing Source to one
-        // character per line.
-        var wide = await Page.EvalOnSelectorAsync<bool>(
+        var scrolls = await Page.EvalOnSelectorAsync<bool>(
             "#rb-table-body", "el => el.scrollWidth > el.clientWidth + 1");
-        Assert.That(wide, Is.True, "the grid should scroll sideways rather than crush its columns");
+        Assert.That(scrolls, Is.True, "six columns cannot fit a phone, so the grid should scroll");
 
-        // The header is a separate table, so it has to follow.
         await Page.EvalOnSelectorAsync("#rb-table-body", "el => el.scrollLeft = 400");
         await Page.WaitForTimeoutAsync(200);
         var headerLeft = await Page.EvalOnSelectorAsync<int>("#rb-table-header", "el => el.scrollLeft");
         Assert.That(headerLeft, Is.EqualTo(400), "the header must track the body's horizontal scroll");
-
-        // The page itself still must not scroll sideways.
-        var pageScrolls = await Page.EvaluateAsync<bool>(
-            "document.documentElement.scrollWidth > document.documentElement.clientWidth + 1");
-        Assert.That(pageScrolls, Is.False);
     }
 
     [Test]
     public async Task Song_gives_up_width_as_columns_are_added()
     {
-        // Song is the unsized column, so it absorbs the slack and is the one
-        // that gives way — the bug was it holding a fixed share while the
-        // others were crushed.
+        // Song takes the largest share of any surplus, so it is the column
+        // that visibly narrows when another one appears — without ever
+        // dropping below its own declared width.
         await Page.GetByPlaceholder("Search song or artist…").FillAsync("believer");
         await Expect(Page.GetByText("1 shown")).ToBeVisibleAsync();
         var before = (await Page.Locator("tbody td.col-song").First.BoundingBoxAsync())!.Width;
