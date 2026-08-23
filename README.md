@@ -62,7 +62,7 @@ npx wrangler login
 npx wrangler deploy --var ALLOWED_ORIGIN:https://<you>.github.io
 ```
 
-Put the Worker URL it prints into `appsettings.json` under `Psn.GatewayUrl`. See
+Put the Worker URL it prints into `appsettings.json` under `PlayStation.GatewayUrl`. See
 [`gateway/README.md`](gateway/README.md) for more.
 
 In the app, press the PlayStation button → *Open PlayStation login*, sign in, then

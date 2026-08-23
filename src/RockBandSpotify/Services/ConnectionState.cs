@@ -43,38 +43,38 @@ public enum ConnectionStatus
 /// </summary>
 public class ConnectionState
 {
-    private const string PlaylistKey = "rb_spotify_playlist";
+    private const string PlaylistKey = "rock_band_spotify_playlist";
 
-    private readonly SpotifyAuthService _auth;
+    private readonly SpotifyAuthenticationService _authentication;
     private readonly SpotifyApiService _api;
-    private readonly PsnService _psn;
+    private readonly PlayStationService _playStation;
     private readonly MatchingService _matcher;
     private readonly PlaylistSyncService _sync;
-    private readonly IJSRuntime _js;
+    private readonly IJSRuntime _javaScript;
     private readonly string _playlistName;
 
     public ConnectionState(
-        SpotifyAuthService auth,
+        SpotifyAuthenticationService authentication,
         SpotifyApiService api,
-        PsnService psn,
+        PlayStationService playStation,
         MatchingService matcher,
         PlaylistSyncService sync,
         PlaylistConfig playlist,
-        IJSRuntime js)
+        IJSRuntime javaScript)
     {
         _playlistName = playlist.Name;
-        _auth = auth;
+        _authentication = authentication;
         _api = api;
-        _psn = psn;
+        _playStation = playStation;
         _matcher = matcher;
         _sync = sync;
-        _js = js;
+        _javaScript = javaScript;
     }
 
     /// <summary>Raised whenever anything below changes, so the header can redraw.</summary>
     public event Action? Changed;
 
-    public ConnectionStatus Psn { get; private set; }
+    public ConnectionStatus PlayStation { get; private set; }
     public ConnectionStatus Spotify { get; private set; }
 
     /// <summary>How many catalogue songs the account owns, once fetched.</summary>
@@ -97,7 +97,7 @@ public class ConnectionState
     public string PlaylistName => Playlist?.Name ?? _playlistName;
 
     /// <summary>Set while a press is being acted on, so the button can show it.</summary>
-    public bool PsnBusy { get; private set; }
+    public bool PlayStationBusy { get; private set; }
     public bool SpotifyBusy { get; private set; }
 
     /// <summary>
@@ -113,20 +113,20 @@ public class ConnectionState
     /// <summary>What the buttons are doing, shown while they do it.</summary>
     public string? BusyText { get; private set; }
 
-    public bool IsSpotifyConfigured => _auth.IsConfigured;
-    public bool IsPsnConfigured => _psn.IsGatewayConfigured;
+    public bool IsSpotifyConfigured => _authentication.IsConfigured;
+    public bool IsPlayStationConfigured => _playStation.IsGatewayConfigured;
 
     /// <summary>Reads both connections back from the browser on start-up.</summary>
     public async Task RefreshAsync()
     {
-        var library = await _psn.GetCachedSongsAsync();
+        var library = await _playStation.GetCachedSongsAsync();
         Count(library);
-        Psn = OwnedCount > 0 ? ConnectionStatus.Synced
-            : await _psn.HasTokenAsync() ? ConnectionStatus.Connected
+        PlayStation = OwnedCount > 0 ? ConnectionStatus.Synced
+            : await _playStation.HasTokenAsync() ? ConnectionStatus.Connected
             : ConnectionStatus.Disconnected;
 
         Playlist = await ReadPlaylistAsync();
-        Spotify = !await _auth.IsAuthenticatedAsync() ? ConnectionStatus.Disconnected
+        Spotify = !await _authentication.IsAuthenticatedAsync() ? ConnectionStatus.Disconnected
             : Playlist is not null ? ConnectionStatus.Synced
             : ConnectionStatus.Connected;
 
@@ -134,11 +134,11 @@ public class ConnectionState
     }
 
     /// <summary>Stores the pasted token and immediately fetches, so one paste is enough.</summary>
-    public async Task ConnectPsnAsync(string npsso)
+    public async Task ConnectPlayStationAsync(string npsso)
     {
         try
         {
-            await _psn.SaveTokenAsync(npsso);
+            await _playStation.SaveTokenAsync(npsso);
         }
         catch (Exception ex)
         {
@@ -146,23 +146,23 @@ public class ConnectionState
             return;
         }
 
-        Psn = ConnectionStatus.Connected;
+        PlayStation = ConnectionStatus.Connected;
         Notify();
-        await FetchPsnAsync();
+        await FetchPlayStationAsync();
     }
 
     /// <summary>Asks PlayStation what the account owns and resolves it to catalogue songs.</summary>
-    public async Task FetchPsnAsync()
+    public async Task FetchPlayStationAsync()
     {
-        PsnBusy = true;
+        PlayStationBusy = true;
         BusyText = "Asking PlayStation what you own…";
         Notice = null;
         Notify();
         try
         {
-            var library = await _psn.FetchSongsAsync();
+            var library = await _playStation.FetchSongsAsync();
             Count(library);
-            Psn = OwnedCount > 0 ? ConnectionStatus.Synced : ConnectionStatus.Connected;
+            PlayStation = OwnedCount > 0 ? ConnectionStatus.Synced : ConnectionStatus.Connected;
             if (OwnedCount == 0)
                 Fail("PlayStation returned nothing this app recognises as a Rock Band song.");
             else
@@ -174,16 +174,16 @@ public class ConnectionState
         }
         finally
         {
-            PsnBusy = false;
+            PlayStationBusy = false;
             BusyText = null;
             Notify();
         }
     }
 
-    public async Task DisconnectPsnAsync()
+    public async Task DisconnectPlayStationAsync()
     {
-        await _psn.DisconnectAsync();
-        Psn = ConnectionStatus.Disconnected;
+        await _playStation.DisconnectAsync();
+        PlayStation = ConnectionStatus.Disconnected;
         Count(null);
         Succeed("Disconnected from PlayStation.");
     }
@@ -192,11 +192,11 @@ public class ConnectionState
     /// Forgets the fetched songs but keeps the token, so the next press
     /// re-fetches without another trip to Sony's login page.
     /// </summary>
-    public async Task ClearPsnSongsAsync()
+    public async Task ClearPlayStationSongsAsync()
     {
-        await _psn.ClearSongsAsync();
+        await _playStation.ClearSongsAsync();
         Count(null);
-        Psn = ConnectionStatus.Connected;
+        PlayStation = ConnectionStatus.Connected;
         Succeed("Cleared the fetched songs. Your sign-in is still here.");
     }
 
@@ -216,7 +216,7 @@ public class ConnectionState
         Notice = null;
         try
         {
-            await _auth.BeginLoginAsync();
+            await _authentication.BeginLoginAsync();
         }
         catch (Exception ex)
         {
@@ -237,7 +237,7 @@ public class ConnectionState
         Notify();
         try
         {
-            var library = await _psn.GetCachedSongsAsync();
+            var library = await _playStation.GetCachedSongsAsync();
             if (library is null || library.Songs.Count == 0)
             {
                 Fail("Connect PlayStation first — there are no owned songs to sync.");
@@ -272,7 +272,7 @@ public class ConnectionState
 
     public async Task DisconnectSpotifyAsync()
     {
-        await _auth.LogoutAsync();
+        await _authentication.LogoutAsync();
         await WritePlaylistAsync(null);
         Playlist = null;
         Spotify = ConnectionStatus.Disconnected;
@@ -322,7 +322,7 @@ public class ConnectionState
     {
         try
         {
-            var raw = await _js.InvokeAsync<string?>("rbSpotify.getItem", PlaylistKey);
+            var raw = await _javaScript.InvokeAsync<string?>("rockBandSpotify.getItem", PlaylistKey);
             if (string.IsNullOrEmpty(raw)) return null;
 
             // Earlier builds stored just the URL. Read those rather than
@@ -346,9 +346,9 @@ public class ConnectionState
         try
         {
             if (playlist is null)
-                await _js.InvokeVoidAsync("rbSpotify.removeItem", PlaylistKey);
+                await _javaScript.InvokeVoidAsync("rockBandSpotify.removeItem", PlaylistKey);
             else
-                await _js.InvokeVoidAsync("rbSpotify.setItem", PlaylistKey, JsonSerializer.Serialize(playlist));
+                await _javaScript.InvokeVoidAsync("rockBandSpotify.setItem", PlaylistKey, JsonSerializer.Serialize(playlist));
         }
         catch { /* the synced state just won't survive a reload */ }
     }

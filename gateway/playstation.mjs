@@ -1,4 +1,4 @@
-// Shared PSN logic used by both the Worker (worker.js) and the local test
+// Shared PlayStation Network logic used by both the Worker (worker.js) and the local test
 // script (test-local.mjs), so the auth/fetch/parse behaviour is identical.
 //
 // Stateless: callers pass the npsso per request; nothing is stored here.
@@ -22,13 +22,13 @@ export async function getAccessToken(npsso) {
     `&scope=${encodeURIComponent("psn:mobile.v2.core psn:clientapp")}` +
     `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
 
-  const authRes = await fetch(authorizeUrl, {
+  const authorizeResponse = await fetch(authorizeUrl, {
     method: "GET",
     redirect: "manual",
     headers: { Cookie: `npsso=${npsso}` },
   });
 
-  const location = authRes.headers.get("location") || "";
+  const location = authorizeResponse.headers.get("location") || "";
   const match = location.match(/[?&]code=([^&]+)/);
   if (!match) {
     throw new Error("Login failed — the npsso is likely expired or invalid.");
@@ -42,7 +42,7 @@ export async function getAccessToken(npsso) {
     token_format: "jwt",
   });
   const basic = btoa(`${CLIENT_ID}:${CLIENT_SECRET}`);
-  const tokenRes = await fetch(`${AUTH_BASE}/token`, {
+  const tokenResponse = await fetch(`${AUTH_BASE}/token`, {
     method: "POST",
     headers: {
       Authorization: `Basic ${basic}`,
@@ -50,10 +50,10 @@ export async function getAccessToken(npsso) {
     },
     body,
   });
-  if (!tokenRes.ok) {
-    throw new Error(`Token exchange failed (${tokenRes.status}).`);
+  if (!tokenResponse.ok) {
+    throw new Error(`Token exchange failed (${tokenResponse.status}).`);
   }
-  const token = await tokenRes.json();
+  const token = await tokenResponse.json();
   if (!token.access_token) throw new Error("No access token returned.");
   return token.access_token;
 }
@@ -67,14 +67,14 @@ export async function fetchEntitlements(accessToken) {
   const limit = 500;
   let offset = 0;
   for (let page = 0; page < 40; page++) {
-    const res = await fetch(`${ENTITLEMENT_URL}?offset=${offset}&limit=${limit}`, {
+    const response = await fetch(`${ENTITLEMENT_URL}?offset=${offset}&limit=${limit}`, {
       headers: { Authorization: `Bearer ${accessToken}`, Accept: "application/json" },
     });
-    if (!res.ok) throw new Error(`Entitlement request failed (${res.status}).`);
-    const data = await res.json();
+    if (!response.ok) throw new Error(`Entitlement request failed (${response.status}).`);
+    const data = await response.json();
     const items = data.entitlements || data.entitlementList || [];
     const total = data.totalResults ?? data.total ?? Infinity;
-    for (const e of items) byId.set(e.id ?? e.productId ?? JSON.stringify(e), e);
+    for (const entitlement of items) byId.set(entitlement.id ?? entitlement.productId ?? JSON.stringify(entitlement), e);
     offset += items.length;
     if (items.length === 0 || offset >= total) break;
   }
@@ -83,7 +83,7 @@ export async function fetchEntitlements(accessToken) {
 
 // The 7 confirmed Rock Band game title codes (publisher-title). A song is owned
 // if either the entitlement id OR its productId sits under one of these.
-export const RB_TITLES = new Set([
+export const ROCK_BAND_TITLES = new Set([
   "EP0006-BLES00228", // Rock Band 1
   "EP0006-BLES00986", // Rock Band 2
   "EP0006-CUSA03384", // Rock Band 4
@@ -103,7 +103,7 @@ const contentOf = (s) => (s || "").split("-").slice(2).join("-");
 // "song" (an individual track), "disc" (an on-disc PROCKBAND entitlement) or
 // "bundle" (a pack or disc export).
 //
-// PSN grants a pack's contents as one entitlement per song, each carrying that
+// PlayStation grants a pack's contents as one entitlement per song, each carrying that
 // song's own content code, so a pack needs no special handling to be matched.
 // A disc export is the exception: its songs never had store listings of their
 // own, so the export product's code is the only identifier they have. That
@@ -111,23 +111,23 @@ const contentOf = (s) => (s || "").split("-").slice(2).join("-");
 // the productId of the rows it granted — hence it is emitted as an item too.
 export function ownedRockBandSongs(entitlements) {
   const owned = entitlements.filter(
-    (e) => RB_TITLES.has(titleOf(e.id)) || RB_TITLES.has(titleOf(e.productId || e.id)),
+    (entitlement) => ROCK_BAND_TITLES.has(titleOf(entitlement.id)) || ROCK_BAND_TITLES.has(titleOf(entitlement.productId || entitlement.id)),
   );
 
   // A product is a bundle because it granted an entitlement other than itself,
   // not because of any pattern in its name.
   const bundles = new Map();
-  for (const e of owned) {
-    const product = contentOf(e.productId);
-    if (product && product !== contentOf(e.id)) bundles.set(product, e.productId);
+  for (const entitlement of owned) {
+    const product = contentOf(entitlement.productId);
+    if (product && product !== contentOf(entitlement.id)) bundles.set(product, entitlement.productId);
   }
 
   const byCode = new Map();
   for (const [code, id] of bundles) byCode.set(code, { code, id, type: "bundle" });
-  for (const e of owned) {
-    const code = contentOf(e.id);
+  for (const entitlement of owned) {
+    const code = contentOf(entitlement.id);
     if (!code || byCode.has(code)) continue;
-    byCode.set(code, { code, id: e.id, type: /^PROC/.test(code) ? "disc" : "song" });
+    byCode.set(code, { code, id: entitlement.id, type: /^PROC/.test(code) ? "disc" : "song" });
   }
   return [...byCode.values()];
 }

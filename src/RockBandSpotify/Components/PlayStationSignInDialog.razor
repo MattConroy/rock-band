@@ -5,14 +5,14 @@
    from an expired token once PlayStation rejects it. *@
 
 <div class="dialog-backdrop" @onclick="OnCancel">
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="psn-dialog-title"
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="playstation-dialog-title"
          @onclick:stopPropagation="true" @onkeydown="OnKeyDown">
         <div class="dialog-head">
-            <h2 id="psn-dialog-title">Connect PlayStation</h2>
+            <h2 id="playstation-dialog-title">Connect PlayStation</h2>
             <button type="button" class="dialog-close" aria-label="Close" @onclick="OnCancel">✕</button>
         </div>
 
-        <p class="rb-sub dialog-intro">
+        <p class="rock-band-subtext dialog-intro">
             This isn't Sony's own app, so it can't read your login directly. The token
             stays in this browser and lasts about two months.
         </p>
@@ -22,7 +22,7 @@
                 <span class="dialog-step-num">1</span>
                 <span>Sign in on Sony's site</span>
             </div>
-            <a class="rb-btn rb-btn-secondary dialog-step-control"
+            <a class="rock-band-button rock-band-button-secondary dialog-step-control"
                href="https://ca.account.sony.com/api/v1/ssocookie"
                target="_blank" rel="noopener">Open PlayStation login ↗</a>
         </div>
@@ -34,7 +34,7 @@
             </div>
 
             <div class="field-wrap">
-                <input class="rb-select dialog-step-control dialog-input @FieldClass"
+                <input class="rock-band-select dialog-step-control dialog-input @FieldClass"
                        type="password" autocomplete="off" spellcheck="false"
                        placeholder="npsso value, or the whole line"
                        aria-describedby="npsso-note"
@@ -68,12 +68,12 @@
 
         @if (!string.IsNullOrEmpty(Error))
         {
-            <p class="rb-alert-bad dialog-error">@Error</p>
+            <p class="rock-band-alert-bad dialog-error">@Error</p>
         }
 
         <div class="dialog-actions">
-            <button class="rb-btn rb-btn-secondary" @onclick="OnCancel">Cancel</button>
-            <button class="rb-btn" disabled="@(!_check.IsValid)" @onclick="Connect">Connect</button>
+            <button class="rock-band-button rock-band-button-secondary" @onclick="OnCancel">Cancel</button>
+            <button class="rock-band-button" disabled="@(!_check.IsValid)" @onclick="Connect">Connect</button>
         </div>
     </div>
 </div>
@@ -97,7 +97,7 @@
     {
         NpssoState.Valid => "dialog-note-ok",
         NpssoState.Invalid => "dialog-note-bad",
-        _ => "rb-sub",
+        _ => "rock-band-subtext",
     };
 
     private void OnInput(ChangeEventArgs e)

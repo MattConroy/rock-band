@@ -16,8 +16,8 @@ public class ConnectionButtonTests : AppPageTest
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
     }
 
-    private ILocator Psn => Page.Locator(".conn-btn").First;
-    private ILocator Spotify => Page.Locator(".conn-btn").Nth(1);
+    private ILocator PlayStation => Page.Locator(".connection-button").First;
+    private ILocator Spotify => Page.Locator(".connection-button").Nth(1);
 
     private async Task SeedLibrary(params int[] songIds)
     {
@@ -31,15 +31,15 @@ public class ConnectionButtonTests : AppPageTest
     [Test]
     public async Task Both_connections_appear_in_the_header()
     {
-        await Expect(Page.Locator(".conn-btn")).ToHaveCountAsync(2);
+        await Expect(Page.Locator(".connection-button")).ToHaveCountAsync(2);
     }
 
     [Test]
     public async Task They_start_disconnected()
     {
-        await Expect(Psn).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("conn-disconnected"));
-        await Expect(Spotify).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("conn-disconnected"));
-        await Expect(Psn).ToHaveAttributeAsync("title", new System.Text.RegularExpressions.Regex("not connected"));
+        await Expect(PlayStation).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("connection-disconnected"));
+        await Expect(Spotify).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("connection-disconnected"));
+        await Expect(PlayStation).ToHaveAttributeAsync("title", new System.Text.RegularExpressions.Regex("not connected"));
     }
 
     [Test]
@@ -47,7 +47,7 @@ public class ConnectionButtonTests : AppPageTest
     {
         await Expect(Page.GetByRole(AriaRole.Dialog)).ToHaveCountAsync(0);
 
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
 
         await Expect(Page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
         await Expect(Page.GetByPlaceholder("npsso value, or the whole line")).ToBeVisibleAsync();
@@ -58,7 +58,7 @@ public class ConnectionButtonTests : AppPageTest
     [Test]
     public async Task The_token_dialog_can_be_dismissed()
     {
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Expect(Page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Cancel" }).ClickAsync();
@@ -80,7 +80,7 @@ public class ConnectionButtonTests : AppPageTest
             await route.FulfillAsync(new() { Status = 401, ContentType = "application/json", Body = "{}" });
         });
 
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         var connect = Page.GetByRole(AriaRole.Button, new() { Name = "Connect", Exact = true });
         await Expect(connect).ToBeDisabledAsync();
 
@@ -92,7 +92,7 @@ public class ConnectionButtonTests : AppPageTest
         await Expect(connect).ToBeEnabledAsync();
 
         await connect.ClickAsync();
-        await Expect(Page.Locator(".conn-toast-bad")).ToBeVisibleAsync();
+        await Expect(Page.Locator(".connection-toast-bad")).ToBeVisibleAsync();
         Assert.That(sent, Does.Contain(ValidToken));
         Assert.That(sent, Does.Not.Contain("{\\"));
     }
@@ -100,7 +100,7 @@ public class ConnectionButtonTests : AppPageTest
     [Test]
     public async Task A_paste_that_is_not_a_token_cannot_be_submitted()
     {
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Page.GetByPlaceholder("npsso value, or the whole line").FillAsync("npsso value goes here");
 
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Connect", Exact = true })).ToBeDisabledAsync();
@@ -109,7 +109,7 @@ public class ConnectionButtonTests : AppPageTest
     [Test]
     public async Task The_field_marks_itself_valid_or_not_as_you_type()
     {
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         var field = Page.GetByPlaceholder("npsso value, or the whole line");
 
         // Nothing typed yet is neither state — no mark, no coloured outline.
@@ -141,7 +141,7 @@ public class ConnectionButtonTests : AppPageTest
             await route.FulfillAsync(new() { Status = 401, ContentType = "application/json", Body = "{}" });
         });
 
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Page.GetByPlaceholder("npsso value, or the whole line").FillAsync(ValidToken[..40]);
         await Page.Keyboard.PressAsync("Enter");
 
@@ -154,8 +154,8 @@ public class ConnectionButtonTests : AppPageTest
     {
         await SeedLibrary(4411, 98);
 
-        await Expect(Psn).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("conn-synced"));
-        await Expect(Psn).ToHaveAttributeAsync("title", new System.Text.RegularExpressions.Regex("2 songs owned"));
+        await Expect(PlayStation).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("connection-synced"));
+        await Expect(PlayStation).ToHaveAttributeAsync("title", new System.Text.RegularExpressions.Regex("2 songs owned"));
     }
 
     [Test]
@@ -163,7 +163,7 @@ public class ConnectionButtonTests : AppPageTest
     {
         await SeedLibrary(4411, 98); // Believer, Everlong
 
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
 
         await Expect(Page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
         await Expect(Page.Locator(".stat").First).ToContainTextAsync("2");
@@ -176,17 +176,17 @@ public class ConnectionButtonTests : AppPageTest
         // press did nothing and there was no way back to the full catalogue.
         await SeedLibrary(4411, 98);
 
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" }).ClickAsync();
         await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
         await Expect(Page.Locator("tbody")).ToContainTextAsync("Believer");
 
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Page.GetByRole(AriaRole.Button, new() { Name = "Show the whole catalogue" }).ClickAsync();
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
 
         // And again, to prove it isn't a one-shot.
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" }).ClickAsync();
         await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
     }
@@ -199,14 +199,14 @@ public class ConnectionButtonTests : AppPageTest
         // dialog offered to undo a filter that was already gone, and its
         // opposite did nothing.
         await SeedLibrary(4411, 98);
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" }).ClickAsync();
         await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Clear filters" }).ClickAsync();
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
 
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" })).ToBeVisibleAsync();
 
         // And the filter is still reachable rather than stuck.
@@ -223,7 +223,7 @@ public class ConnectionButtonTests : AppPageTest
         await Page.GetByLabel("Ownership").SelectOptionAsync("Owned");
         await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
 
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Show the whole catalogue" })).ToBeVisibleAsync();
     }
 
@@ -233,25 +233,25 @@ public class ConnectionButtonTests : AppPageTest
         // A sync that adds nothing and one that adds hundreds used to look
         // identical from the outside — silence either way.
         await SeedLibrary(4411, 98);
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Clear fetched songs" }).ClickAsync();
 
-        await Expect(Page.Locator(".conn-toast-good")).ToContainTextAsync("Cleared the fetched songs");
-        await Page.Locator(".conn-error-dismiss").ClickAsync();
-        await Expect(Page.Locator(".conn-toast-good")).ToHaveCountAsync(0);
+        await Expect(Page.Locator(".connection-toast-good")).ToContainTextAsync("Cleared the fetched songs");
+        await Page.Locator(".connection-toast-dismiss").ClickAsync();
+        await Expect(Page.Locator(".connection-toast-good")).ToHaveCountAsync(0);
     }
 
     [Test]
     public async Task Clearing_the_songs_keeps_the_sign_in()
     {
         await SeedLibrary(4411, 98);
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Clear fetched songs" }).ClickAsync();
 
         // Back to connected — amber, not disconnected — so no new token is needed.
-        await Expect(Psn).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("conn-connected"));
+        await Expect(PlayStation).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("connection-connected"));
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
     }
 
@@ -259,14 +259,14 @@ public class ConnectionButtonTests : AppPageTest
     public async Task Disconnecting_forgets_the_token_too()
     {
         await SeedLibrary(4411, 98);
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
 
         await Page.GetByRole(AriaRole.Button, new() { Name = "Disconnect PlayStation" }).ClickAsync();
 
-        await Expect(Psn).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("conn-disconnected"));
+        await Expect(PlayStation).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("connection-disconnected"));
 
         // And the next press asks for a token again rather than a status.
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Expect(Page.GetByPlaceholder("npsso value, or the whole line")).ToBeVisibleAsync();
     }
 
@@ -276,11 +276,11 @@ public class ConnectionButtonTests : AppPageTest
         // Disconnecting while narrowed would otherwise leave the page filtered
         // to a library that no longer exists.
         await SeedLibrary(4411, 98);
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" }).ClickAsync();
         await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
 
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Page.GetByRole(AriaRole.Button, new() { Name = "Disconnect PlayStation" }).ClickAsync();
 
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
@@ -290,7 +290,7 @@ public class ConnectionButtonTests : AppPageTest
     public async Task The_narrowed_view_is_in_the_address_and_survives_a_reload()
     {
         await SeedLibrary(4411, 98);
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" }).ClickAsync();
         await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
 
@@ -321,14 +321,14 @@ public class ConnectionButtonTests : AppPageTest
             Body = "{\"error\":\"npsso rejected by PlayStation\"}",
         }));
 
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Page.GetByPlaceholder("npsso value, or the whole line").FillAsync(ValidToken);
         await Page.GetByRole(AriaRole.Button, new() { Name = "Connect", Exact = true }).ClickAsync();
 
-        await Expect(Page.Locator(".conn-toast-bad")).ToContainTextAsync("npsso rejected by PlayStation");
+        await Expect(Page.Locator(".connection-toast-bad")).ToContainTextAsync("npsso rejected by PlayStation");
 
-        await Page.Locator(".conn-error-dismiss").ClickAsync();
-        await Expect(Page.Locator(".conn-toast-bad")).ToHaveCountAsync(0);
+        await Page.Locator(".connection-toast-dismiss").ClickAsync();
+        await Expect(Page.Locator(".connection-toast-bad")).ToHaveCountAsync(0);
     }
 
     [Test]
@@ -339,7 +339,7 @@ public class ConnectionButtonTests : AppPageTest
         await Page.SetViewportSizeAsync(320, 700);
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
 
-        foreach (var button in await Page.Locator(".conn-btn").AllAsync())
+        foreach (var button in await Page.Locator(".connection-button").AllAsync())
         {
             var box = await button.BoundingBoxAsync();
             Assert.That(box, Is.Not.Null);
@@ -404,7 +404,7 @@ public class ConnectionButtonTests : AppPageTest
         await Page.ReloadAsync();
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
 
-        await Expect(Spotify).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("conn-synced"));
+        await Expect(Spotify).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("connection-synced"));
     }
 
     [Test]
@@ -413,10 +413,10 @@ public class ConnectionButtonTests : AppPageTest
         var errors = new List<string>();
         Page.Console += (_, msg) => { if (msg.Type == "error") errors.Add(msg.Text); };
 
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Page.GetByRole(AriaRole.Button, new() { Name = "Cancel" }).ClickAsync();
         await SeedLibrary(4411);
-        await Psn.ClickAsync();
+        await PlayStation.ClickAsync();
         await Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" }).ClickAsync();
 
         Assert.That(errors, Is.Empty);

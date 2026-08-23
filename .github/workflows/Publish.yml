@@ -1,7 +1,7 @@
 name: Publish
 
 # Deploys both halves of the app on every push to main: the Blazor WASM app to
-# GitHub Pages, and the PSN gateway to Cloudflare. The two are independent —
+# GitHub Pages, and the PlayStation gateway to Cloudflare. The two are independent —
 # deploying the (usually unchanged) Worker alongside the app is cheap and
 # keeps this workflow to a single trigger instead of two.
 #

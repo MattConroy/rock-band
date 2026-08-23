@@ -1,7 +1,7 @@
-# PSN gateway (Cloudflare Worker)
+# PlayStation gateway (Cloudflare Worker)
 
 A **stateless** relay that lets the browser app read your PlayStation entitlements.
-The browser can't call PSN directly (no CORS); this Worker makes the call
+The browser can't call PlayStation directly (no CORS); this Worker makes the call
 server-side and returns just your Rock Band song list.
 
 **It stores nothing.** Your `npsso` arrives in the POST body, is used for that one
@@ -16,7 +16,7 @@ POST /              body: { "npsso": "<64-char token>" }
 
 Response: `{ "generatedAt", "source", "counts", "items": [ { code, id, type } ] }`
 
-`code` is the PSN content code (e.g. `RBBELIEVERXX2775`), `type` is
+`code` is the PlayStation content code (e.g. `RBBELIEVERXX2775`), `type` is
 `"song"`, `"disc"`, or `"bundle"`. The app matches these codes against its
 own static song catalogue — this Worker never resolves or returns names.
 
@@ -48,11 +48,11 @@ wrangler dev      # serves http://localhost:8787
 
 ## Checking your entitlements without deploying
 
-`test-local.mjs` runs the same PSN calls the Worker makes, on your own machine,
+`test-local.mjs` runs the same PlayStation calls the Worker makes, on your own machine,
 so your `npsso` never leaves it:
 
 ```bash
-PSN_NPSSO=<your-64-char-token> node test-local.mjs
+PlayStation_NPSSO=<your-64-char-token> node test-local.mjs
 ```
 
 It prints how many entitlements the account holds and which Rock Band items the

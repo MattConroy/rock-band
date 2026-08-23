@@ -18,7 +18,7 @@
     background: #060810;
     color: #fff;
     padding: 0.8rem 1rem;
-    border-bottom: 3px solid var(--rb-accent);
+    border-bottom: 3px solid var(--rock-band-accent);
 }
 
 .app-header-inner {
@@ -47,7 +47,7 @@
 
 /* The connection buttons sit where the nav links used to, hard right, and
    never shrink or wrap — they are the only controls in the header. */
-.app-header-inner :deep(.conn-buttons) { margin-left: auto; flex: none; }
+.app-header-inner :deep(.connection-buttons) { margin-left: auto; flex: none; }
 
 .app-main {
     max-width: 68.75rem;

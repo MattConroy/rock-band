@@ -10,13 +10,13 @@ namespace RockBandSpotify.Pages;
 /// </summary>
 public partial class SpotifyConnectCallback
 {
-    [Inject] private SpotifyAuthService Auth { get; set; } = default!;
-    [Inject] private NavigationManager Nav { get; set; } = default!;
+    [Inject] private SpotifyAuthenticationService Authentication { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        await Auth.TryCompleteLoginAsync(Nav.Uri);
-        var returnPath = await Auth.ConsumeReturnPathAsync();
-        Nav.NavigateTo(returnPath);
+        await Authentication.TryCompleteLoginAsync(Navigation.Uri);
+        var returnPath = await Authentication.ConsumeReturnPathAsync();
+        Navigation.NavigateTo(returnPath);
     }
 }

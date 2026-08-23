@@ -18,18 +18,18 @@ namespace RockBandSpotify.Services;
 /// </summary>
 public class OwnedLibrary
 {
-    private const string StorageKey = "rb_owned_songs";
+    private const string StorageKey = "rock_band_owned_songs";
 
-    private readonly IJSRuntime _js;
+    private readonly IJSRuntime _javaScript;
 
-    public OwnedLibrary(IJSRuntime js) => _js = js;
+    public OwnedLibrary(IJSRuntime javaScript) => _javaScript = javaScript;
 
     /// <summary>The stored library, or null when nothing has been fetched.</summary>
     public async Task<SongLibrary?> LoadAsync()
     {
         try
         {
-            var raw = await _js.InvokeAsync<string?>("rbSpotify.getItem", StorageKey);
+            var raw = await _javaScript.InvokeAsync<string?>("rockBandSpotify.getItem", StorageKey);
             if (string.IsNullOrEmpty(raw)) return null;
             return JsonSerializer.Deserialize<SongLibrary>(raw);
         }
@@ -51,7 +51,7 @@ public class OwnedLibrary
     {
         try
         {
-            await _js.InvokeVoidAsync("rbSpotify.setItem", StorageKey, JsonSerializer.Serialize(library));
+            await _javaScript.InvokeVoidAsync("rockBandSpotify.setItem", StorageKey, JsonSerializer.Serialize(library));
         }
         catch { /* the list just won't survive a reload */ }
     }
@@ -60,7 +60,7 @@ public class OwnedLibrary
     {
         try
         {
-            await _js.InvokeVoidAsync("rbSpotify.removeItem", StorageKey);
+            await _javaScript.InvokeVoidAsync("rockBandSpotify.removeItem", StorageKey);
         }
         catch { /* nothing to clear */ }
     }

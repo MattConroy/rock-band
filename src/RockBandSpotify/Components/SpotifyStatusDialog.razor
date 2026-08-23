@@ -23,7 +23,7 @@
             </div>
         </dl>
 
-        <p class="rb-sub dialog-intro">
+        <p class="rock-band-subtext dialog-intro">
             @if (ReadyCount == 0)
             {
                 @:Nothing to sync yet — connect PlayStation so there are owned songs to add.
@@ -39,20 +39,20 @@
         </p>
 
         <div class="dialog-stack">
-            <button type="button" class="rb-btn dialog-step-control" disabled="@Busy" @onclick="OnSync">
+            <button type="button" class="rock-band-button dialog-step-control" disabled="@Busy" @onclick="OnSync">
                 @(Busy ? "Syncing…" : TrackCount == 0 ? "Sync now" : "Sync again")
             </button>
-            <button type="button" class="rb-btn rb-btn-secondary dialog-step-control" @onclick="OnOpen">
+            <button type="button" class="rock-band-button rock-band-button-secondary dialog-step-control" @onclick="OnOpen">
                 Open in Spotify ↗
             </button>
         </div>
 
         <div class="dialog-danger">
-            <button type="button" class="link-btn link-btn-bad" disabled="@Busy" @onclick="OnDisconnect">
+            <button type="button" class="link-button link-button-bad" disabled="@Busy" @onclick="OnDisconnect">
                 Disconnect Spotify
             </button>
         </div>
-        <p class="dialog-note rb-sub">
+        <p class="dialog-note rock-band-subtext">
             Disconnecting forgets your sign-in here. The playlist stays on your
             Spotify account.
         </p>

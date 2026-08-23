@@ -60,8 +60,8 @@ public class CatalogueSong
     /// kept them out of the export.
     /// </para>
     /// </summary>
-    [JsonPropertyName("psnIds")]
-    public List<string> PsnIds { get; set; } = [];
+    [JsonPropertyName("playStationIds")]
+    public List<string> PlayStationIds { get; set; } = [];
 
     /// <summary>
     /// The Spotify track this song is, when we know it — a bare track id such

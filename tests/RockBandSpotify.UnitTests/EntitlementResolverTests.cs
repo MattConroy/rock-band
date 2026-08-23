@@ -6,7 +6,7 @@ namespace RockBandSpotify.UnitTests;
 public class EntitlementResolverTests
 {
     private static CatalogueSong Song(int id, string title, params string[] psnIds)
-        => new() { Id = id, Song = title, Artist = "A", PsnIds = [.. psnIds] };
+        => new() { Id = id, Song = title, Artist = "A", PlayStationIds = [.. psnIds] };
 
     private static readonly List<CatalogueSong> Catalogue =
     [

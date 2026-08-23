@@ -1,6 +1,6 @@
 /* The card fills whatever vertical space app-main has left, and only the
    table scrolls inside it — the page itself never grows past the viewport. */
-.rb-card {
+.rock-band-card {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
@@ -31,14 +31,14 @@
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: var(--rb-muted);
+    color: var(--rock-band-muted);
     font-size: 1.1rem;
     line-height: 1;
     cursor: pointer;
     padding: 0.15rem 0.35rem;
 }
 
-.search-clear:hover { color: var(--rb-text); }
+.search-clear:hover { color: var(--rock-band-text); }
 
 /* The selects wrap among themselves rather than being one unbreakable row:
    with three of them a phone has nowhere to put ~500px of controls, and
@@ -52,7 +52,7 @@
     min-width: 0;
 }
 
-.select-group .rb-select {
+.select-group .rock-band-select {
     flex: 1 1 auto;
     min-width: 7rem;
     max-width: 10rem;
@@ -65,7 +65,7 @@
     padding: 0.35rem 0.65rem;
     border-radius: 4px;
     background: linear-gradient(90deg, rgba(47, 143, 224, 0.28), rgba(47, 143, 224, 0.05));
-    border-left: 3px solid var(--rb-accent);
+    border-left: 3px solid var(--rock-band-accent);
     font-size: 0.85rem;
     flex-shrink: 0;
 }
@@ -74,7 +74,7 @@
     position: relative;
 }
 
-.icon-btn {
+.icon-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -82,20 +82,20 @@
     height: 1.625rem;
     padding: 0;
     background: #1a2231;
-    color: var(--rb-text);
+    color: var(--rock-band-text);
     border: none;
     border-radius: 6px;
     cursor: pointer;
 }
 
-.icon-btn:hover { background: #223349; color: var(--rb-accent); }
+.icon-button:hover { background: #223349; color: var(--rock-band-accent); }
 
 .column-picker-menu {
     position: absolute;
     right: 0;
     top: calc(100% + 0.3rem);
-    background: var(--rb-card);
-    border: 1px solid var(--rb-border);
+    background: var(--rock-band-card);
+    border: 1px solid var(--rock-band-border);
     border-radius: 8px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
     padding: 0.5rem 0.75rem;
@@ -151,7 +151,7 @@
     overflow-y: auto;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    scrollbar-color: var(--rb-muted) var(--rb-card);
+    scrollbar-color: var(--rock-band-muted) var(--rock-band-card);
 }
 
 .table-body-wrap::-webkit-scrollbar {
@@ -160,16 +160,16 @@
 }
 
 .table-body-wrap::-webkit-scrollbar-track {
-    background: var(--rb-card);
+    background: var(--rock-band-card);
 }
 
 .table-body-wrap::-webkit-scrollbar-thumb {
-    background: var(--rb-muted);
+    background: var(--rock-band-muted);
     border-radius: 6px;
 }
 
 .table-body-wrap::-webkit-scrollbar-thumb:hover {
-    background: var(--rb-text);
+    background: var(--rock-band-text);
 }
 
 /* Named catalogue-table, not table, to avoid colliding with Bootstrap's own
@@ -203,21 +203,21 @@
 .catalogue-table td {
     text-align: left;
     padding: 0.4rem 0.55rem;
-    border-bottom: 1px solid var(--rb-border);
+    border-bottom: 1px solid var(--rock-band-border);
     vertical-align: middle;
     overflow-wrap: break-word;
     line-height: 1.3;
 }
 
-/* Padding lives on .th-sort-btn, not the th itself, so the whole header
+/* Padding lives on .header-sort-button, not the th itself, so the whole header
    cell is one tap target instead of just the text inside it. */
 .catalogue-table th {
     padding: 0;
-    border-bottom: 2px solid var(--rb-accent);
+    border-bottom: 2px solid var(--rock-band-accent);
     vertical-align: middle;
 }
 
-.th-sort-btn {
+.header-sort-button {
     display: flex;
     align-items: center;
     gap: 0.3rem;
@@ -231,15 +231,15 @@
     text-transform: uppercase;
     letter-spacing: 0.6px;
     font-weight: 800;
-    color: var(--rb-accent);
+    color: var(--rock-band-accent);
     text-align: left;
     line-height: 1.3;
     cursor: pointer;
 }
 
-.th-sort-btn:hover,
-.th-sort-btn:focus-visible {
-    color: var(--rb-text);
+.header-sort-button:hover,
+.header-sort-button:focus-visible {
+    color: var(--rock-band-text);
 }
 
 .sort-indicator {
@@ -248,5 +248,5 @@
 
 .catalogue-table tbody tr:hover {
     background: linear-gradient(90deg, rgba(47, 143, 224, 0.22), rgba(47, 143, 224, 0.04));
-    box-shadow: inset 3px 0 0 var(--rb-accent);
+    box-shadow: inset 3px 0 0 var(--rock-band-accent);
 }

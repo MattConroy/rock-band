@@ -5,10 +5,10 @@
    instead, so the button has one meaning at every stage. *@
 
 <div class="dialog-backdrop" @onclick="OnClose">
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="psn-status-title"
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="playstation-status-title"
          @onclick:stopPropagation="true" @onkeydown="OnKeyDown">
         <div class="dialog-head">
-            <h2 id="psn-status-title">PlayStation</h2>
+            <h2 id="playstation-status-title">PlayStation</h2>
             <button type="button" class="dialog-close" aria-label="Close" @onclick="OnClose">✕</button>
         </div>
 
@@ -23,7 +23,7 @@
             </div>
         </dl>
 
-        <p class="rb-sub dialog-intro">
+        <p class="rock-band-subtext dialog-intro">
             @if (MatchedCount == OwnedCount)
             {
                 @:Every owned song has a Spotify track, so all of them can reach the playlist.
@@ -35,24 +35,24 @@
         </p>
 
         <div class="dialog-stack">
-            <button type="button" class="rb-btn dialog-step-control" @onclick="OnToggleFilter">
+            <button type="button" class="rock-band-button dialog-step-control" @onclick="OnToggleFilter">
                 @(ShowingOwned ? "Show the whole catalogue" : "Show only songs I own")
             </button>
-            <button type="button" class="rb-btn rb-btn-secondary dialog-step-control"
+            <button type="button" class="rock-band-button rock-band-button-secondary dialog-step-control"
                     disabled="@Busy" @onclick="OnRefetch">
                 @(Busy ? "Fetching…" : "Fetch again from PlayStation")
             </button>
         </div>
 
         <div class="dialog-danger">
-            <button type="button" class="link-btn" disabled="@Busy" @onclick="OnClear">
+            <button type="button" class="link-button" disabled="@Busy" @onclick="OnClear">
                 Clear fetched songs
             </button>
-            <button type="button" class="link-btn link-btn-bad" disabled="@Busy" @onclick="OnDisconnect">
+            <button type="button" class="link-button link-button-bad" disabled="@Busy" @onclick="OnDisconnect">
                 Disconnect PlayStation
             </button>
         </div>
-        <p class="dialog-note rb-sub">
+        <p class="dialog-note rock-band-subtext">
             Clearing keeps your sign-in, so fetching again needs no new token.
             Disconnecting forgets both.
         </p>
