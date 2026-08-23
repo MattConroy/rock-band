@@ -299,7 +299,7 @@ public class CatalogueTests : AppPageTest
     private async Task SeedOwned(params int[] songIds)
     {
         await Page.EvaluateAsync(
-            "ids => localStorage.setItem('rb_owned_songs', JSON.stringify({ generatedAt: null, songIds: ids }))",
+            "ids => localStorage.setItem('rock_band_owned_songs', JSON.stringify({ generatedAt: null, songIds: ids }))",
             songIds);
         await Page.ReloadAsync();
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
@@ -372,7 +372,7 @@ public class CatalogueTests : AppPageTest
     public async Task No_column_is_squeezed_at_any_width(int viewport, string columns)
     {
         await SeedOwned(4411);
-        await Page.EvaluateAsync($"() => localStorage.setItem('rb_catalogue_columns', '{columns}')");
+        await Page.EvaluateAsync($"() => localStorage.setItem('rock_band_catalogue_columns', '{columns}')");
         await Page.SetViewportSizeAsync(viewport, 800);
         await Page.ReloadAsync();
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
@@ -403,7 +403,7 @@ public class CatalogueTests : AppPageTest
     {
         await SeedOwned(4411);
         await Page.EvaluateAsync(
-            "() => localStorage.setItem('rb_catalogue_columns', JSON.stringify(['Year','Genre','Source','Released']))");
+            "() => localStorage.setItem('rock_band_catalogue_columns', JSON.stringify(['Year','Genre','Source','Released']))");
         await Page.SetViewportSizeAsync(390, 780);
         await Page.ReloadAsync();
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });

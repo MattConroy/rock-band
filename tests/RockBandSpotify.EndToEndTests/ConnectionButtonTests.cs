@@ -22,7 +22,7 @@ public class ConnectionButtonTests : AppPageTest
     private async Task SeedLibrary(params int[] songIds)
     {
         await Page.EvaluateAsync(
-            "ids => localStorage.setItem('rb_owned_songs', JSON.stringify({ generatedAt: null, songIds: ids }))",
+            "ids => localStorage.setItem('rock_band_owned_songs', JSON.stringify({ generatedAt: null, songIds: ids }))",
             songIds);
         await Page.ReloadAsync();
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
@@ -353,10 +353,10 @@ public class ConnectionButtonTests : AppPageTest
     {
         await Page.EvaluateAsync(
             @"count => {
-                localStorage.setItem('rb_spotify_token', JSON.stringify({
+                localStorage.setItem('rock_band_spotify_token', JSON.stringify({
                     AccessToken: 'fake', ExpiresAt: '2099-01-01T00:00:00+00:00',
                     Scope: 'playlist-read-private playlist-modify-public playlist-modify-private' }));
-                localStorage.setItem('rb_spotify_playlist', JSON.stringify({
+                localStorage.setItem('rock_band_spotify_playlist', JSON.stringify({
                     Url: 'https://open.spotify.com/playlist/xyz', Name: 'Rock Band DLC', TrackCount: count }));
             }", trackCount);
         await Page.ReloadAsync();
@@ -399,8 +399,8 @@ public class ConnectionButtonTests : AppPageTest
         // Earlier builds saved just the URL. Reading those keeps a sync that
         // already happened rather than silently demoting it.
         await Page.EvaluateAsync(
-            "localStorage.setItem('rb_spotify_token', JSON.stringify({ AccessToken: 'fake', ExpiresAt: '2099-01-01T00:00:00+00:00', Scope: 'playlist-read-private playlist-modify-public playlist-modify-private' }));"
-            + "localStorage.setItem('rb_spotify_playlist', JSON.stringify('https://open.spotify.com/playlist/old'));");
+            "localStorage.setItem('rock_band_spotify_token', JSON.stringify({ AccessToken: 'fake', ExpiresAt: '2099-01-01T00:00:00+00:00', Scope: 'playlist-read-private playlist-modify-public playlist-modify-private' }));"
+            + "localStorage.setItem('rock_band_spotify_playlist', JSON.stringify('https://open.spotify.com/playlist/old'));");
         await Page.ReloadAsync();
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
 
