@@ -18,8 +18,8 @@
 
 .search-box {
     position: relative;
-    flex: 1 1 220px;
-    max-width: 320px;
+    flex: 1 1 13.75rem;
+    max-width: 20rem;
 }
 
 .search { width: 100%; box-sizing: border-box; padding-right: 1.8rem; }
@@ -55,7 +55,7 @@
 .select-group .rb-select {
     flex: 1 1 auto;
     min-width: 7rem;
-    max-width: 160px;
+    max-width: 10rem;
 }
 
 /* Echoes a rhythm-game menu's "sorted by / X of Y" info strip. */
@@ -78,8 +78,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 1.625rem;
+    height: 1.625rem;
     padding: 0;
     background: #1a2231;
     color: var(--rb-text);

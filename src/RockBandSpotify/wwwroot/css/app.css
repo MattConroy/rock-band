@@ -203,7 +203,7 @@ body {
     border: 1px solid var(--rb-border);
     background: #131a26;
     color: var(--rb-text);
-    max-width: 320px;
+    max-width: 20rem;
 }
 
 /* Connection buttons ------------------------------------------------------
@@ -217,8 +217,8 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 2.25rem;
+    height: 2.25rem;
     padding: 0;
     border: none;
     border-radius: 8px;
@@ -227,6 +227,10 @@ body {
     cursor: pointer;
     transition: color 0.15s, background 0.15s;
 }
+
+/* Sized here rather than on the element, so the glyph grows with the button
+   when the reader's font size does. */
+.conn-btn svg { width: 1.25rem; height: 1.25rem; }
 
 .conn-btn:hover:not(:disabled) { background: #223349; }
 .conn-btn:disabled { cursor: progress; }
@@ -248,9 +252,9 @@ body {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 18px;
-    height: 18px;
-    margin: -9px 0 0 -9px;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin: -0.5625rem 0 0 -0.5625rem;
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.18);
     border-top-color: var(--rb-accent);
@@ -265,10 +269,10 @@ body {
 
 .conn-dot {
     position: absolute;
-    right: 3px;
-    bottom: 3px;
-    width: 8px;
-    height: 8px;
+    right: 0.1875rem;
+    bottom: 0.1875rem;
+    width: 0.5rem;
+    height: 0.5rem;
     border-radius: 50%;
     box-sizing: border-box;
     /* Punched out of the icon behind it, so the dot reads as a badge rather
@@ -305,7 +309,7 @@ body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     padding: 1.25rem;
     width: 100%;
-    max-width: 420px;
+    max-width: 26.25rem;
 }
 
 /* Anything that goes wrong outside the dialog needs somewhere to land, or a
