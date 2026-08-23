@@ -236,19 +236,24 @@ body {
    button, and a phone has no cursor to change. The icon fades and the dot
    becomes a spinner. */
 .conn-busy { opacity: 1; }
-.conn-busy svg { opacity: 0.35; }
+.conn-busy svg { opacity: 0.25; }
 .conn-busy .conn-dot { display: none; }
 
-/* A ring around the whole button, not a dot in its corner — at 8px the old
-   spinner was easy to miss entirely on a sync that takes several seconds. */
+/* Centred over the dimmed icon, and a real circle. Tracing the button's
+   rounded-rectangle outline meant the gap in the ring changed shape as it
+   went round, which reads as a wobble rather than a spin. Still far bigger
+   than the 8px corner dot this replaced. */
 .conn-busy::after {
     content: "";
     position: absolute;
-    inset: -3px;
-    border-radius: 11px;
-    border: 2px solid transparent;
+    top: 50%;
+    left: 50%;
+    width: 18px;
+    height: 18px;
+    margin: -9px 0 0 -9px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.18);
     border-top-color: var(--rb-accent);
-    border-right-color: var(--rb-accent);
     animation: conn-spin 0.8s linear infinite;
 }
 
