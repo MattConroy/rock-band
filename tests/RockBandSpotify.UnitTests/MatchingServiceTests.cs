@@ -11,18 +11,8 @@ public class MatchingServiceTests
 {
     private sealed class FakeLookup : ITrackLookup
     {
-        public Dictionary<string, SpotifyTrack> Known { get; init; } = new();
         public List<SpotifyTrack> SearchResult { get; set; } = new();
         public List<string> Searched { get; } = new();
-        public List<string> LookedUp { get; } = new();
-        public Exception? LookupThrows { get; set; }
-
-        public Task<Dictionary<string, SpotifyTrack>> GetTracksAsync(IReadOnlyList<string> ids)
-        {
-            LookedUp.AddRange(ids);
-            if (LookupThrows is not null) throw LookupThrows;
-            return Task.FromResult(ids.Where(Known.ContainsKey).ToDictionary(i => i, i => Known[i]));
-        }
 
         public Task<List<SpotifyTrack>> SearchTracksAsync(string title, string artist, int limit = 5)
         {
@@ -48,8 +38,7 @@ public class MatchingServiceTests
     [Fact]
     public async Task A_song_with_a_known_id_is_never_searched()
     {
-        var track = Track("abc", "Believer", "Imagine Dragons");
-        var api = new FakeLookup { Known = { ["abc"] = track } };
+        var api = new FakeLookup();
 
         var results = await Matcher(api).MatchAllAsync(
             [Song("Believer", "Imagine Dragons", "abc")]);
@@ -57,13 +46,35 @@ public class MatchingServiceTests
         Assert.Empty(api.Searched);
         var match = Assert.Single(results);
         Assert.Equal(MatchStatus.Matched, match.Status);
-        Assert.Same(track, match.Selected);
+        Assert.Equal("abc", match.Selected!.Id);
+    }
+
+    [Fact]
+    public async Task A_known_id_becomes_a_track_uri_without_asking_Spotify()
+    {
+        // GET /tracks was removed in February 2026, and turning an id into a
+        // URI never needed it — the form is fixed.
+        var match = Assert.Single(await Matcher(new FakeLookup())
+            .MatchAllAsync([Song("Believer", "Imagine Dragons", "abc")]));
+
+        Assert.Equal("spotify:track:abc", match.Selected!.Uri);
+        Assert.True(match.IsSyncable);
+    }
+
+    [Fact]
+    public async Task A_known_song_carries_the_catalogue_title_and_artist()
+    {
+        var match = Assert.Single(await Matcher(new FakeLookup())
+            .MatchAllAsync([Song("Believer", "Imagine Dragons", "abc")]));
+
+        Assert.Equal("Believer", match.Selected!.Name);
+        Assert.Equal("Imagine Dragons", match.Selected.ArtistNames);
     }
 
     [Fact]
     public async Task A_known_id_is_certain_and_included()
     {
-        var api = new FakeLookup { Known = { ["abc"] = Track("abc", "Believer", "Imagine Dragons") } };
+        var api = new FakeLookup();
 
         var match = Assert.Single(await Matcher(api)
             .MatchAllAsync([Song("Believer", "Imagine Dragons", "abc")]));
@@ -89,50 +100,9 @@ public class MatchingServiceTests
     }
 
     [Fact]
-    public async Task An_id_Spotify_no_longer_knows_falls_back_to_searching()
-    {
-        // GetTracksAsync omits ids it can't resolve rather than failing, so the
-        // song has to reach the search path anyway.
-        var api = new FakeLookup { SearchResult = [Track("xyz", "Believer", "Imagine Dragons")] };
-
-        var match = Assert.Single(await Matcher(api)
-            .MatchAllAsync([Song("Believer", "Imagine Dragons", "gone")]));
-
-        Assert.Equal(["Believer"], api.Searched);
-        Assert.Equal("xyz", match.Selected!.Id);
-    }
-
-    [Fact]
-    public async Task A_failed_batch_lookup_degrades_to_searching_everything()
-    {
-        var api = new FakeLookup
-        {
-            LookupThrows = new HttpRequestException("network"),
-            SearchResult = [Track("xyz", "Believer", "Imagine Dragons")],
-        };
-
-        var results = await Matcher(api).MatchAllAsync(
-            [Song("Believer", "Imagine Dragons", "abc"), Song("Africa", "Toto", "def")]);
-
-        Assert.Equal(2, api.Searched.Count);
-        Assert.All(results, m => Assert.NotEqual(MatchStatus.Error, m.Status));
-    }
-
-    [Fact]
-    public async Task Ids_are_looked_up_once_for_the_whole_library()
-    {
-        var api = new FakeLookup();
-        await Matcher(api).MatchAllAsync(
-            [Song("A", "X", "id1"), Song("B", "Y", "id2"), Song("C", "Z")]);
-
-        // One batched call carrying both ids, rather than a request per song.
-        Assert.Equal(["id1", "id2"], api.LookedUp);
-    }
-
-    [Fact]
     public async Task Progress_counts_every_song_whichever_path_it_took()
     {
-        var api = new FakeLookup { Known = { ["abc"] = Track("abc", "A", "X") } };
+        var api = new FakeLookup();
         var seen = new List<int>();
 
         await Matcher(api).MatchAllAsync(
@@ -159,16 +129,29 @@ public class MatchingServiceTests
     [Fact]
     public async Task Switching_searching_off_does_not_affect_known_songs()
     {
-        var track = Track("abc", "Believer", "Imagine Dragons");
-        var api = new FakeLookup { Known = { ["abc"] = track } };
+        var api = new FakeLookup();
 
         var results = await Matcher(api, search: false).MatchAllAsync(
             [Song("Believer", "Imagine Dragons", "abc"), Song("Africa", "Toto")]);
 
         Assert.Empty(api.Searched);
         Assert.Equal(MatchStatus.Matched, results[0].Status);
-        Assert.Same(track, results[0].Selected);
+        Assert.Equal("spotify:track:abc", results[0].Selected!.Uri);
         Assert.Equal(MatchStatus.Skipped, results[1].Status);
+    }
+
+    [Fact]
+    public async Task A_library_of_known_songs_asks_Spotify_for_nothing()
+    {
+        // The whole matching step is now offline when the catalogue knows the
+        // tracks, which is the case for nearly every owned song.
+        var api = new FakeLookup();
+
+        var results = await Matcher(api, search: false).MatchAllAsync(
+            [Song("A", "X", "id1"), Song("B", "Y", "id2"), Song("C", "Z", "id3")]);
+
+        Assert.Empty(api.Searched);
+        Assert.All(results, m => Assert.True(m.IsSyncable));
     }
 
     [Fact]

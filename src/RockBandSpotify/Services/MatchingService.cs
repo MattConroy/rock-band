@@ -6,9 +6,9 @@ namespace RockBandSpotify.Services;
 /// Turns owned songs into Spotify tracks, ready for review before syncing.
 ///
 /// <para>
-/// Most songs need no searching. The catalogue knows which Spotify track they
-/// are, so those are fetched by id — fifty per request — and there is nothing to
-/// score, because nothing was guessed.
+/// Most songs need nothing from Spotify at all. The catalogue already knows
+/// which track they are, and a track's URI follows from its id, so those are
+/// resolved here with no request and nothing to score — nothing was guessed.
 /// </para>
 /// <para>
 /// The remainder are searched by name and scored only if
@@ -39,15 +39,14 @@ public class MatchingService
     {
         var list = songs.ToList();
         var results = new List<SongMatch>(list.Count);
-        var known = await LookUpKnownTracksAsync(list);
 
         for (var i = 0; i < list.Count; i++)
         {
             var song = list[i];
             var match = new SongMatch { Song = song };
 
-            if (song.SpotifyId is not null && known.TryGetValue(song.SpotifyId, out var track))
-                Accept(match, track);
+            if (!string.IsNullOrEmpty(song.SpotifyId))
+                Accept(match, TrackFor(song));
             else if (_config.SearchForMissingTracks)
                 await SearchAndScoreAsync(song, match);
             else
@@ -62,23 +61,24 @@ public class MatchingService
     }
 
     /// <summary>
-    /// Fetches the tracks the catalogue already names. A failure here is not
-    /// fatal: an empty result simply sends every song down the search path.
+    /// The track a catalogue id stands for, built rather than fetched.
+    ///
+    /// <para>
+    /// This used to come from GET /tracks, which Spotify removed in February
+    /// 2026 with no replacement. Every batch then failed, every song fell
+    /// through to the search path, and with searching off the sync produced an
+    /// empty playlist. Nothing was lost by dropping it: a URI follows from the
+    /// id, and the title and artist shown are the catalogue's own — which is
+    /// what they always were on screen anyway.
+    /// </para>
     /// </summary>
-    private async Task<Dictionary<string, SpotifyTrack>> LookUpKnownTracksAsync(List<CatalogueSong> songs)
+    private static SpotifyTrack TrackFor(CatalogueSong song) => new()
     {
-        var ids = songs.Select(s => s.SpotifyId).OfType<string>().ToList();
-        if (ids.Count == 0) return [];
-
-        try
-        {
-            return await _api.GetTracksAsync(ids);
-        }
-        catch
-        {
-            return [];
-        }
-    }
+        Id = song.SpotifyId!,
+        Uri = $"spotify:track:{song.SpotifyId}",
+        Name = song.Song,
+        Artists = [new SpotifyArtist { Name = song.Artist }],
+    };
 
     /// <summary>A track the catalogue named: no candidates to weigh, no doubt to record.</summary>
     private static void Accept(SongMatch match, SpotifyTrack track)

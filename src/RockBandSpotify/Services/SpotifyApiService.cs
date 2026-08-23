@@ -104,14 +104,14 @@ public class SpotifyApiService : ITrackLookup
     public async Task<List<SpotifyTrack>> SearchTracksAsync(string title, string artist, int limit = 5)
     {
         var q = $"track:{title} artist:{artist}";
-        var url = $"{ApiBase}/search?type=track&limit={limit}&q={Uri.EscapeDataString(q)}";
+        var url = $"{ApiBase}/search?type=track&limit={Clamp(limit)}&q={Uri.EscapeDataString(q)}";
         var request = await AuthorizedRequest(HttpMethod.Get, url);
         var response = await SendAsync(request);
 
         if (!response.IsSuccessStatusCode)
         {
             // Fall back to a looser free-text query if the fielded search finds nothing useful.
-            var loose = $"{ApiBase}/search?type=track&limit={limit}&q={Uri.EscapeDataString($"{title} {artist}")}";
+            var loose = $"{ApiBase}/search?type=track&limit={Clamp(limit)}&q={Uri.EscapeDataString($"{title} {artist}")}";
             var looseReq = await AuthorizedRequest(HttpMethod.Get, loose);
             response = await SendAsync(looseReq);
             await EnsureAsync(response, "the track search");
@@ -122,33 +122,13 @@ public class SpotifyApiService : ITrackLookup
     }
 
     /// <summary>
-    /// Looks up tracks by id, fifty at a time — the endpoint's limit.
-    /// <para>
-    /// This is what makes a known id worth having: a library of 850 songs is
-    /// seventeen requests here against 850 searches, and the answer needs no
-    /// scoring because nothing was guessed. Ids Spotify no longer recognises
-    /// come back as nulls and are simply absent from the result.
-    /// </para>
+    /// Spotify cut search's maximum limit from 50 to 10 in February 2026, and
+    /// asking for more is a 400. Clamped rather than trusted, because the
+    /// caller that eventually wants more candidates shouldn't have to know.
     /// </summary>
-    public async Task<Dictionary<string, SpotifyTrack>> GetTracksAsync(IReadOnlyList<string> ids)
-    {
-        var found = new Dictionary<string, SpotifyTrack>(StringComparer.OrdinalIgnoreCase);
+    internal const int MaxSearchLimit = 10;
 
-        foreach (var batch in ids.Distinct(StringComparer.OrdinalIgnoreCase).Chunk(50))
-        {
-            var url = $"{ApiBase}/tracks?ids={Uri.EscapeDataString(string.Join(",", batch))}";
-            var request = await AuthorizedRequest(HttpMethod.Get, url);
-            var response = await SendAsync(request);
-            if (!response.IsSuccessStatusCode) continue;
-
-            var page = await response.Content.ReadFromJsonAsync<SpotifyTracksResponse>();
-            foreach (var track in page?.Tracks ?? [])
-                if (track is not null && !string.IsNullOrEmpty(track.Id))
-                    found[track.Id] = track;
-        }
-
-        return found;
-    }
+    private static int Clamp(int limit) => Math.Clamp(limit, 1, MaxSearchLimit);
 
     /// <summary>Finds a playlist owned by the user by exact (case-insensitive) name.</summary>
     public async Task<SpotifyPlaylist?> FindPlaylistByNameAsync(string name)

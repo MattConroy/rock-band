@@ -235,18 +235,27 @@ body {
 /* Fetching and syncing both take long enough that silence reads as a dead
    button, and a phone has no cursor to change. The icon fades and the dot
    becomes a spinner. */
-.conn-busy svg { opacity: 0.45; }
-.conn-busy .conn-dot {
-    background: none;
-    border: 1.5px solid rgba(255, 255, 255, 0.25);
+.conn-busy { opacity: 1; }
+.conn-busy svg { opacity: 0.35; }
+.conn-busy .conn-dot { display: none; }
+
+/* A ring around the whole button, not a dot in its corner — at 8px the old
+   spinner was easy to miss entirely on a sync that takes several seconds. */
+.conn-busy::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 11px;
+    border: 2px solid transparent;
     border-top-color: var(--rb-accent);
-    animation: conn-spin 0.7s linear infinite;
+    border-right-color: var(--rb-accent);
+    animation: conn-spin 0.8s linear infinite;
 }
 
 @keyframes conn-spin { to { transform: rotate(360deg); } }
 
 @media (prefers-reduced-motion: reduce) {
-    .conn-busy .conn-dot { animation-duration: 2.4s; }
+    .conn-busy::after { animation-duration: 2.4s; }
 }
 
 .conn-dot {
@@ -296,7 +305,7 @@ body {
 
 /* Anything that goes wrong outside the dialog needs somewhere to land, or a
    failed press is indistinguishable from a button that does nothing. */
-.conn-error {
+.conn-toast {
     position: fixed;
     top: 4.2rem;
     right: 1rem;
@@ -309,12 +318,26 @@ body {
     gap: 0.6rem;
     padding: 0.7rem 0.85rem;
     border-radius: 10px;
-    background: #3a1720;
-    border: 1px solid #7c2d3f;
-    color: #ffd9e0;
     font-size: 0.85rem;
     line-height: 1.35;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.conn-toast-good { background: #12301f; border: 1px solid #2f7d4f; color: #c9f4d8; }
+.conn-toast-bad { background: #3a1720; border: 1px solid #7c2d3f; color: #ffd9e0; }
+.conn-toast-busy { background: #16233a; border: 1px solid #2f4a75; color: #cfe0ff; }
+
+.toast-mark { flex: none; font-weight: 700; }
+
+.toast-spinner {
+    flex: none;
+    width: 0.9rem;
+    height: 0.9rem;
+    margin-top: 0.1rem;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top-color: currentColor;
+    animation: conn-spin 0.8s linear infinite;
 }
 
 .conn-error-dismiss {

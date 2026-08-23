@@ -82,11 +82,6 @@ public class SpotifySearchResponse
 }
 
 /// <summary>GET /v1/tracks — entries are null where an id no longer resolves.</summary>
-public class SpotifyTracksResponse
-{
-    [JsonPropertyName("tracks")]
-    public List<SpotifyTrack?> Tracks { get; set; } = new();
-}
 
 public class SpotifyTrackPage
 {
