@@ -1,4 +1,4 @@
-# Rock Band → Spotify
+# Rock Band Catalogue
 
 Browse the Rock Band song catalogue, mark which songs you own on PlayStation, and
 build a Spotify playlist from them.

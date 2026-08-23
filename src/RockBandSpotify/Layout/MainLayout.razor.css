@@ -45,9 +45,12 @@
     white-space: nowrap;
 }
 
-/* The connection buttons sit where the nav links used to, hard right, and
-   never shrink or wrap — they are the only controls in the header. */
-.app-header-inner :deep(.connection-buttons) { margin-left: auto; flex: none; }
+/* The connection buttons sit hard right, and never shrink or wrap — they are
+   the only controls in the header. Blazor's isolation combinator is ::deep,
+   not :deep(); the parenthesised form is another framework's and was emitted
+   into the bundle verbatim, leaving the rule dead and the buttons wherever
+   the title left them. */
+.app-header-inner ::deep .connection-buttons { margin-left: auto; flex: none; }
 
 .app-main {
     max-width: 68.75rem;
