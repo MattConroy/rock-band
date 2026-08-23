@@ -1,37 +1,6 @@
 // Minimal JS interop: localStorage access and full-page redirect for the
 // Spotify Authorization Code + PKCE flow.
 
-// Storage keys used to be abbreviated (rb_spotify_token and friends). Anyone
-// who signed in before the rename still has their token and fetched library
-// under the old names, so the values move across once, on load, rather than
-// silently signing them out and dropping the library.
-(function moveStorageToFullWords() {
-    var moved = {
-        rb_catalogue_columns: "rock_band_catalogue_columns",
-        rb_owned_songs: "rock_band_owned_songs",
-        rb_spotify_playlist: "rock_band_spotify_playlist",
-        rb_pkce_verifier: "rock_band_pkce_verifier",
-        rb_spotify_token: "rock_band_spotify_token",
-        rb_pkce_return_path: "rock_band_pkce_return_path",
-        rb_psn_npsso: "rock_band_playstation_npsso"
-    };
-    try {
-        Object.keys(moved).forEach(function (was) {
-            var now = moved[was];
-            var value = window.localStorage.getItem(was);
-            // Never overwrite a value already saved under the new name.
-            if (value !== null && window.localStorage.getItem(now) === null) {
-                window.localStorage.setItem(now, value);
-            }
-            if (value !== null) {
-                window.localStorage.removeItem(was);
-            }
-        });
-    } catch (e) {
-        // Storage blocked entirely; the app copes with having none.
-    }
-})();
-
 window.rockBandSpotify = {
     getItem: function (key) {
         return window.localStorage.getItem(key);

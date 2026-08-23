@@ -18,8 +18,8 @@ public class SpotifyConnectCallbackTests : AppPageTest
         // back intact.
         await Page.GotoAsync("/catalogue");
         await Page.EvaluateAsync(
-            "localStorage.setItem('rb_owned_songs', JSON.stringify({ generatedAt: null, songIds: [4411, 98] }))");
-        await Page.EvaluateAsync("localStorage.setItem('rb_pkce_return_path', 'catalogue?owned=1')");
+            "localStorage.setItem('rock_band_owned_songs', JSON.stringify({ generatedAt: null, songIds: [4411, 98] }))");
+        await Page.EvaluateAsync("localStorage.setItem('rock_band_pkce_return_path', 'catalogue?owned=1')");
 
         await Page.GotoAsync("/spotify-connect?code=fake&state=fake");
 
