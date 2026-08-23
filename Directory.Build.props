@@ -1,0 +1,11 @@
+<Project>
+
+  <!-- Warnings are errors everywhere, so a local build fails on what CI would
+       fail on. The two disagreed until now: CI passed -warnaserror and a
+       plain `dotnet build` did not, so a nullability error reached a pull
+       request having built cleanly on the machine that wrote it. -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>
