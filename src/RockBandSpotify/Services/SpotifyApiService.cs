@@ -46,6 +46,50 @@ public class SpotifyApiService : ITrackLookup
         return response;
     }
 
+    /// <summary>
+    /// Fails with something a person can act on. EnsureSuccessStatusCode throws
+    /// "net_http_message_not_success_statuscode_reason, 403, Forbidden" — no
+    /// endpoint, no reason — which says nothing about whether the sign-in is
+    /// short a scope, the playlist belongs to someone else, or Spotify is
+    /// simply down.
+    /// </summary>
+    private static async Task EnsureAsync(HttpResponseMessage response, string what)
+    {
+        if (response.IsSuccessStatusCode) return;
+
+        var detail = await ReadErrorMessageAsync(response);
+        var message = $"Spotify refused {what} ({(int)response.StatusCode} {response.ReasonPhrase})"
+            + (detail is null ? "." : $": {detail}");
+
+        // A 403 after a successful sign-in almost always means the token was
+        // granted before the app asked for the scope this call needs.
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+            message += " Disconnect Spotify and sign in again — the app may need a permission your sign-in didn't cover.";
+
+        throw new InvalidOperationException(message);
+    }
+
+    /// <summary>Spotify puts a human-readable reason in the body; dig it out.</summary>
+    private static async Task<string?> ReadErrorMessageAsync(HttpResponseMessage response)
+    {
+        try
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(body)) return null;
+            using var doc = JsonDocument.Parse(body);
+            if (doc.RootElement.TryGetProperty("error", out var error))
+            {
+                if (error.ValueKind == JsonValueKind.String) return error.GetString();
+                if (error.TryGetProperty("message", out var m)) return m.GetString();
+            }
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private static async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage original, JsonContent? body)
     {
         var clone = new HttpRequestMessage(original.Method, original.RequestUri);
@@ -60,7 +104,7 @@ public class SpotifyApiService : ITrackLookup
     {
         var request = await AuthorizedRequest(HttpMethod.Get, $"{ApiBase}/me");
         var response = await SendAsync(request);
-        response.EnsureSuccessStatusCode();
+        await EnsureAsync(response, "the sign-in check (GET /me)");
         return (await response.Content.ReadFromJsonAsync<SpotifyUser>())!;
     }
 
@@ -78,7 +122,7 @@ public class SpotifyApiService : ITrackLookup
             var loose = $"{ApiBase}/search?type=track&limit={limit}&q={Uri.EscapeDataString($"{title} {artist}")}";
             var looseReq = await AuthorizedRequest(HttpMethod.Get, loose);
             response = await SendAsync(looseReq);
-            response.EnsureSuccessStatusCode();
+            await EnsureAsync(response, "the track search");
         }
 
         var result = await response.Content.ReadFromJsonAsync<SpotifySearchResponse>();
@@ -122,7 +166,7 @@ public class SpotifyApiService : ITrackLookup
         {
             var request = await AuthorizedRequest(HttpMethod.Get, url);
             var response = await SendAsync(request);
-            response.EnsureSuccessStatusCode();
+            await EnsureAsync(response, "the playlist list (GET /me/playlists)");
             var page = await response.Content.ReadFromJsonAsync<SpotifyPlaylistPage>();
             var match = page?.Items.FirstOrDefault(p =>
                 string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
@@ -138,7 +182,7 @@ public class SpotifyApiService : ITrackLookup
         var request = await AuthorizedRequest(HttpMethod.Post, $"{ApiBase}/users/{userId}/playlists");
         var body = JsonContent.Create(new { name, description, @public = isPublic });
         var response = await SendAsync(request, body);
-        response.EnsureSuccessStatusCode();
+        await EnsureAsync(response, "creating the playlist");
         return (await response.Content.ReadFromJsonAsync<SpotifyPlaylist>())!;
     }
 
@@ -151,7 +195,7 @@ public class SpotifyApiService : ITrackLookup
         {
             var request = await AuthorizedRequest(HttpMethod.Get, url);
             var response = await SendAsync(request);
-            response.EnsureSuccessStatusCode();
+            await EnsureAsync(response, "reading the playlist's tracks");
             using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
             var root = doc.RootElement;
             foreach (var item in root.GetProperty("items").EnumerateArray())
@@ -179,7 +223,7 @@ public class SpotifyApiService : ITrackLookup
             var request = await AuthorizedRequest(HttpMethod.Post, $"{ApiBase}/playlists/{playlistId}/tracks");
             var body = JsonContent.Create(new { uris = batch });
             var response = await SendAsync(request, body);
-            response.EnsureSuccessStatusCode();
+            await EnsureAsync(response, "adding tracks to the playlist");
         }
     }
 

@@ -49,7 +49,18 @@ public class SpotifyAuthService
     public async Task<bool> IsAuthenticatedAsync()
     {
         _token ??= await LoadTokenAsync();
-        return _token is not null;
+        if (_token is null) return false;
+
+        // A token granted before a scope was added still works for some calls
+        // and 403s on others, which surfaces as a permission error nobody can
+        // act on. Treat it as signed out so the next press asks Spotify again.
+        if (!_token.Covers(_config.Scopes))
+        {
+            await LogoutAsync();
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>Kicks off login by redirecting the whole page to Spotify.</summary>
@@ -186,7 +197,9 @@ public class SpotifyAuthService
         {
             AccessToken = response.AccessToken,
             RefreshToken = response.RefreshToken,
-            ExpiresAt = DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn)
+            ExpiresAt = DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),
+            // What Spotify actually granted, which can be narrower than asked.
+            Scope = response.Scope ?? _config.Scopes,
         };
         await _js.InvokeVoidAsync("rbSpotify.setItem", TokenKey, JsonSerializer.Serialize(_token));
     }

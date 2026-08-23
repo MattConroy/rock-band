@@ -27,7 +27,25 @@ public class StoredToken
     public string? RefreshToken { get; set; }
     public DateTimeOffset ExpiresAt { get; set; }
 
+    /// <summary>
+    /// What the token was granted for. Kept so that adding a scope to the app
+    /// invalidates tokens issued before it: Spotify answers a call the token
+    /// doesn't cover with a bare 403, which is indistinguishable from a real
+    /// permission problem, so the mismatch is better caught here.
+    /// </summary>
+    public string? Scope { get; set; }
+
     public bool IsExpired => DateTimeOffset.UtcNow >= ExpiresAt.AddSeconds(-60);
+
+    /// <summary>Whether this token covers every scope in <paramref name="required"/>.</summary>
+    public bool Covers(string required)
+    {
+        var granted = Split(Scope);
+        return Split(required).All(granted.Contains);
+    }
+
+    private static HashSet<string> Split(string? scopes) =>
+        new((scopes ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries), StringComparer.Ordinal);
 }
 
 public class SpotifyUser

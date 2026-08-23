@@ -47,6 +47,9 @@ public class PsnService
         await _owned.ClearAsync();
     }
 
+    /// <summary>Forgets the fetched songs but keeps the token.</summary>
+    public Task ClearSongsAsync() => _owned.ClearAsync();
+
     /// <summary>The last fetched library, rebuilt from the stored ids, or null if there isn't one.</summary>
     public async Task<SongLibrary?> GetCachedSongsAsync()
     {

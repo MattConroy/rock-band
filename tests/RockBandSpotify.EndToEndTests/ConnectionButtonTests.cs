@@ -159,15 +159,80 @@ public class ConnectionButtonTests : AppPageTest
     }
 
     [Test]
-    public async Task Pressing_a_synced_PlayStation_narrows_the_catalogue()
+    public async Task Pressing_a_synced_PlayStation_shows_what_was_fetched()
     {
         await SeedLibrary(4411, 98); // Believer, Everlong
 
         await Psn.ClickAsync();
 
+        await Expect(Page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
+        await Expect(Page.Locator(".stat").First).ToContainTextAsync("2");
+    }
+
+    [Test]
+    public async Task The_owned_filter_can_be_turned_on_and_back_off()
+    {
+        // It used to navigate to the address it was already on, so a second
+        // press did nothing and there was no way back to the full catalogue.
+        await SeedLibrary(4411, 98);
+
+        await Psn.ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" }).ClickAsync();
         await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
         await Expect(Page.Locator("tbody")).ToContainTextAsync("Believer");
-        await Expect(Page.Locator("tbody")).ToContainTextAsync("Everlong");
+
+        await Psn.ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Show the whole catalogue" }).ClickAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
+
+        // And again, to prove it isn't a one-shot.
+        await Psn.ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" }).ClickAsync();
+        await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
+    }
+
+    [Test]
+    public async Task Clearing_the_songs_keeps_the_sign_in()
+    {
+        await SeedLibrary(4411, 98);
+        await Psn.ClickAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Clear fetched songs" }).ClickAsync();
+
+        // Back to connected — amber, not disconnected — so no new token is needed.
+        await Expect(Psn).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("conn-connected"));
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
+    }
+
+    [Test]
+    public async Task Disconnecting_forgets_the_token_too()
+    {
+        await SeedLibrary(4411, 98);
+        await Psn.ClickAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Disconnect PlayStation" }).ClickAsync();
+
+        await Expect(Psn).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("conn-disconnected"));
+
+        // And the next press asks for a token again rather than a status.
+        await Psn.ClickAsync();
+        await Expect(Page.GetByPlaceholder("npsso value, or the whole line")).ToBeVisibleAsync();
+    }
+
+    [Test]
+    public async Task Leaving_the_filter_on_does_not_strand_an_empty_catalogue()
+    {
+        // Disconnecting while narrowed would otherwise leave the page filtered
+        // to a library that no longer exists.
+        await SeedLibrary(4411, 98);
+        await Psn.ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" }).ClickAsync();
+        await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
+
+        await Psn.ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Disconnect PlayStation" }).ClickAsync();
+
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
     }
 
     [Test]
@@ -175,6 +240,7 @@ public class ConnectionButtonTests : AppPageTest
     {
         await SeedLibrary(4411, 98);
         await Psn.ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" }).ClickAsync();
         await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
 
         Assert.That(Page.Url, Does.Contain("owned=1"));
@@ -241,6 +307,7 @@ public class ConnectionButtonTests : AppPageTest
         await Page.GetByRole(AriaRole.Button, new() { Name = "Cancel" }).ClickAsync();
         await SeedLibrary(4411);
         await Psn.ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" }).ClickAsync();
 
         Assert.That(errors, Is.Empty);
     }
