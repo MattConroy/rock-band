@@ -26,10 +26,10 @@ jobs:
     name: PublishPages
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -66,9 +66,12 @@ jobs:
           touch dist/wwwroot/.nojekyll
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist/wwwroot
+          # v4 began excluding dotfiles, which would silently drop the
+          # .nojekyll written above.
+          include-hidden-files: true
 
   DeployPages:
     name: DeployPages
@@ -83,7 +86,7 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   PublishGateway:
     name: PublishGateway
@@ -95,11 +98,13 @@ jobs:
       run:
         working-directory: gateway
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Deploy Worker
         id: deploy
-        uses: cloudflare/wrangler-action@v3
+        # v4 defaults to Wrangler 4, which the CheckGateway job already
+        # dry-run deploys this same config with on every pull request.
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: gateway
