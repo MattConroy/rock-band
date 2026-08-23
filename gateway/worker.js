@@ -1,21 +1,21 @@
-// Stateless PSN gateway for the Rock Band -> Spotify app.
+// Stateless PlayStation gateway for the Rock Band -> Spotify app.
 //
 // Why this exists: browsers refuse to read PlayStation's API responses (no CORS),
-// so the WASM app can't call PSN directly. This Worker relays the call from the
+// so the WASM app can't call PlayStation directly. This Worker relays the call from the
 // server side, where CORS doesn't apply, and adds the one header the browser needs.
 //
 // It is deliberately STATELESS: the caller's npsso arrives in the request body,
 // is used for this request only, and is never stored or logged. The PSN logic
-// lives in psn.mjs (shared with the local test script).
+// lives in playstation.mjs (shared with the local test script).
 //
 // The app matches the returned entitlement codes against its own static song
-// catalogue client-side — this Worker's only job is handing back what PSN says
+// catalogue client-side — this Worker's only job is handing back what PlayStation says
 // you own.
 //
 // Request:  POST /              { "npsso": "<64-char token>" }
 // Response: { "generatedAt", "source", "counts", "items": [{ code, id, type }] }
 
-import { getAccessToken, fetchEntitlements, ownedRockBandSongs } from "./psn.mjs";
+import { getAccessToken, fetchEntitlements, ownedRockBandSongs } from "./playstation.mjs";
 
 export default {
   async fetch(request, env) {

@@ -1,51 +1,51 @@
 @implements IDisposable
 @using Microsoft.AspNetCore.Components.Routing
 @inject ConnectionState State
-@inject NavigationManager Nav
+@inject NavigationManager Navigation
 @inject IJSRuntime JS
 
 @* The two connections, always on screen. Each shows how far along it is and
    presses through to the next useful thing: sign in, fetch or sync, and once
    there is something to show, show it. *@
-<div class="conn-buttons">
-    @if (State.IsPsnConfigured)
+<div class="connection-buttons">
+    @if (State.IsPlayStationConfigured)
     {
-        <button type="button" class="conn-btn @StatusClass(State.Psn) @(State.PsnBusy ? "conn-busy" : "")"
-                title="@PsnTitle" aria-label="@PsnTitle" aria-busy="@State.PsnBusy"
-                disabled="@State.PsnBusy" @onclick="PressPsnAsync">
+        <button type="button" class="connection-button @StatusClass(State.PlayStation) @(State.PlayStationBusy ? "connection-busy" : "")"
+                title="@PlayStationTitle" aria-label="@PlayStationTitle" aria-busy="@State.PlayStationBusy"
+                disabled="@State.PlayStationBusy" @onclick="PressPlayStationAsync">
             <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="currentColor" d="M8.984 2.596v17.547l3.915 1.261V6.688c0-.69.304-1.151.794-.991.636.18.76.814.76 1.505v5.875c2.441 1.193 4.362-.002 4.362-3.152 0-3.237-1.126-4.675-4.438-5.827-1.307-.448-3.728-1.186-5.39-1.502zm4.656 16.241l6.296-2.275c.715-.258.826-.625.246-.818-.586-.192-1.637-.139-2.357.123l-4.205 1.5V14.98l.24-.085s1.201-.42 2.913-.615c1.696-.18 3.785.03 5.437.661 1.848.601 2.04 1.472 1.576 2.072-.465.6-1.622 1.036-1.622 1.036l-8.544 3.107V18.86zM1.807 18.6c-1.9-.545-2.214-1.668-1.352-2.32.801-.586 2.16-1.052 2.16-1.052l5.615-2.013v2.313L4.205 17c-.705.271-.825.632-.239.826.586.195 1.637.15 2.343-.12L8.247 17v2.074c-.12.03-.256.044-.39.073-1.939.331-3.996.196-6.038-.479z"/>
             </svg>
-            <span class="conn-dot"></span>
+            <span class="connection-dot"></span>
         </button>
     }
 
     @if (State.IsSpotifyConfigured)
     {
-        <button type="button" class="conn-btn @StatusClass(State.Spotify) @(State.SpotifyBusy ? "conn-busy" : "")"
+        <button type="button" class="connection-button @StatusClass(State.Spotify) @(State.SpotifyBusy ? "connection-busy" : "")"
                 title="@SpotifyTitle" aria-label="@SpotifyTitle" aria-busy="@State.SpotifyBusy"
                 disabled="@State.SpotifyBusy" @onclick="PressSpotifyAsync">
             <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="currentColor" d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
             </svg>
-            <span class="conn-dot"></span>
+            <span class="connection-dot"></span>
         </button>
     }
 </div>
 
-@if (_showPsnDialog)
+@if (_showPlayStationDialog)
 {
-    <PsnSignInDialog OnConnect="ConnectPsnAsync" OnCancel="ClosePsnDialog" Error="@State.Error" />
+    <PlayStationSignInDialog OnConnect="ConnectPlayStationAsync" OnCancel="ClosePlayStationDialog" Error="@State.Error" />
 }
-else if (_showPsnStatus)
+else if (_showPlayStationStatus)
 {
-    <PsnStatusDialog OwnedCount="State.OwnedCount" MatchedCount="State.MatchedCount"
-                     ShowingOwned="@ShowingOwned" Busy="State.PsnBusy"
-                     OnClose="() => _showPsnStatus = false"
+    <PlayStationStatusDialog OwnedCount="State.OwnedCount" MatchedCount="State.MatchedCount"
+                     ShowingOwned="@ShowingOwned" Busy="State.PlayStationBusy"
+                     OnClose="() => _showPlayStationStatus = false"
                      OnToggleFilter="ToggleOwnedFilter"
-                     OnRefetch="State.FetchPsnAsync"
-                     OnClear="ClearPsnAsync"
-                     OnDisconnect="DisconnectPsnAsync" />
+                     OnRefetch="State.FetchPlayStationAsync"
+                     OnClear="ClearPlayStationAsync"
+                     OnDisconnect="DisconnectPlayStationAsync" />
 }
 else if (_showSpotifyStatus)
 {
@@ -61,30 +61,30 @@ else if (_showSpotifyStatus)
 
 @if (State.BusyText is not null)
 {
-    <div class="conn-toast conn-toast-busy" role="status">
+    <div class="connection-toast connection-toast-busy" role="status">
         <span class="toast-spinner" aria-hidden="true"></span>
         <span>@State.BusyText</span>
     </div>
 }
-else if (State.Notice is { } notice && !_showPsnDialog)
+else if (State.Notice is { } notice && !_showPlayStationDialog)
 {
-    <div class="conn-toast @(notice.Kind == NoticeKind.Good ? "conn-toast-good" : "conn-toast-bad")"
+    <div class="connection-toast @(notice.Kind == NoticeKind.Good ? "connection-toast-good" : "connection-toast-bad")"
          role="@(notice.Kind == NoticeKind.Good ? "status" : "alert")">
         <span class="toast-mark" aria-hidden="true">@(notice.Kind == NoticeKind.Good ? "✓" : "✕")</span>
         <span>@notice.Text</span>
-        <button type="button" class="conn-error-dismiss" aria-label="Dismiss"
+        <button type="button" class="connection-toast-dismiss" aria-label="Dismiss"
                 @onclick="State.ClearNotice">✕</button>
     </div>
 }
 
 @code {
-    private bool _showPsnDialog;
-    private bool _showPsnStatus;
+    private bool _showPlayStationDialog;
+    private bool _showPlayStationStatus;
     private bool _showSpotifyStatus;
 
     /// <summary>Whether the catalogue is currently narrowed to owned songs.</summary>
     private bool ShowingOwned =>
-        Nav.ToAbsoluteUri(Nav.Uri).Query.Contains("owned=1", StringComparison.Ordinal);
+        Navigation.ToAbsoluteUri(Navigation.Uri).Query.Contains("owned=1", StringComparison.Ordinal);
 
     protected override async Task OnInitializedAsync()
     {
@@ -92,7 +92,7 @@ else if (State.Notice is { } notice && !_showPsnDialog)
         // The status dialog reads the filter out of the address, so the button
         // has to redraw when the catalogue changes it — otherwise it keeps
         // offering to undo a filter that is no longer applied.
-        Nav.LocationChanged += OnLocationChanged;
+        Navigation.LocationChanged += OnLocationChanged;
         await State.RefreshAsync();
     }
 
@@ -103,17 +103,17 @@ else if (State.Notice is { } notice && !_showPsnDialog)
     public void Dispose()
     {
         State.Changed -= OnStateChanged;
-        Nav.LocationChanged -= OnLocationChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 
     private static string StatusClass(ConnectionStatus status) => status switch
     {
-        ConnectionStatus.Synced => "conn-synced",
-        ConnectionStatus.Connected => "conn-connected",
-        _ => "conn-disconnected",
+        ConnectionStatus.Synced => "connection-synced",
+        ConnectionStatus.Connected => "connection-connected",
+        _ => "connection-disconnected",
     };
 
-    private string PsnTitle => State.PsnBusy ? "Fetching your PlayStation library…" : State.Psn switch
+    private string PlayStationTitle => State.PlayStationBusy ? "Fetching your PlayStation library…" : State.PlayStation switch
     {
         ConnectionStatus.Synced => $"PlayStation · {State.OwnedCount} songs owned. Show only these.",
         ConnectionStatus.Connected => "PlayStation · connected. Fetch your songs.",
@@ -127,32 +127,32 @@ else if (State.Notice is { } notice && !_showPsnDialog)
         _ => "Spotify · not connected. Sign in.",
     };
 
-    private async Task PressPsnAsync()
+    private async Task PressPlayStationAsync()
     {
-        switch (State.Psn)
+        switch (State.PlayStation)
         {
             case ConnectionStatus.Disconnected:
-                _showPsnDialog = true;
+                _showPlayStationDialog = true;
                 break;
             case ConnectionStatus.Connected:
-                await State.FetchPsnAsync();
+                await State.FetchPlayStationAsync();
                 break;
             case ConnectionStatus.Synced:
-                _showPsnStatus = true;
+                _showPlayStationStatus = true;
                 break;
         }
     }
 
-    private void ClosePsnDialog()
+    private void ClosePlayStationDialog()
     {
-        _showPsnDialog = false;
+        _showPlayStationDialog = false;
         State.ClearNotice();
     }
 
-    private async Task ConnectPsnAsync(string npsso)
+    private async Task ConnectPlayStationAsync(string npsso)
     {
-        _showPsnDialog = false;
-        await State.ConnectPsnAsync(npsso);
+        _showPlayStationDialog = false;
+        await State.ConnectPlayStationAsync(npsso);
     }
 
     /// <summary>
@@ -162,15 +162,15 @@ else if (State.Notice is { } notice && !_showPsnDialog)
     /// </summary>
     private void ToggleOwnedFilter()
     {
-        _showPsnStatus = false;
-        Nav.NavigateTo(Nav.GetUriWithQueryParameter("owned", ShowingOwned ? null : "1"));
+        _showPlayStationStatus = false;
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("owned", ShowingOwned ? null : "1"));
     }
 
     private async Task OpenPlaylistAsync()
     {
         _showSpotifyStatus = false;
         if (State.PlaylistUrl is not null)
-            await JS.InvokeVoidAsync("rbSpotify.openInNewTab", State.PlaylistUrl);
+            await JS.InvokeVoidAsync("rockBandSpotify.openInNewTab", State.PlaylistUrl);
     }
 
     private async Task SyncSpotifyAsync()
@@ -185,18 +185,18 @@ else if (State.Notice is { } notice && !_showPsnDialog)
         await State.DisconnectSpotifyAsync();
     }
 
-    private async Task ClearPsnAsync()
+    private async Task ClearPlayStationAsync()
     {
-        _showPsnStatus = false;
-        if (ShowingOwned) Nav.NavigateTo(Nav.GetUriWithQueryParameter("owned", (string?)null));
-        await State.ClearPsnSongsAsync();
+        _showPlayStationStatus = false;
+        if (ShowingOwned) Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("owned", (string?)null));
+        await State.ClearPlayStationSongsAsync();
     }
 
-    private async Task DisconnectPsnAsync()
+    private async Task DisconnectPlayStationAsync()
     {
-        _showPsnStatus = false;
-        if (ShowingOwned) Nav.NavigateTo(Nav.GetUriWithQueryParameter("owned", (string?)null));
-        await State.DisconnectPsnAsync();
+        _showPlayStationStatus = false;
+        if (ShowingOwned) Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("owned", (string?)null));
+        await State.DisconnectPlayStationAsync();
     }
 
     private async Task PressSpotifyAsync()

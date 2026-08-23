@@ -11,26 +11,26 @@ namespace RockBandSpotify.Services;
 /// stateless gateway Worker (the browser can't call PSN directly — no CORS).
 /// The token is your own and never leaves your machine except to your Worker.
 /// </summary>
-public class PsnService
+public class PlayStationService
 {
-    private const string TokenKey = "rb_psn_npsso";
+    private const string TokenKey = "rock_band_playstation_npsso";
 
     private readonly HttpClient _http;
-    private readonly IJSRuntime _js;
-    private readonly PsnConfig _config;
+    private readonly IJSRuntime _javaScript;
+    private readonly PlayStationConfig _configuration;
     private readonly CatalogueService _catalogue;
     private readonly OwnedLibrary _owned;
 
-    public PsnService(HttpClient http, IJSRuntime js, PsnConfig config, CatalogueService catalogue, OwnedLibrary owned)
+    public PlayStationService(HttpClient http, IJSRuntime javaScript, PlayStationConfig configuration, CatalogueService catalogue, OwnedLibrary owned)
     {
         _http = http;
-        _js = js;
-        _config = config;
+        _javaScript = javaScript;
+        _configuration = configuration;
         _catalogue = catalogue;
         _owned = owned;
     }
 
-    public bool IsGatewayConfigured => _config.IsConfigured;
+    public bool IsGatewayConfigured => _configuration.IsConfigured;
 
     /// <summary>Link that opens Sony's login and lands on the page showing the npsso.</summary>
     public string SsoCookieUrl => "https://ca.account.sony.com/api/v1/ssocookie";
@@ -74,7 +74,7 @@ public class PsnService
         HttpResponseMessage response;
         try
         {
-            response = await _http.PostAsJsonAsync(_config.GatewayUrl, new { npsso });
+            response = await _http.PostAsJsonAsync(_configuration.GatewayUrl, new { npsso });
         }
         catch (Exception ex)
         {
@@ -91,8 +91,8 @@ public class PsnService
         // The gateway reports content codes, not names — deliberately, so it never
         // needs the catalogue. Turning them into songs is a straight comparison
         // against the store ids the catalogue already holds.
-        var owned = await response.Content.ReadFromJsonAsync<PsnEntitlementsResponse>()
-                    ?? new PsnEntitlementsResponse();
+        var owned = await response.Content.ReadFromJsonAsync<PlayStationEntitlementsResponse>()
+                    ?? new PlayStationEntitlementsResponse();
 
         var catalogue = await _catalogue.GetSongsAsync();
         var resolved = EntitlementResolver.Resolve(owned.Items.Select(i => i.Code), catalogue);
@@ -120,7 +120,7 @@ public class PsnService
         if (string.IsNullOrEmpty(npsso))
             throw new InvalidOperationException("Not connected to PlayStation.");
 
-        var url = _config.GatewayUrl.TrimEnd('/') + "/?debug=1";
+        var url = _configuration.GatewayUrl.TrimEnd('/') + "/?debug=1";
         var response = await _http.PostAsJsonAsync(url, new { npsso });
         var body = await response.Content.ReadAsStringAsync();
 
@@ -161,11 +161,11 @@ public class PsnService
     }
 
     private async Task<string?> GetItemAsync(string key)
-        => await _js.InvokeAsync<string?>("rbSpotify.getItem", key);
+        => await _javaScript.InvokeAsync<string?>("rockBandSpotify.getItem", key);
 
     private async Task SetItemAsync(string key, string value)
-        => await _js.InvokeVoidAsync("rbSpotify.setItem", key, value);
+        => await _javaScript.InvokeVoidAsync("rockBandSpotify.setItem", key, value);
 
     private async Task RemoveItemAsync(string key)
-        => await _js.InvokeVoidAsync("rbSpotify.removeItem", key);
+        => await _javaScript.InvokeVoidAsync("rockBandSpotify.removeItem", key);
 }

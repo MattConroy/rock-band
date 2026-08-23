@@ -124,85 +124,85 @@ code {
        itself — overlay scrollbars on iOS Safari in particular — picks a
        light-on-dark treatment instead of assuming a light page. */
     color-scheme: dark;
-    --rb-green: #1db954;
-    --rb-green-dark: #169c46;
-    --rb-accent: #2f8fe0;
-    --rb-accent-dark: #1f6bb0;
-    --rb-bg: #0a0e16;
-    --rb-card: #131a26;
-    --rb-border: #223349;
-    --rb-text: #eef2f8;
-    --rb-muted: #8291a8;
+    --rock-band-green: #1db954;
+    --rock-band-green-dark: #169c46;
+    --rock-band-accent: #2f8fe0;
+    --rock-band-accent-dark: #1f6bb0;
+    --rock-band-bg: #0a0e16;
+    --rock-band-card: #131a26;
+    --rock-band-border: #223349;
+    --rock-band-text: #eef2f8;
+    --rock-band-muted: #8291a8;
 }
 
 body {
-    background: var(--rb-bg);
-    color: var(--rb-text);
+    background: var(--rock-band-bg);
+    color: var(--rock-band-text);
     margin: 0;
 }
 
 /* Cards */
-.rb-card {
-    background: var(--rb-card);
-    border: 1px solid var(--rb-border);
-    border-top: 3px solid var(--rb-accent);
+.rock-band-card {
+    background: var(--rock-band-card);
+    border: 1px solid var(--rock-band-border);
+    border-top: 3px solid var(--rock-band-accent);
     border-radius: 6px;
     padding: 1.1rem 1.25rem;
     margin-bottom: 1rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
-.rb-card h2 {
+.rock-band-card h2 {
     font-size: 0.95rem;
     margin: 0 0 0.35rem;
     text-transform: uppercase;
     letter-spacing: 0.6px;
     font-weight: 800;
-    color: var(--rb-accent);
+    color: var(--rock-band-accent);
 }
 
 /* Buttons */
-.rb-btn {
-    background: var(--rb-green); color: #fff; border: none;
+.rock-band-button {
+    background: var(--rock-band-green); color: #fff; border: none;
     padding: 0.5rem 1.1rem; border-radius: 999px; font-weight: 600; cursor: pointer;
 }
-.rb-btn:hover:not(:disabled) { background: var(--rb-green-dark); }
-.rb-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.rb-btn-secondary {
+.rock-band-button:hover:not(:disabled) { background: var(--rock-band-green-dark); }
+.rock-band-button:disabled { opacity: 0.5; cursor: not-allowed; }
+.rock-band-button-secondary {
     background: #1a2231;
-    color: var(--rb-text);
+    color: var(--rock-band-text);
     border-radius: 6px;
 }
-.rb-btn-secondary:hover:not(:disabled) { background: #223349; color: var(--rb-accent); }
+.rock-band-button-secondary:hover:not(:disabled) { background: #223349; color: var(--rock-band-accent); }
 
 /* Pills */
-.rb-pill { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
-.rb-pill-ok { background: rgba(29, 185, 84, 0.18); color: #3ddc73; }
-.rb-pill-warn { background: rgba(255, 157, 46, 0.18); color: #ffb85c; }
-.rb-pill-muted { background: rgba(148, 163, 184, 0.18); color: var(--rb-muted); }
-.rb-pill-bad { background: rgba(220, 53, 69, 0.2); color: #ff7a86; }
+.rock-band-pill { display: inline-block; padding: 0.1rem 0.6rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+.rock-band-pill-ok { background: rgba(29, 185, 84, 0.18); color: #3ddc73; }
+.rock-band-pill-warning { background: rgba(255, 157, 46, 0.18); color: #ffb85c; }
+.rock-band-pill-muted { background: rgba(148, 163, 184, 0.18); color: var(--rock-band-muted); }
+.rock-band-pill-bad { background: rgba(220, 53, 69, 0.2); color: #ff7a86; }
 
 /* Alerts */
-.rb-alert { padding: 0.7rem 0.9rem; border-radius: 6px; margin: 0.5rem 0; }
-.rb-alert-info { background: rgba(59, 130, 246, 0.14); color: #8ab8ff; }
-.rb-alert-warn { background: rgba(255, 157, 46, 0.14); color: #ffb85c; }
-.rb-alert-ok { background: rgba(29, 185, 84, 0.14); color: #3ddc73; }
-.rb-alert-bad { background: rgba(220, 53, 69, 0.16); color: #ff7a86; }
+.rock-band-alert { padding: 0.7rem 0.9rem; border-radius: 6px; margin: 0.5rem 0; }
+.rock-band-alert-info { background: rgba(59, 130, 246, 0.14); color: #8ab8ff; }
+.rock-band-alert-warning { background: rgba(255, 157, 46, 0.14); color: #ffb85c; }
+.rock-band-alert-ok { background: rgba(29, 185, 84, 0.14); color: #3ddc73; }
+.rock-band-alert-bad { background: rgba(220, 53, 69, 0.16); color: #ff7a86; }
 
 /* Text + layout helpers */
-.rb-muted { color: var(--rb-muted); font-size: 0.9rem; }
-.rb-sub { color: var(--rb-muted); font-size: 0.8rem; }
-.rb-row-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
-.rb-select:focus-visible {
-    outline: 2px solid var(--rb-accent);
+.rock-band-muted { color: var(--rock-band-muted); font-size: 0.9rem; }
+.rock-band-subtext { color: var(--rock-band-muted); font-size: 0.8rem; }
+.rock-band-row-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.rock-band-select:focus-visible {
+    outline: 2px solid var(--rock-band-accent);
     outline-offset: 1px;
 }
 
-.rb-select {
+.rock-band-select {
     padding: 0.3rem 0.4rem;
     border-radius: 6px;
-    border: 1px solid var(--rb-border);
+    border: 1px solid var(--rock-band-border);
     background: #131a26;
-    color: var(--rb-text);
+    color: var(--rock-band-text);
     max-width: 20rem;
 }
 
@@ -210,9 +210,9 @@ body {
    One per service, always in the header. The dot carries the state: hollow
    when disconnected, filled once signed in, and the service's own colour
    once there is something to show. */
-.conn-buttons { display: flex; gap: 0.4rem; align-items: center; }
+.connection-buttons { display: flex; gap: 0.4rem; align-items: center; }
 
-.conn-btn {
+.connection-button {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -230,24 +230,24 @@ body {
 
 /* Sized here rather than on the element, so the glyph grows with the button
    when the reader's font size does. */
-.conn-btn svg { width: 1.25rem; height: 1.25rem; }
+.connection-button svg { width: 1.25rem; height: 1.25rem; }
 
-.conn-btn:hover:not(:disabled) { background: #223349; }
-.conn-btn:disabled { cursor: progress; }
-.conn-btn:focus-visible { outline: 2px solid var(--rb-accent); outline-offset: 2px; }
+.connection-button:hover:not(:disabled) { background: #223349; }
+.connection-button:disabled { cursor: progress; }
+.connection-button:focus-visible { outline: 2px solid var(--rock-band-accent); outline-offset: 2px; }
 
 /* Fetching and syncing both take long enough that silence reads as a dead
    button, and a phone has no cursor to change. The icon fades and the dot
    becomes a spinner. */
-.conn-busy { opacity: 1; }
-.conn-busy svg { opacity: 0.25; }
-.conn-busy .conn-dot { display: none; }
+.connection-busy { opacity: 1; }
+.connection-busy svg { opacity: 0.25; }
+.connection-busy .connection-dot { display: none; }
 
 /* Centred over the dimmed icon, and a real circle. Tracing the button's
    rounded-rectangle outline meant the gap in the ring changed shape as it
    went round, which reads as a wobble rather than a spin. Still far bigger
    than the 8px corner dot this replaced. */
-.conn-busy::after {
+.connection-busy::after {
     content: "";
     position: absolute;
     top: 50%;
@@ -257,17 +257,17 @@ body {
     margin: -0.5625rem 0 0 -0.5625rem;
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.18);
-    border-top-color: var(--rb-accent);
-    animation: conn-spin 0.8s linear infinite;
+    border-top-color: var(--rock-band-accent);
+    animation: connection-spin 0.8s linear infinite;
 }
 
-@keyframes conn-spin { to { transform: rotate(360deg); } }
+@keyframes connection-spin { to { transform: rotate(360deg); } }
 
 @media (prefers-reduced-motion: reduce) {
-    .conn-busy::after { animation-duration: 2.4s; }
+    .connection-busy::after { animation-duration: 2.4s; }
 }
 
-.conn-dot {
+.connection-dot {
     position: absolute;
     right: 0.1875rem;
     bottom: 0.1875rem;
@@ -280,13 +280,13 @@ body {
     box-shadow: 0 0 0 2px #1a2231;
 }
 
-.conn-btn:hover:not(:disabled) .conn-dot { box-shadow: 0 0 0 2px #223349; }
+.connection-button:hover:not(:disabled) .connection-dot { box-shadow: 0 0 0 2px #223349; }
 
-.conn-disconnected .conn-dot { border: 1.5px solid #7d8794; }
-.conn-connected { color: #c7cbd1; }
-.conn-connected .conn-dot { background: #ffb85c; }
-.conn-synced { color: var(--rb-text); }
-.conn-synced .conn-dot { background: #3ddc73; }
+.connection-disconnected .connection-dot { border: 1.5px solid #7d8794; }
+.connection-connected { color: #c7cbd1; }
+.connection-connected .connection-dot { background: #ffb85c; }
+.connection-synced { color: var(--rock-band-text); }
+.connection-synced .connection-dot { background: #3ddc73; }
 
 /* Modal -------------------------------------------------------------------
    Used for the PlayStation token, which is the one thing a person has to
@@ -303,8 +303,8 @@ body {
 }
 
 .dialog {
-    background: var(--rb-card);
-    border: 1px solid var(--rb-border);
+    background: var(--rock-band-card);
+    border: 1px solid var(--rock-band-border);
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     padding: 1.25rem;
@@ -314,7 +314,7 @@ body {
 
 /* Anything that goes wrong outside the dialog needs somewhere to land, or a
    failed press is indistinguishable from a button that does nothing. */
-.conn-toast {
+.connection-toast {
     position: fixed;
     top: 4.2rem;
     right: 1rem;
@@ -332,9 +332,9 @@ body {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
-.conn-toast-good { background: #12301f; border: 1px solid #2f7d4f; color: #c9f4d8; }
-.conn-toast-bad { background: #3a1720; border: 1px solid #7c2d3f; color: #ffd9e0; }
-.conn-toast-busy { background: #16233a; border: 1px solid #2f4a75; color: #cfe0ff; }
+.connection-toast-good { background: #12301f; border: 1px solid #2f7d4f; color: #c9f4d8; }
+.connection-toast-bad { background: #3a1720; border: 1px solid #7c2d3f; color: #ffd9e0; }
+.connection-toast-busy { background: #16233a; border: 1px solid #2f4a75; color: #cfe0ff; }
 
 .toast-mark { flex: none; font-weight: 700; }
 
@@ -346,10 +346,10 @@ body {
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-top-color: currentColor;
-    animation: conn-spin 0.8s linear infinite;
+    animation: connection-spin 0.8s linear infinite;
 }
 
-.conn-error-dismiss {
+.connection-toast-dismiss {
     flex: none;
     margin-left: auto;
     padding: 0 0.2rem;
@@ -362,7 +362,7 @@ body {
     opacity: 0.75;
 }
 
-.conn-error-dismiss:hover { opacity: 1; }
+.connection-toast-dismiss:hover { opacity: 1; }
 
 .dialog-head {
     display: flex;
@@ -382,14 +382,14 @@ body {
     padding: 0.25rem 0.4rem;
     border: none;
     background: none;
-    color: var(--rb-muted);
+    color: var(--rock-band-muted);
     font-size: 0.95rem;
     line-height: 1;
     cursor: pointer;
     border-radius: 6px;
 }
 
-.dialog-close:hover { color: var(--rb-text); background: #223349; }
+.dialog-close:hover { color: var(--rock-band-text); background: #223349; }
 
 .dialog-intro { margin: 0.4rem 0 0; }
 
@@ -404,7 +404,7 @@ body {
     gap: 0.5rem;
     margin-bottom: 0.45rem;
     font-size: 0.85rem;
-    color: var(--rb-text);
+    color: var(--rock-band-text);
 }
 
 .dialog-step-num {
@@ -416,7 +416,7 @@ body {
     height: 1.25rem;
     border-radius: 50%;
     background: #223349;
-    color: var(--rb-muted);
+    color: var(--rock-band-muted);
     font-size: 0.7rem;
     font-weight: 700;
 }
@@ -424,7 +424,7 @@ body {
 .dialog-step-control {
     display: block;
     width: 100%;
-    /* .rb-select caps itself at 320px for the catalogue's filter row; in here
+    /* .rock-band-select caps itself at 320px for the catalogue's filter row; in here
        the control should fill the dialog like the button above it. */
     max-width: none;
     box-sizing: border-box;
@@ -456,7 +456,7 @@ body {
 .field-ok { color: #5fd48a; }
 .field-bad { color: #ff8fa3; }
 
-input.field-ok, input.field-bad { color: var(--rb-text); }
+input.field-ok, input.field-bad { color: var(--rock-band-text); }
 input.field-ok { border-color: #3ddc73; box-shadow: 0 0 0 1px #3ddc73; }
 input.field-bad { border-color: #e2566f; box-shadow: 0 0 0 1px #e2566f; }
 
@@ -483,10 +483,10 @@ input.field-bad:focus-visible { outline-color: #e2566f; }
     padding: 0.7rem 0.8rem;
     border-radius: 10px;
     background: #131a26;
-    border: 1px solid var(--rb-border);
+    border: 1px solid var(--rock-band-border);
 }
 
-.stat dt { font-size: 0.72rem; color: var(--rb-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.stat dt { font-size: 0.72rem; color: var(--rock-band-muted); text-transform: uppercase; letter-spacing: 0.4px; }
 .stat dd { margin: 0.2rem 0 0; font-size: 1.5rem; font-weight: 700; }
 
 .dialog-stack { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1.1rem; }
@@ -499,23 +499,23 @@ input.field-bad:focus-visible { outline-color: #e2566f; }
     gap: 1rem;
     margin-top: 1.2rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--rb-border);
+    border-top: 1px solid var(--rock-band-border);
 }
 
-.link-btn {
+.link-button {
     padding: 0;
     border: none;
     background: none;
-    color: var(--rb-muted);
+    color: var(--rock-band-muted);
     font-size: 0.82rem;
     text-decoration: underline;
     text-underline-offset: 3px;
     cursor: pointer;
 }
 
-.link-btn:hover:not(:disabled) { color: var(--rb-text); }
-.link-btn-bad:hover:not(:disabled) { color: #ff8fa3; }
-.link-btn:disabled { opacity: 0.5; cursor: default; }
+.link-button:hover:not(:disabled) { color: var(--rock-band-text); }
+.link-button-bad:hover:not(:disabled) { color: #ff8fa3; }
+.link-button:disabled { opacity: 0.5; cursor: default; }
 
 .dialog-error { margin: 1rem 0 0; }
 

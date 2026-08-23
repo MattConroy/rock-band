@@ -18,7 +18,7 @@ public class SpotifyConfig
     public bool SearchForMissingTracks { get; set; }
 }
 
-public class PsnConfig
+public class PlayStationConfig
 {
     public string GatewayUrl { get; set; } = "";
 

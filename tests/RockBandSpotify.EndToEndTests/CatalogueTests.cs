@@ -409,12 +409,12 @@ public class CatalogueTests : AppPageTest
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
 
         var scrolls = await Page.EvalOnSelectorAsync<bool>(
-            "#rb-table-body", "el => el.scrollWidth > el.clientWidth + 1");
+            "#rock-band-table-body", "el => el.scrollWidth > el.clientWidth + 1");
         Assert.That(scrolls, Is.True, "six columns cannot fit a phone, so the grid should scroll");
 
-        await Page.EvalOnSelectorAsync("#rb-table-body", "el => el.scrollLeft = 400");
+        await Page.EvalOnSelectorAsync("#rock-band-table-body", "el => el.scrollLeft = 400");
         await Page.WaitForTimeoutAsync(200);
-        var headerLeft = await Page.EvalOnSelectorAsync<int>("#rb-table-header", "el => el.scrollLeft");
+        var headerLeft = await Page.EvalOnSelectorAsync<int>("#rock-band-table-header", "el => el.scrollLeft");
         Assert.That(headerLeft, Is.EqualTo(400), "the header must track the body's horizontal scroll");
     }
 
@@ -443,9 +443,9 @@ public class CatalogueTests : AppPageTest
         await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
 
         // Every select has to sit within the card, not hang off its edge.
-        var cardRight = (await Page.Locator(".rb-card").First.BoundingBoxAsync())!.X
-                        + (await Page.Locator(".rb-card").First.BoundingBoxAsync())!.Width;
-        foreach (var sel in await Page.Locator(".select-group .rb-select").AllAsync())
+        var cardRight = (await Page.Locator(".rock-band-card").First.BoundingBoxAsync())!.X
+                        + (await Page.Locator(".rock-band-card").First.BoundingBoxAsync())!.Width;
+        foreach (var sel in await Page.Locator(".select-group .rock-band-select").AllAsync())
         {
             var box = (await sel.BoundingBoxAsync())!;
             Assert.That(box.X + box.Width, Is.LessThanOrEqualTo(cardRight + 1),

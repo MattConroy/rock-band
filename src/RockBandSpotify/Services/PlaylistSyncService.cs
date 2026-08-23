@@ -15,12 +15,12 @@ public record SyncResult(
 public class PlaylistSyncService
 {
     private readonly SpotifyApiService _api;
-    private readonly PlaylistConfig _config;
+    private readonly PlaylistConfig _configuration;
 
-    public PlaylistSyncService(SpotifyApiService api, PlaylistConfig config)
+    public PlaylistSyncService(SpotifyApiService api, PlaylistConfig configuration)
     {
         _api = api;
-        _config = config;
+        _configuration = configuration;
     }
 
     public async Task<SyncResult> SyncAsync(IEnumerable<SongMatch> matches)
@@ -31,12 +31,12 @@ public class PlaylistSyncService
             .Distinct()
             .ToList();
 
-        var playlist = await _api.FindPlaylistByNameAsync(_config.Name);
+        var playlist = await _api.FindPlaylistByNameAsync(_configuration.Name);
         var created = false;
         if (playlist is null)
         {
             playlist = await _api.CreatePlaylistAsync(
-                _config.Name, _config.Description, _config.Public);
+                _configuration.Name, _configuration.Description, _configuration.Public);
             created = true;
         }
 

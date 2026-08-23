@@ -13,34 +13,34 @@ namespace RockBandSpotify.Services;
 /// client secret and runs entirely in the browser — the right fit for a static
 /// GitHub Pages SPA. Tokens are cached in localStorage and refreshed on demand.
 /// </summary>
-public class SpotifyAuthService
+public class SpotifyAuthenticationService
 {
     private const string AuthorizeEndpoint = "https://accounts.spotify.com/authorize";
     private const string TokenEndpoint = "https://accounts.spotify.com/api/token";
-    private const string VerifierKey = "rb_pkce_verifier";
-    private const string TokenKey = "rb_spotify_token";
-    private const string ReturnPathKey = "rb_pkce_return_path";
+    private const string VerifierKey = "rock_band_pkce_verifier";
+    private const string TokenKey = "rock_band_spotify_token";
+    private const string ReturnPathKey = "rock_band_pkce_return_path";
 
     private readonly HttpClient _http;
-    private readonly IJSRuntime _js;
-    private readonly NavigationManager _nav;
-    private readonly SpotifyConfig _config;
+    private readonly IJSRuntime _javaScript;
+    private readonly NavigationManager _navigation;
+    private readonly SpotifyConfig _configuration;
     private readonly string _redirectUri;
 
-    public SpotifyAuthService(HttpClient http, IJSRuntime js, NavigationManager nav, SpotifyConfig config, string baseAddress)
+    public SpotifyAuthenticationService(HttpClient http, IJSRuntime javaScript, NavigationManager nav, SpotifyConfig configuration, string baseAddress)
     {
         _http = http;
-        _js = js;
-        _nav = nav;
-        _config = config;
+        _javaScript = javaScript;
+        _navigation = nav;
+        _configuration = configuration;
         // Spotify requires an exact redirect URI match; this dedicated callback
         // route (e.g. https://user.github.io/rock-band/spotify-connect) must be
         // registered in the Spotify dashboard as a Redirect URI.
         _redirectUri = baseAddress + "spotify-connect";
     }
 
-    public bool IsConfigured => !string.IsNullOrWhiteSpace(_config.ClientId)
-                                && !_config.ClientId.StartsWith("REPLACE_");
+    public bool IsConfigured => !string.IsNullOrWhiteSpace(_configuration.ClientId)
+                                && !_configuration.ClientId.StartsWith("REPLACE_");
 
     public string RedirectUri => _redirectUri;
 
@@ -54,7 +54,7 @@ public class SpotifyAuthService
         // A token granted before a scope was added still works for some calls
         // and 403s on others, which surfaces as a permission error nobody can
         // act on. Treat it as signed out so the next press asks Spotify again.
-        if (!_token.Covers(_config.Scopes))
+        if (!_token.Covers(_configuration.Scopes))
         {
             await LogoutAsync();
             return false;
@@ -68,31 +68,31 @@ public class SpotifyAuthService
     {
         var verifier = GenerateCodeVerifier();
         var challenge = GenerateCodeChallenge(verifier);
-        await _js.InvokeVoidAsync("rbSpotify.setItem", VerifierKey, verifier);
+        await _javaScript.InvokeVoidAsync("rockBandSpotify.setItem", VerifierKey, verifier);
         // Remember where login was triggered from, so the callback page can
         // send the user back there instead of always landing on one fixed page.
-        await _js.InvokeVoidAsync("rbSpotify.setItem", ReturnPathKey, _nav.ToBaseRelativePath(_nav.Uri));
+        await _javaScript.InvokeVoidAsync("rockBandSpotify.setItem", ReturnPathKey, _navigation.ToBaseRelativePath(_navigation.Uri));
 
         var query = new Dictionary<string, string>
         {
-            ["client_id"] = _config.ClientId,
+            ["client_id"] = _configuration.ClientId,
             ["response_type"] = "code",
             ["redirect_uri"] = _redirectUri,
             ["code_challenge_method"] = "S256",
             ["code_challenge"] = challenge,
-            ["scope"] = _config.Scopes
+            ["scope"] = _configuration.Scopes
         };
         var url = AuthorizeEndpoint + "?" + string.Join("&",
             query.Select(kv => $"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(kv.Value)}"));
-        await _js.InvokeVoidAsync("rbSpotify.redirect", url);
+        await _javaScript.InvokeVoidAsync("rockBandSpotify.redirect", url);
     }
 
     /// <summary>The page login was triggered from, so the callback page can
     /// return the user there. Clears the stashed value; defaults to home.</summary>
     public async Task<string> ConsumeReturnPathAsync()
     {
-        var path = await _js.InvokeAsync<string?>("rbSpotify.getItem", ReturnPathKey);
-        await _js.InvokeVoidAsync("rbSpotify.removeItem", ReturnPathKey);
+        var path = await _javaScript.InvokeAsync<string?>("rockBandSpotify.getItem", ReturnPathKey);
+        await _javaScript.InvokeVoidAsync("rockBandSpotify.removeItem", ReturnPathKey);
         return string.IsNullOrEmpty(path) ? "/" : path;
     }
 
@@ -107,7 +107,7 @@ public class SpotifyAuthService
         if (!queryParams.TryGetValue("code", out var code))
             return false;
 
-        var verifier = await _js.InvokeAsync<string?>("rbSpotify.getItem", VerifierKey);
+        var verifier = await _javaScript.InvokeAsync<string?>("rockBandSpotify.getItem", VerifierKey);
         if (string.IsNullOrEmpty(verifier))
             return false;
 
@@ -116,14 +116,14 @@ public class SpotifyAuthService
             ["grant_type"] = "authorization_code",
             ["code"] = code,
             ["redirect_uri"] = _redirectUri,
-            ["client_id"] = _config.ClientId,
+            ["client_id"] = _configuration.ClientId,
             ["code_verifier"] = verifier
         };
 
         var response = await _http.PostAsync(TokenEndpoint, new FormUrlEncodedContent(form));
         // Always strip the spent code from the URL, success or not.
-        await _js.InvokeVoidAsync("rbSpotify.replaceUrl", _redirectUri);
-        await _js.InvokeVoidAsync("rbSpotify.removeItem", VerifierKey);
+        await _javaScript.InvokeVoidAsync("rockBandSpotify.replaceUrl", _redirectUri);
+        await _javaScript.InvokeVoidAsync("rockBandSpotify.removeItem", VerifierKey);
 
         if (!response.IsSuccessStatusCode)
             return false;
@@ -154,7 +154,7 @@ public class SpotifyAuthService
     public async Task LogoutAsync()
     {
         _token = null;
-        await _js.InvokeVoidAsync("rbSpotify.removeItem", TokenKey);
+        await _javaScript.InvokeVoidAsync("rockBandSpotify.removeItem", TokenKey);
     }
 
     private async Task<bool> RefreshAsync()
@@ -169,7 +169,7 @@ public class SpotifyAuthService
         {
             ["grant_type"] = "refresh_token",
             ["refresh_token"] = _token.RefreshToken,
-            ["client_id"] = _config.ClientId
+            ["client_id"] = _configuration.ClientId
         };
         var response = await _http.PostAsync(TokenEndpoint, new FormUrlEncodedContent(form));
         if (!response.IsSuccessStatusCode)
@@ -199,14 +199,14 @@ public class SpotifyAuthService
             RefreshToken = response.RefreshToken,
             ExpiresAt = DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn),
             // What Spotify actually granted, which can be narrower than asked.
-            Scope = response.Scope ?? _config.Scopes,
+            Scope = response.Scope ?? _configuration.Scopes,
         };
-        await _js.InvokeVoidAsync("rbSpotify.setItem", TokenKey, JsonSerializer.Serialize(_token));
+        await _javaScript.InvokeVoidAsync("rockBandSpotify.setItem", TokenKey, JsonSerializer.Serialize(_token));
     }
 
     private async Task<StoredToken?> LoadTokenAsync()
     {
-        var raw = await _js.InvokeAsync<string?>("rbSpotify.getItem", TokenKey);
+        var raw = await _javaScript.InvokeAsync<string?>("rockBandSpotify.getItem", TokenKey);
         if (string.IsNullOrEmpty(raw))
             return null;
         try

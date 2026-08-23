@@ -20,12 +20,12 @@ namespace RockBandSpotify.Services;
 public class MatchingService
 {
     private readonly ITrackLookup _api;
-    private readonly SpotifyConfig _config;
+    private readonly SpotifyConfig _configuration;
 
-    public MatchingService(ITrackLookup api, SpotifyConfig config)
+    public MatchingService(ITrackLookup api, SpotifyConfig configuration)
     {
         _api = api;
-        _config = config;
+        _configuration = configuration;
     }
 
     /// <summary>
@@ -47,7 +47,7 @@ public class MatchingService
 
             if (!string.IsNullOrEmpty(song.SpotifyId))
                 Accept(match, TrackFor(song));
-            else if (_config.SearchForMissingTracks)
+            else if (_configuration.SearchForMissingTracks)
                 await SearchAndScoreAsync(song, match);
             else
                 Skip(match);

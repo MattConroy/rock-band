@@ -3,12 +3,12 @@ using System.Text.Json.Serialization;
 namespace RockBandSpotify.Models;
 
 /// <summary>
-/// What the gateway Worker returns (see gateway/worker.js): the raw content
+/// What the gateway Worker returns (see gateway/worker.javaScript): the raw content
 /// codes an account owns. It deliberately resolves no names — turning a code
 /// into a song is <see cref="Services.EntitlementResolver"/>'s job, against the
 /// catalogue the browser already has.
 /// </summary>
-public class PsnEntitlementsResponse
+public class PlayStationEntitlementsResponse
 {
     [JsonPropertyName("generatedAt")]
     public string? GeneratedAt { get; set; }
@@ -17,10 +17,10 @@ public class PsnEntitlementsResponse
     public string? Source { get; set; }
 
     [JsonPropertyName("items")]
-    public List<PsnOwnedItem> Items { get; set; } = [];
+    public List<PlayStationOwnedItem> Items { get; set; } = [];
 }
 
-public class PsnOwnedItem
+public class PlayStationOwnedItem
 {
     /// <summary>The content code, e.g. <c>RBPHOTOGRCCF04AD</c>.</summary>
     [JsonPropertyName("code")]

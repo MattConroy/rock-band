@@ -10,7 +10,7 @@ public sealed record OwnedSongs(
 
 /// <summary>
 /// Works out which catalogue songs an account owns, by comparing the content
-/// codes PSN reports against the store ids in <see cref="CatalogueSong.PsnIds"/>.
+/// codes PSN reports against the store ids in <see cref="CatalogueSong.PlayStationIds"/>.
 ///
 /// <para>
 /// A plain string comparison, deliberately. The codes are the same identifiers
@@ -29,12 +29,12 @@ public static class EntitlementResolver
         IEnumerable<string> codes,
         IReadOnlyList<CatalogueSong> catalogue)
     {
-        var byPsnId = new Dictionary<string, List<CatalogueSong>>(StringComparer.OrdinalIgnoreCase);
+        var byPlayStationId = new Dictionary<string, List<CatalogueSong>>(StringComparer.OrdinalIgnoreCase);
         foreach (var song in catalogue)
-            foreach (var id in song.PsnIds)
+            foreach (var id in song.PlayStationIds)
             {
-                if (!byPsnId.TryGetValue(id, out var granted))
-                    byPsnId[id] = granted = [];
+                if (!byPlayStationId.TryGetValue(id, out var granted))
+                    byPlayStationId[id] = granted = [];
                 granted.Add(song);
             }
 
@@ -47,7 +47,7 @@ public static class EntitlementResolver
         {
             if (string.IsNullOrWhiteSpace(code) || !seenCodes.Add(code)) continue;
 
-            if (byPsnId.TryGetValue(code, out var granted))
+            if (byPlayStationId.TryGetValue(code, out var granted))
             {
                 foreach (var song in granted)
                     if (seenSongs.Add(song.Id)) matched.Add(song);

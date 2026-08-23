@@ -12,17 +12,17 @@ public class SpotifyApiService : ITrackLookup
     private const string ApiBase = "https://api.spotify.com/v1";
 
     private readonly HttpClient _http;
-    private readonly SpotifyAuthService _auth;
+    private readonly SpotifyAuthenticationService _authentication;
 
-    public SpotifyApiService(HttpClient http, SpotifyAuthService auth)
+    public SpotifyApiService(HttpClient http, SpotifyAuthenticationService authentication)
     {
         _http = http;
-        _auth = auth;
+        _authentication = authentication;
     }
 
     private async Task<HttpRequestMessage> AuthorizedRequest(HttpMethod method, string url)
     {
-        var token = await _auth.GetAccessTokenAsync()
+        var token = await _authentication.GetAccessTokenAsync()
             ?? throw new InvalidOperationException("Not signed in to Spotify.");
         var request = new HttpRequestMessage(method, url);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);

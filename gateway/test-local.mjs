@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Local test for the PSN side — runs on YOUR machine so your npsso never leaves it.
+// Local test for the PlayStation side — runs on YOUR machine so your npsso never leaves it.
 //
 //   PSN_NPSSO=your-64-char-token node test-local.mjs
 //
@@ -10,7 +10,7 @@
 // https://ca.account.sony.com/api/v1/ssocookie and copy the npsso value.
 
 import { writeFile } from "node:fs/promises";
-import { getAccessToken, fetchEntitlements, ownedRockBandSongs } from "./psn.mjs";
+import { getAccessToken, fetchEntitlements, ownedRockBandSongs } from "./playstation.mjs";
 
 const npsso = process.env.PSN_NPSSO || process.argv[2];
 if (!npsso) {
@@ -23,7 +23,7 @@ function line() {
 }
 
 try {
-  console.log("→ Authenticating with PSN…");
+  console.log("→ Authenticating with PlayStation…");
   const accessToken = await getAccessToken(npsso);
 
   console.log("→ Fetching entitlements…");

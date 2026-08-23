@@ -23,11 +23,11 @@ public partial class Catalogue
     private string? OwnedQuery { get; set; }
 
     [Inject] private CatalogueService Catalog { get; set; } = default!;
-    [Inject] private NavigationManager Nav { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private OwnedLibrary Owned { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
-    private const string ColumnsStorageKey = "rb_catalogue_columns";
+    private const string ColumnsStorageKey = "rock_band_catalogue_columns";
 
     /// <summary>One optional (non-Song/Artist) column: its storage key, header
     /// label, and cell value.</summary>
@@ -111,7 +111,7 @@ public partial class Catalogue
         if (!firstRender) return;
         try
         {
-            await JS.InvokeVoidAsync("rbSpotify.syncTableScroll", "rb-table-header", "rb-table-body");
+            await JS.InvokeVoidAsync("rockBandSpotify.syncTableScroll", "rock-band-table-header", "rock-band-table-body");
         }
         catch { /* pre-rendering or non-WASM host: the header just won't follow */ }
     }
@@ -168,7 +168,7 @@ public partial class Catalogue
         int width;
         try
         {
-            width = ((IJSInProcessRuntime)JS).Invoke<int>("rbSpotify.getViewportWidth");
+            width = ((IJSInProcessRuntime)JS).Invoke<int>("rockBandSpotify.getViewportWidth");
         }
         catch
         {
@@ -182,7 +182,7 @@ public partial class Catalogue
     {
         try
         {
-            var raw = ((IJSInProcessRuntime)JS).Invoke<string?>("rbSpotify.getItem", ColumnsStorageKey);
+            var raw = ((IJSInProcessRuntime)JS).Invoke<string?>("rockBandSpotify.getItem", ColumnsStorageKey);
             if (string.IsNullOrEmpty(raw)) return null;
             var keys = JsonSerializer.Deserialize<string[]>(raw);
             return keys is null ? null : new HashSet<string>(keys);
@@ -197,7 +197,7 @@ public partial class Catalogue
     {
         try
         {
-            ((IJSInProcessRuntime)JS).InvokeVoid("rbSpotify.setItem", ColumnsStorageKey, JsonSerializer.Serialize(_visibleColumns));
+            ((IJSInProcessRuntime)JS).InvokeVoid("rockBandSpotify.setItem", ColumnsStorageKey, JsonSerializer.Serialize(_visibleColumns));
         }
         catch { /* localStorage unavailable — preference just won't persist */ }
     }
@@ -247,8 +247,8 @@ public partial class Catalogue
     /// </summary>
     private void SetOwned(OwnedFilter wanted)
     {
-        var uri = Nav.GetUriWithQueryParameter("owned", QueryFor(wanted));
-        if (uri == Nav.Uri)
+        var uri = Navigation.GetUriWithQueryParameter("owned", QueryFor(wanted));
+        if (uri == Navigation.Uri)
         {
             // Already at that address, so no navigation will arrive to apply it.
             _owned = wanted;
@@ -256,7 +256,7 @@ public partial class Catalogue
             return;
         }
 
-        Nav.NavigateTo(uri);
+        Navigation.NavigateTo(uri);
     }
 
     private void ClearSearch()
