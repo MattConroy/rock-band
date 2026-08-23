@@ -36,6 +36,16 @@
 {
     <PsnSignInDialog OnConnect="ConnectPsnAsync" OnCancel="ClosePsnDialog" Error="@State.Error" />
 }
+else if (_showPsnStatus)
+{
+    <PsnStatusDialog OwnedCount="State.OwnedCount" MatchedCount="State.MatchedCount"
+                     ShowingOwned="@ShowingOwned" Busy="State.PsnBusy"
+                     OnClose="() => _showPsnStatus = false"
+                     OnToggleFilter="ToggleOwnedFilter"
+                     OnRefetch="State.FetchPsnAsync"
+                     OnClear="ClearPsnAsync"
+                     OnDisconnect="DisconnectPsnAsync" />
+}
 else if (!string.IsNullOrEmpty(State.Error))
 {
     <div class="conn-error" role="alert">
@@ -47,6 +57,11 @@ else if (!string.IsNullOrEmpty(State.Error))
 
 @code {
     private bool _showPsnDialog;
+    private bool _showPsnStatus;
+
+    /// <summary>Whether the catalogue is currently narrowed to owned songs.</summary>
+    private bool ShowingOwned =>
+        Nav.ToAbsoluteUri(Nav.Uri).Query.Contains("owned=1", StringComparison.Ordinal);
 
     protected override async Task OnInitializedAsync()
     {
@@ -90,9 +105,7 @@ else if (!string.IsNullOrEmpty(State.Error))
                 await State.FetchPsnAsync();
                 break;
             case ConnectionStatus.Synced:
-                // Narrow the catalogue to what the account owns. Carried in the
-                // address so it survives a reload and can be shared.
-                Nav.NavigateTo(Nav.GetUriWithQueryParameter("owned", "1"));
+                _showPsnStatus = true;
                 break;
         }
     }
@@ -107,6 +120,31 @@ else if (!string.IsNullOrEmpty(State.Error))
     {
         _showPsnDialog = false;
         await State.ConnectPsnAsync(npsso);
+    }
+
+    /// <summary>
+    /// Adds or removes the filter rather than only setting it — the old
+    /// behaviour navigated to an address it was already on, so a second press
+    /// did nothing and there was no way back to the full catalogue.
+    /// </summary>
+    private void ToggleOwnedFilter()
+    {
+        _showPsnStatus = false;
+        Nav.NavigateTo(Nav.GetUriWithQueryParameter("owned", ShowingOwned ? null : "1"));
+    }
+
+    private async Task ClearPsnAsync()
+    {
+        _showPsnStatus = false;
+        if (ShowingOwned) Nav.NavigateTo(Nav.GetUriWithQueryParameter("owned", (string?)null));
+        await State.ClearPsnSongsAsync();
+    }
+
+    private async Task DisconnectPsnAsync()
+    {
+        _showPsnStatus = false;
+        if (ShowingOwned) Nav.NavigateTo(Nav.GetUriWithQueryParameter("owned", (string?)null));
+        await State.DisconnectPsnAsync();
     }
 
     private async Task PressSpotifyAsync()

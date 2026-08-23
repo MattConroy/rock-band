@@ -11,7 +11,8 @@ Live at **<https://mattconroy.github.io/rock-band/>**.
   spin-offs and the Rock Band Network. Search by title or artist, filter by genre
   or by the game a song came from, sort any column. No login needed.
 - **See what you own** — connect PlayStation once and the catalogue gains an
-  ownership column, so you can narrow it to the songs in your library.
+  ownership column. Pressing the button then shows what was fetched and lets you
+  narrow the list to your own songs, fetch again, or disconnect.
 - **Build a playlist** — connect Spotify and sync your owned songs into a
   playlist. Re-running only adds what is missing.
 

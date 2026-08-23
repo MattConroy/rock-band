@@ -64,6 +64,14 @@ public class ConnectionState
     /// <summary>How many catalogue songs the account owns, once fetched.</summary>
     public int OwnedCount { get; private set; }
 
+    /// <summary>
+    /// How many of those the catalogue already knows a Spotify track for. The
+    /// rest can't reach a playlist, so it is the number worth showing next to
+    /// the owned count rather than leaving the shortfall to be discovered at
+    /// the end of a sync.
+    /// </summary>
+    public int MatchedCount { get; private set; }
+
     /// <summary>Where the synced playlist lives, for opening it.</summary>
     public string? PlaylistUrl { get; private set; }
 
@@ -81,7 +89,7 @@ public class ConnectionState
     public async Task RefreshAsync()
     {
         var library = await _psn.GetCachedSongsAsync();
-        OwnedCount = library?.Songs.Count ?? 0;
+        Count(library);
         Psn = OwnedCount > 0 ? ConnectionStatus.Synced
             : await _psn.HasTokenAsync() ? ConnectionStatus.Connected
             : ConnectionStatus.Disconnected;
@@ -122,7 +130,7 @@ public class ConnectionState
         try
         {
             var library = await _psn.FetchSongsAsync();
-            OwnedCount = library.Songs.Count;
+            Count(library);
             Psn = OwnedCount > 0 ? ConnectionStatus.Synced : ConnectionStatus.Connected;
             if (OwnedCount == 0)
                 Error = "PlayStation returned nothing this app recognises as a Rock Band song.";
@@ -142,8 +150,26 @@ public class ConnectionState
     {
         await _psn.DisconnectAsync();
         Psn = ConnectionStatus.Disconnected;
-        OwnedCount = 0;
+        Count(null);
         Notify();
+    }
+
+    /// <summary>
+    /// Forgets the fetched songs but keeps the token, so the next press
+    /// re-fetches without another trip to Sony's login page.
+    /// </summary>
+    public async Task ClearPsnSongsAsync()
+    {
+        await _psn.ClearSongsAsync();
+        Count(null);
+        Psn = ConnectionStatus.Connected;
+        Notify();
+    }
+
+    private void Count(SongLibrary? library)
+    {
+        OwnedCount = library?.Songs.Count ?? 0;
+        MatchedCount = library?.Songs.Count(s => !string.IsNullOrEmpty(s.SpotifyId)) ?? 0;
     }
 
     /// <summary>

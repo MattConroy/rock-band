@@ -1,0 +1,78 @@
+@* What the PlayStation button opens once there is a library to talk about.
+   Pressing used to apply the owned filter directly, which worked once and
+   then did nothing, because the second press asked for the address it was
+   already on. Everything that can be done to the fetched songs lives here
+   instead, so the button has one meaning at every stage. *@
+
+<div class="dialog-backdrop" @onclick="OnClose">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="psn-status-title"
+         @onclick:stopPropagation="true" @onkeydown="OnKeyDown">
+        <div class="dialog-head">
+            <h2 id="psn-status-title">PlayStation</h2>
+            <button type="button" class="dialog-close" aria-label="Close" @onclick="OnClose">✕</button>
+        </div>
+
+        <dl class="stat-row">
+            <div class="stat">
+                <dt>Songs owned</dt>
+                <dd>@OwnedCount</dd>
+            </div>
+            <div class="stat">
+                <dt>On Spotify</dt>
+                <dd>@MatchedCount</dd>
+            </div>
+        </dl>
+
+        <p class="rb-sub dialog-intro">
+            @if (MatchedCount == OwnedCount)
+            {
+                @:Every owned song has a Spotify track, so all of them can reach the playlist.
+            }
+            else
+            {
+                @($"{OwnedCount - MatchedCount} of your songs have no Spotify track in the catalogue yet, so they can't be added to the playlist.")
+            }
+        </p>
+
+        <div class="dialog-stack">
+            <button type="button" class="rb-btn dialog-step-control" @onclick="OnToggleFilter">
+                @(ShowingOwned ? "Show the whole catalogue" : "Show only songs I own")
+            </button>
+            <button type="button" class="rb-btn rb-btn-secondary dialog-step-control"
+                    disabled="@Busy" @onclick="OnRefetch">
+                @(Busy ? "Fetching…" : "Fetch again from PlayStation")
+            </button>
+        </div>
+
+        <div class="dialog-danger">
+            <button type="button" class="link-btn" disabled="@Busy" @onclick="OnClear">
+                Clear fetched songs
+            </button>
+            <button type="button" class="link-btn link-btn-bad" disabled="@Busy" @onclick="OnDisconnect">
+                Disconnect PlayStation
+            </button>
+        </div>
+        <p class="dialog-note rb-sub">
+            Clearing keeps your sign-in, so fetching again needs no new token.
+            Disconnecting forgets both.
+        </p>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int OwnedCount { get; set; }
+    [Parameter] public int MatchedCount { get; set; }
+    [Parameter] public bool ShowingOwned { get; set; }
+    [Parameter] public bool Busy { get; set; }
+
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnToggleFilter { get; set; }
+    [Parameter] public EventCallback OnRefetch { get; set; }
+    [Parameter] public EventCallback OnClear { get; set; }
+    [Parameter] public EventCallback OnDisconnect { get; set; }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape") await OnClose.InvokeAsync();
+    }
+}
