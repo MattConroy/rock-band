@@ -348,6 +348,65 @@ public class ConnectionButtonTests : AppPageTest
         }
     }
 
+    /// <summary>Signed in, with a playlist recorded from an earlier sync.</summary>
+    private async Task SeedSpotify(int trackCount)
+    {
+        await Page.EvaluateAsync(
+            @"count => {
+                localStorage.setItem('rb_spotify_token', JSON.stringify({
+                    AccessToken: 'fake', ExpiresAt: '2099-01-01T00:00:00+00:00',
+                    Scope: 'playlist-read-private playlist-modify-public playlist-modify-private' }));
+                localStorage.setItem('rb_spotify_playlist', JSON.stringify({
+                    Url: 'https://open.spotify.com/playlist/xyz', Name: 'Rock Band DLC', TrackCount: count }));
+            }", trackCount);
+        await Page.ReloadAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
+    }
+
+    [Test]
+    public async Task A_synced_Spotify_offers_a_resync_not_just_the_playlist()
+    {
+        // Opening the playlist was all it did, which is a dead end the moment
+        // the playlist is wrong — as it was when a sync produced an empty one.
+        await SeedLibrary(4411, 98);
+        await SeedSpotify(trackCount: 0);
+
+        await Spotify.ClickAsync();
+
+        await Expect(Page.GetByRole(AriaRole.Dialog)).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Sync now" })).ToBeVisibleAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Open in Spotify ↗" })).ToBeVisibleAsync();
+    }
+
+    [Test]
+    public async Task An_empty_playlist_is_visible_as_empty()
+    {
+        await SeedLibrary(4411, 98);
+        await SeedSpotify(trackCount: 0);
+
+        // The count is on the button itself, so it doesn't take opening the
+        // playlist in another tab to notice nothing is in it.
+        await Expect(Spotify).ToHaveAttributeAsync("title",
+            new System.Text.RegularExpressions.Regex("0 songs in Rock Band DLC"));
+
+        await Spotify.ClickAsync();
+        await Expect(Page.Locator(".dialog-intro")).ToContainTextAsync("2 of your songs aren't in Rock Band DLC yet");
+    }
+
+    [Test]
+    public async Task A_playlist_stored_by_an_older_build_still_counts_as_synced()
+    {
+        // Earlier builds saved just the URL. Reading those keeps a sync that
+        // already happened rather than silently demoting it.
+        await Page.EvaluateAsync(
+            "localStorage.setItem('rb_spotify_token', JSON.stringify({ AccessToken: 'fake', ExpiresAt: '2099-01-01T00:00:00+00:00', Scope: 'playlist-read-private playlist-modify-public playlist-modify-private' }));"
+            + "localStorage.setItem('rb_spotify_playlist', JSON.stringify('https://open.spotify.com/playlist/old'));");
+        await Page.ReloadAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
+
+        await Expect(Spotify).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("conn-synced"));
+    }
+
     [Test]
     public async Task No_console_errors_from_the_header()
     {

@@ -1,0 +1,82 @@
+@* What the Spotify button opens once a playlist exists.
+
+   Pressing it used to open the playlist and nothing else, which is a dead end
+   the moment the playlist is wrong — there was no way back to a sync. The same
+   trap the PlayStation button had. *@
+
+<div class="dialog-backdrop" @onclick="OnClose">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="spotify-status-title"
+         @onclick:stopPropagation="true" @onkeydown="OnKeyDown">
+        <div class="dialog-head">
+            <h2 id="spotify-status-title">Spotify</h2>
+            <button type="button" class="dialog-close" aria-label="Close" @onclick="OnClose">✕</button>
+        </div>
+
+        <dl class="stat-row">
+            <div class="stat">
+                <dt>In the playlist</dt>
+                <dd>@TrackCount</dd>
+            </div>
+            <div class="stat">
+                <dt>Ready to add</dt>
+                <dd>@ReadyCount</dd>
+            </div>
+        </dl>
+
+        <p class="rb-sub dialog-intro">
+            @if (ReadyCount == 0)
+            {
+                @:Nothing to sync yet — connect PlayStation so there are owned songs to add.
+            }
+            else if (TrackCount >= ReadyCount)
+            {
+                @($"{PlaylistName} has everything the catalogue can match.")
+            }
+            else
+            {
+                @($"{ReadyCount - TrackCount} of your songs aren't in {PlaylistName} yet.")
+            }
+        </p>
+
+        <div class="dialog-stack">
+            <button type="button" class="rb-btn dialog-step-control" disabled="@Busy" @onclick="OnSync">
+                @(Busy ? "Syncing…" : TrackCount == 0 ? "Sync now" : "Sync again")
+            </button>
+            <button type="button" class="rb-btn rb-btn-secondary dialog-step-control" @onclick="OnOpen">
+                Open in Spotify ↗
+            </button>
+        </div>
+
+        <div class="dialog-danger">
+            <button type="button" class="link-btn link-btn-bad" disabled="@Busy" @onclick="OnDisconnect">
+                Disconnect Spotify
+            </button>
+        </div>
+        <p class="dialog-note rb-sub">
+            Disconnecting forgets your sign-in here. The playlist stays on your
+            Spotify account.
+        </p>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string PlaylistName { get; set; } = "";
+
+    /// <summary>Songs already in the playlist, as of the last sync.</summary>
+    [Parameter] public int TrackCount { get; set; }
+
+    /// <summary>Owned songs the catalogue knows a Spotify track for.</summary>
+    [Parameter] public int ReadyCount { get; set; }
+
+    [Parameter] public bool Busy { get; set; }
+
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnOpen { get; set; }
+    [Parameter] public EventCallback OnSync { get; set; }
+    [Parameter] public EventCallback OnDisconnect { get; set; }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape") await OnClose.InvokeAsync();
+    }
+}

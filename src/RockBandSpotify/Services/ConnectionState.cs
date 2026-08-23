@@ -11,6 +11,13 @@ public enum NoticeKind { Good, Bad }
 /// <summary>Something worth telling the person who pressed the button.</summary>
 public record Notice(string Text, NoticeKind Kind);
 
+/// <summary>
+/// The playlist as it stood after the last sync. The count is remembered so
+/// the header can say how much is in there without asking Spotify again —
+/// and so a playlist that came back empty is visible as empty.
+/// </summary>
+public record PlaylistInfo(string Url, string Name, int TrackCount);
+
 public enum ConnectionStatus
 {
     /// <summary>Not signed in.</summary>
@@ -81,8 +88,13 @@ public class ConnectionState
     /// </summary>
     public int MatchedCount { get; private set; }
 
-    /// <summary>Where the synced playlist lives, for opening it.</summary>
-    public string? PlaylistUrl { get; private set; }
+    /// <summary>The synced playlist, or null if there isn't one yet.</summary>
+    public PlaylistInfo? Playlist { get; private set; }
+
+    public string? PlaylistUrl => Playlist?.Url;
+
+    /// <summary>The name the playlist would be given, whether or not it exists.</summary>
+    public string PlaylistName => Playlist?.Name ?? _playlistName;
 
     /// <summary>Set while a press is being acted on, so the button can show it.</summary>
     public bool PsnBusy { get; private set; }
@@ -113,9 +125,9 @@ public class ConnectionState
             : await _psn.HasTokenAsync() ? ConnectionStatus.Connected
             : ConnectionStatus.Disconnected;
 
-        PlaylistUrl = await ReadPlaylistUrlAsync();
+        Playlist = await ReadPlaylistAsync();
         Spotify = !await _auth.IsAuthenticatedAsync() ? ConnectionStatus.Disconnected
-            : PlaylistUrl is not null ? ConnectionStatus.Synced
+            : Playlist is not null ? ConnectionStatus.Synced
             : ConnectionStatus.Connected;
 
         Notify();
@@ -238,8 +250,11 @@ public class ConnectionState
             Notify();
             var result = await _sync.SyncAsync(matches);
 
-            PlaylistUrl = result.Playlist.WebUrl;
-            await WritePlaylistUrlAsync(PlaylistUrl);
+            Playlist = new PlaylistInfo(
+                result.Playlist.WebUrl,
+                result.Playlist.Name,
+                result.Added + result.AlreadyPresent);
+            await WritePlaylistAsync(Playlist);
             Spotify = ConnectionStatus.Synced;
             Succeed(Describe(result));
         }
@@ -258,8 +273,8 @@ public class ConnectionState
     public async Task DisconnectSpotifyAsync()
     {
         await _auth.LogoutAsync();
-        await WritePlaylistUrlAsync(null);
-        PlaylistUrl = null;
+        await WritePlaylistAsync(null);
+        Playlist = null;
         Spotify = ConnectionStatus.Disconnected;
         Succeed("Disconnected from Spotify.");
     }
@@ -303,12 +318,22 @@ public class ConnectionState
 
     private void Notify() => Changed?.Invoke();
 
-    private async Task<string?> ReadPlaylistUrlAsync()
+    private async Task<PlaylistInfo?> ReadPlaylistAsync()
     {
         try
         {
             var raw = await _js.InvokeAsync<string?>("rbSpotify.getItem", PlaylistKey);
-            return string.IsNullOrEmpty(raw) ? null : JsonSerializer.Deserialize<string>(raw);
+            if (string.IsNullOrEmpty(raw)) return null;
+
+            // Earlier builds stored just the URL. Read those rather than
+            // throwing away a sync that already happened.
+            if (raw.TrimStart().StartsWith('"'))
+            {
+                var url = JsonSerializer.Deserialize<string>(raw);
+                return url is null ? null : new PlaylistInfo(url, _playlistName, 0);
+            }
+
+            return JsonSerializer.Deserialize<PlaylistInfo>(raw);
         }
         catch
         {
@@ -316,14 +341,14 @@ public class ConnectionState
         }
     }
 
-    private async Task WritePlaylistUrlAsync(string? url)
+    private async Task WritePlaylistAsync(PlaylistInfo? playlist)
     {
         try
         {
-            if (url is null)
+            if (playlist is null)
                 await _js.InvokeVoidAsync("rbSpotify.removeItem", PlaylistKey);
             else
-                await _js.InvokeVoidAsync("rbSpotify.setItem", PlaylistKey, JsonSerializer.Serialize(url));
+                await _js.InvokeVoidAsync("rbSpotify.setItem", PlaylistKey, JsonSerializer.Serialize(playlist));
         }
         catch { /* the synced state just won't survive a reload */ }
     }
