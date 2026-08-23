@@ -113,7 +113,7 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
-/* ---- Rock Band → Spotify: design tokens + shared primitives ----
+/* ---- Rock Band: design tokens + shared primitives ----
    Component-specific layout lives in each component's scoped .razor.css.
    This file holds only the cross-cutting design system reused everywhere.
    Palette is an original dark navy/blue treatment evoking a rhythm-game
