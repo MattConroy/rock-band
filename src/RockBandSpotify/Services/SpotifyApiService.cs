@@ -100,14 +100,6 @@ public class SpotifyApiService : ITrackLookup
         return await Task.FromResult(clone);
     }
 
-    public async Task<SpotifyUser> GetCurrentUserAsync()
-    {
-        var request = await AuthorizedRequest(HttpMethod.Get, $"{ApiBase}/me");
-        var response = await SendAsync(request);
-        await EnsureAsync(response, "the sign-in check (GET /me)");
-        return (await response.Content.ReadFromJsonAsync<SpotifyUser>())!;
-    }
-
     /// <summary>Searches tracks by artist + title, returning up to <paramref name="limit"/> candidates.</summary>
     public async Task<List<SpotifyTrack>> SearchTracksAsync(string title, string artist, int limit = 5)
     {
@@ -177,9 +169,14 @@ public class SpotifyApiService : ITrackLookup
         return null;
     }
 
-    public async Task<SpotifyPlaylist> CreatePlaylistAsync(string userId, string name, string description, bool isPublic)
+    /// <summary>
+    /// Creates the playlist on the signed-in account. Spotify retired
+    /// POST /users/{id}/playlists — it now answers 403 for every caller — and
+    /// names POST /me/playlists as the replacement, which needs no user id.
+    /// </summary>
+    public async Task<SpotifyPlaylist> CreatePlaylistAsync(string name, string description, bool isPublic)
     {
-        var request = await AuthorizedRequest(HttpMethod.Post, $"{ApiBase}/users/{userId}/playlists");
+        var request = await AuthorizedRequest(HttpMethod.Post, $"{ApiBase}/me/playlists");
         var body = JsonContent.Create(new { name, description, @public = isPublic });
         var response = await SendAsync(request, body);
         await EnsureAsync(response, "creating the playlist");
@@ -190,12 +187,12 @@ public class SpotifyApiService : ITrackLookup
     public async Task<HashSet<string>> GetPlaylistTrackUrisAsync(string playlistId)
     {
         var uris = new HashSet<string>();
-        string? url = $"{ApiBase}/playlists/{playlistId}/tracks?fields=items(track(uri)),next&limit=100";
+        string? url = $"{ApiBase}/playlists/{playlistId}/items?fields=items(track(uri)),next&limit=100";
         while (url is not null)
         {
             var request = await AuthorizedRequest(HttpMethod.Get, url);
             var response = await SendAsync(request);
-            await EnsureAsync(response, "reading the playlist's tracks");
+            await EnsureAsync(response, "reading the playlist's items");
             using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
             var root = doc.RootElement;
             foreach (var item in root.GetProperty("items").EnumerateArray())
@@ -220,10 +217,10 @@ public class SpotifyApiService : ITrackLookup
     {
         foreach (var batch in Batch(uris, 100))
         {
-            var request = await AuthorizedRequest(HttpMethod.Post, $"{ApiBase}/playlists/{playlistId}/tracks");
+            var request = await AuthorizedRequest(HttpMethod.Post, $"{ApiBase}/playlists/{playlistId}/items");
             var body = JsonContent.Create(new { uris = batch });
             var response = await SendAsync(request, body);
-            await EnsureAsync(response, "adding tracks to the playlist");
+            await EnsureAsync(response, "adding items to the playlist");
         }
     }
 

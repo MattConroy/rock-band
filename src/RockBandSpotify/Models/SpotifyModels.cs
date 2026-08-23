@@ -48,14 +48,6 @@ public class StoredToken
         new((scopes ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries), StringComparer.Ordinal);
 }
 
-public class SpotifyUser
-{
-    [JsonPropertyName("id")]
-    public string Id { get; set; } = "";
-
-    [JsonPropertyName("display_name")]
-    public string? DisplayName { get; set; }
-}
 
 public class SpotifyTrack
 {

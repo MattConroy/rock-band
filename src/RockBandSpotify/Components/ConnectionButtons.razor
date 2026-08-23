@@ -1,4 +1,5 @@
 @implements IDisposable
+@using Microsoft.AspNetCore.Components.Routing
 @inject ConnectionState State
 @inject NavigationManager Nav
 @inject IJSRuntime JS
@@ -66,12 +67,22 @@ else if (!string.IsNullOrEmpty(State.Error))
     protected override async Task OnInitializedAsync()
     {
         State.Changed += OnStateChanged;
+        // The status dialog reads the filter out of the address, so the button
+        // has to redraw when the catalogue changes it — otherwise it keeps
+        // offering to undo a filter that is no longer applied.
+        Nav.LocationChanged += OnLocationChanged;
         await State.RefreshAsync();
     }
 
     private void OnStateChanged() => InvokeAsync(StateHasChanged);
 
-    public void Dispose() => State.Changed -= OnStateChanged;
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        State.Changed -= OnStateChanged;
+        Nav.LocationChanged -= OnLocationChanged;
+    }
 
     private static string StatusClass(ConnectionStatus status) => status switch
     {
