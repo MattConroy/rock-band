@@ -103,8 +103,15 @@ public class SpotifyPlaylist
     [JsonPropertyName("external_urls")]
     public Dictionary<string, string> ExternalUrls { get; set; } = new();
 
+    /// <summary>
+    /// Where to open the playlist. Spotify normally supplies this, but the
+    /// address follows from the id, so a response without external_urls
+    /// doesn't have to mean a button that goes nowhere.
+    /// </summary>
     [JsonIgnore]
-    public string? WebUrl => ExternalUrls.TryGetValue("spotify", out var u) ? u : null;
+    public string WebUrl => ExternalUrls.TryGetValue("spotify", out var u) && !string.IsNullOrEmpty(u)
+        ? u
+        : $"https://open.spotify.com/playlist/{Id}";
 }
 
 public class SpotifyPlaylistPage
