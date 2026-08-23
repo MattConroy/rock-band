@@ -5,6 +5,12 @@ using RockBandSpotify.Models;
 namespace RockBandSpotify.Services;
 
 /// <summary>How far along a connection is, which decides what pressing it does.</summary>
+/// <summary>Whether a notice reports something that worked or something that didn't.</summary>
+public enum NoticeKind { Good, Bad }
+
+/// <summary>Something worth telling the person who pressed the button.</summary>
+public record Notice(string Text, NoticeKind Kind);
+
 public enum ConnectionStatus
 {
     /// <summary>Not signed in.</summary>
@@ -38,6 +44,7 @@ public class ConnectionState
     private readonly MatchingService _matcher;
     private readonly PlaylistSyncService _sync;
     private readonly IJSRuntime _js;
+    private readonly string _playlistName;
 
     public ConnectionState(
         SpotifyAuthService auth,
@@ -45,8 +52,10 @@ public class ConnectionState
         PsnService psn,
         MatchingService matcher,
         PlaylistSyncService sync,
+        PlaylistConfig playlist,
         IJSRuntime js)
     {
+        _playlistName = playlist.Name;
         _auth = auth;
         _api = api;
         _psn = psn;
@@ -79,8 +88,18 @@ public class ConnectionState
     public bool PsnBusy { get; private set; }
     public bool SpotifyBusy { get; private set; }
 
-    /// <summary>Whatever went wrong last, for the header to surface.</summary>
-    public string? Error { get; private set; }
+    /// <summary>
+    /// What just happened, good or bad. Successes are worth saying out loud —
+    /// a sync that adds nothing and a sync that adds eight hundred songs
+    /// otherwise look identical from the outside.
+    /// </summary>
+    public Notice? Notice { get; private set; }
+
+    /// <summary>The last failure, for the sign-in dialog to show inline.</summary>
+    public string? Error => Notice is { Kind: NoticeKind.Bad } bad ? bad.Text : null;
+
+    /// <summary>What the buttons are doing, shown while they do it.</summary>
+    public string? BusyText { get; private set; }
 
     public bool IsSpotifyConfigured => _auth.IsConfigured;
     public bool IsPsnConfigured => _psn.IsGatewayConfigured;
@@ -111,8 +130,7 @@ public class ConnectionState
         }
         catch (Exception ex)
         {
-            Error = $"Couldn't save the token: {ex.Message}";
-            Notify();
+            Fail($"Couldn't save the token: {ex.Message}");
             return;
         }
 
@@ -125,7 +143,8 @@ public class ConnectionState
     public async Task FetchPsnAsync()
     {
         PsnBusy = true;
-        Error = null;
+        BusyText = "Asking PlayStation what you own…";
+        Notice = null;
         Notify();
         try
         {
@@ -133,15 +152,18 @@ public class ConnectionState
             Count(library);
             Psn = OwnedCount > 0 ? ConnectionStatus.Synced : ConnectionStatus.Connected;
             if (OwnedCount == 0)
-                Error = "PlayStation returned nothing this app recognises as a Rock Band song.";
+                Fail("PlayStation returned nothing this app recognises as a Rock Band song.");
+            else
+                Succeed($"Found {OwnedCount} songs you own — {MatchedCount} of them are on Spotify.");
         }
         catch (Exception ex)
         {
-            Error = ex.Message;
+            Fail(ex.Message);
         }
         finally
         {
             PsnBusy = false;
+            BusyText = null;
             Notify();
         }
     }
@@ -151,7 +173,7 @@ public class ConnectionState
         await _psn.DisconnectAsync();
         Psn = ConnectionStatus.Disconnected;
         Count(null);
-        Notify();
+        Succeed("Disconnected from PlayStation.");
     }
 
     /// <summary>
@@ -163,7 +185,7 @@ public class ConnectionState
         await _psn.ClearSongsAsync();
         Count(null);
         Psn = ConnectionStatus.Connected;
-        Notify();
+        Succeed("Cleared the fetched songs. Your sign-in is still here.");
     }
 
     private void Count(SongLibrary? library)
@@ -179,15 +201,14 @@ public class ConnectionState
     /// </summary>
     public async Task SignInToSpotifyAsync()
     {
-        Error = null;
+        Notice = null;
         try
         {
             await _auth.BeginLoginAsync();
         }
         catch (Exception ex)
         {
-            Error = $"Couldn't start the Spotify sign-in: {ex.Message}";
-            Notify();
+            Fail($"Couldn't start the Spotify sign-in: {ex.Message}");
         }
     }
 
@@ -199,31 +220,37 @@ public class ConnectionState
     public async Task SyncSpotifyAsync()
     {
         SpotifyBusy = true;
-        Error = null;
+        BusyText = "Working out which songs to add…";
+        Notice = null;
         Notify();
         try
         {
             var library = await _psn.GetCachedSongsAsync();
             if (library is null || library.Songs.Count == 0)
             {
-                Error = "Connect PlayStation first — there are no owned songs to sync.";
+                Fail("Connect PlayStation first — there are no owned songs to sync.");
                 return;
             }
 
             var matches = await _matcher.MatchAllAsync(library.Songs);
+
+            BusyText = $"Adding songs to {_playlistName}…";
+            Notify();
             var result = await _sync.SyncAsync(matches);
 
             PlaylistUrl = result.Playlist.WebUrl;
             await WritePlaylistUrlAsync(PlaylistUrl);
             Spotify = ConnectionStatus.Synced;
+            Succeed(Describe(result));
         }
         catch (Exception ex)
         {
-            Error = ex.Message;
+            Fail(ex.Message);
         }
         finally
         {
             SpotifyBusy = false;
+            BusyText = null;
             Notify();
         }
     }
@@ -234,12 +261,43 @@ public class ConnectionState
         await WritePlaylistUrlAsync(null);
         PlaylistUrl = null;
         Spotify = ConnectionStatus.Disconnected;
+        Succeed("Disconnected from Spotify.");
+    }
+
+    public void ClearNotice()
+    {
+        Notice = null;
         Notify();
     }
 
-    public void ClearError()
+    /// <summary>
+    /// Says what the sync actually did. "Nothing to add" and "added eight
+    /// hundred songs" are both successes, and they need telling apart.
+    /// </summary>
+    internal static string Describe(SyncResult result)
     {
-        Error = null;
+        var name = result.Playlist.Name;
+        if (result.Added == 0)
+            return result.AlreadyPresent > 0
+                ? $"{name} was already up to date — all {result.AlreadyPresent} songs were in it."
+                : $"Nothing to add to {name}. None of your owned songs have a Spotify track yet.";
+
+        var verb = result.Created ? "Created" : "Updated";
+        var song = result.Added == 1 ? "song" : "songs";
+        return result.AlreadyPresent > 0
+            ? $"{verb} {name} — added {result.Added} {song}, {result.AlreadyPresent} were already there."
+            : $"{verb} {name} — added {result.Added} {song}.";
+    }
+
+    private void Succeed(string text)
+    {
+        Notice = new Notice(text, NoticeKind.Good);
+        Notify();
+    }
+
+    private void Fail(string text)
+    {
+        Notice = new Notice(text, NoticeKind.Bad);
         Notify();
     }
 

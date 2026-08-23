@@ -47,12 +47,22 @@ else if (_showPsnStatus)
                      OnClear="ClearPsnAsync"
                      OnDisconnect="DisconnectPsnAsync" />
 }
-else if (!string.IsNullOrEmpty(State.Error))
+
+@if (State.BusyText is not null)
 {
-    <div class="conn-error" role="alert">
-        <span>@State.Error</span>
+    <div class="conn-toast conn-toast-busy" role="status">
+        <span class="toast-spinner" aria-hidden="true"></span>
+        <span>@State.BusyText</span>
+    </div>
+}
+else if (State.Notice is { } notice && !_showPsnDialog)
+{
+    <div class="conn-toast @(notice.Kind == NoticeKind.Good ? "conn-toast-good" : "conn-toast-bad")"
+         role="@(notice.Kind == NoticeKind.Good ? "status" : "alert")">
+        <span class="toast-mark" aria-hidden="true">@(notice.Kind == NoticeKind.Good ? "✓" : "✕")</span>
+        <span>@notice.Text</span>
         <button type="button" class="conn-error-dismiss" aria-label="Dismiss"
-                @onclick="State.ClearError">✕</button>
+                @onclick="State.ClearNotice">✕</button>
     </div>
 }
 
@@ -124,7 +134,7 @@ else if (!string.IsNullOrEmpty(State.Error))
     private void ClosePsnDialog()
     {
         _showPsnDialog = false;
-        State.ClearError();
+        State.ClearNotice();
     }
 
     private async Task ConnectPsnAsync(string npsso)

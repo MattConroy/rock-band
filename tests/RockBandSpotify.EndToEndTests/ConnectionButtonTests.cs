@@ -92,7 +92,7 @@ public class ConnectionButtonTests : AppPageTest
         await Expect(connect).ToBeEnabledAsync();
 
         await connect.ClickAsync();
-        await Expect(Page.Locator(".conn-error")).ToBeVisibleAsync();
+        await Expect(Page.Locator(".conn-toast-bad")).ToBeVisibleAsync();
         Assert.That(sent, Does.Contain(ValidToken));
         Assert.That(sent, Does.Not.Contain("{\\"));
     }
@@ -228,6 +228,21 @@ public class ConnectionButtonTests : AppPageTest
     }
 
     [Test]
+    public async Task A_success_is_reported_as_well_as_a_failure()
+    {
+        // A sync that adds nothing and one that adds hundreds used to look
+        // identical from the outside — silence either way.
+        await SeedLibrary(4411, 98);
+        await Psn.ClickAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Clear fetched songs" }).ClickAsync();
+
+        await Expect(Page.Locator(".conn-toast-good")).ToContainTextAsync("Cleared the fetched songs");
+        await Page.Locator(".conn-error-dismiss").ClickAsync();
+        await Expect(Page.Locator(".conn-toast-good")).ToHaveCountAsync(0);
+    }
+
+    [Test]
     public async Task Clearing_the_songs_keeps_the_sign_in()
     {
         await SeedLibrary(4411, 98);
@@ -310,10 +325,10 @@ public class ConnectionButtonTests : AppPageTest
         await Page.GetByPlaceholder("npsso value, or the whole line").FillAsync(ValidToken);
         await Page.GetByRole(AriaRole.Button, new() { Name = "Connect", Exact = true }).ClickAsync();
 
-        await Expect(Page.Locator(".conn-error")).ToContainTextAsync("npsso rejected by PlayStation");
+        await Expect(Page.Locator(".conn-toast-bad")).ToContainTextAsync("npsso rejected by PlayStation");
 
         await Page.Locator(".conn-error-dismiss").ClickAsync();
-        await Expect(Page.Locator(".conn-error")).ToHaveCountAsync(0);
+        await Expect(Page.Locator(".conn-toast-bad")).ToHaveCountAsync(0);
     }
 
     [Test]
