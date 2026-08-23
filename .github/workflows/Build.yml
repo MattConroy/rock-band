@@ -25,7 +25,8 @@ jobs:
         run: dotnet restore src/RockBandSpotify/RockBandSpotify.csproj
 
       - name: Build
-        run: dotnet build src/RockBandSpotify/RockBandSpotify.csproj -c Release --no-restore -warnaserror
+        # Warnings are errors via Directory.Build.props, so this matches a local build.
+        run: dotnet build src/RockBandSpotify/RockBandSpotify.csproj -c Release --no-restore
 
   UnitTests:
     name: UnitTests
