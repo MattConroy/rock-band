@@ -192,6 +192,42 @@ public class ConnectionButtonTests : AppPageTest
     }
 
     [Test]
+    public async Task Clearing_the_filters_updates_the_button()
+    {
+        // The page and the header both decided whether the catalogue was
+        // narrowed, and clearing here left owned=1 in the address — so the
+        // dialog offered to undo a filter that was already gone, and its
+        // opposite did nothing.
+        await SeedLibrary(4411, 98);
+        await Psn.ClickAsync();
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" }).ClickAsync();
+        await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
+
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Clear filters" }).ClickAsync();
+        await Expect(Page.GetByText("4953 shown")).ToBeVisibleAsync();
+
+        await Psn.ClickAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" })).ToBeVisibleAsync();
+
+        // And the filter is still reachable rather than stuck.
+        await Page.GetByRole(AriaRole.Button, new() { Name = "Show only songs I own" }).ClickAsync();
+        await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
+    }
+
+    [Test]
+    public async Task The_owned_dropdown_and_the_button_agree()
+    {
+        await SeedLibrary(4411, 98);
+
+        // Narrowing from the page's own dropdown, not the dialog.
+        await Page.GetByLabel("Ownership").SelectOptionAsync("Owned");
+        await Expect(Page.GetByText("2 shown")).ToBeVisibleAsync();
+
+        await Psn.ClickAsync();
+        await Expect(Page.GetByRole(AriaRole.Button, new() { Name = "Show the whole catalogue" })).ToBeVisibleAsync();
+    }
+
+    [Test]
     public async Task Clearing_the_songs_keeps_the_sign_in()
     {
         await SeedLibrary(4411, 98);

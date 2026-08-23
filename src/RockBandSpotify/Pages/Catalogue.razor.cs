@@ -23,6 +23,7 @@ public partial class Catalogue
     private string? OwnedQuery { get; set; }
 
     [Inject] private CatalogueService Catalog { get; set; } = default!;
+    [Inject] private NavigationManager Nav { get; set; } = default!;
     [Inject] private OwnedLibrary Owned { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
@@ -122,7 +123,7 @@ public partial class Catalogue
 
     protected override async Task OnParametersSetAsync()
     {
-        var wanted = OwnedQuery == "1" ? OwnedFilter.Owned : OwnedFilter.Any;
+        var wanted = FilterFor(OwnedQuery);
         if (_all.Count > 0 && wanted != _owned)
         {
             _owned = wanted;
@@ -130,11 +131,30 @@ public partial class Catalogue
         }
     }
 
+    /// <summary>
+    /// The filter has three states, so the address needs three too. Leaving
+    /// "unowned" out of it turned that choice back into "all songs" the moment
+    /// anything re-read the address.
+    /// </summary>
+    private static string? QueryFor(OwnedFilter filter) => filter switch
+    {
+        OwnedFilter.Owned => "1",
+        OwnedFilter.NotOwned => "0",
+        _ => null,
+    };
+
+    private static OwnedFilter FilterFor(string? query) => query switch
+    {
+        "1" => OwnedFilter.Owned,
+        "0" => OwnedFilter.NotOwned,
+        _ => OwnedFilter.Any,
+    };
+
     protected override async Task OnInitializedAsync()
     {
         _all = (await Catalog.GetSongsAsync()).ToList();
         _ownedIds = await Owned.LoadIdsAsync();
-        if (OwnedQuery == "1") _owned = OwnedFilter.Owned;
+        _owned = FilterFor(OwnedQuery);
         _genres = _all.Where(s => !string.IsNullOrEmpty(s.Genre)).Select(s => s.Genre!).Distinct().OrderBy(g => g).ToList();
         // Every source a song lists, not just its origin, so the dropdown can
         // offer a game whose whole tracklist is songs that originated elsewhere.
@@ -210,16 +230,33 @@ public partial class Catalogue
     }
 
     private void OnOwnedChanged(ChangeEventArgs e)
-    {
-        _owned = Enum.TryParse<OwnedFilter>(e.Value?.ToString(), out var v) ? v : OwnedFilter.Any;
-        ApplyFilters();
-    }
+        => SetOwned(Enum.TryParse<OwnedFilter>(e.Value?.ToString(), out var v) ? v : OwnedFilter.Any);
 
     private void ClearFilters()
     {
         _search = ""; _genre = ""; _source = "";
-        _owned = OwnedFilter.Any;
-        ApplyFilters();
+        SetOwned(OwnedFilter.Any);
+    }
+
+    /// <summary>
+    /// Changes the owned filter through the address rather than the field, so
+    /// the header button and this page can't disagree about whether the
+    /// catalogue is narrowed. Clearing the filters here used to leave owned=1
+    /// in the address, which left the button offering to undo a filter that
+    /// was already gone — and its opposite unreachable.
+    /// </summary>
+    private void SetOwned(OwnedFilter wanted)
+    {
+        var uri = Nav.GetUriWithQueryParameter("owned", QueryFor(wanted));
+        if (uri == Nav.Uri)
+        {
+            // Already at that address, so no navigation will arrive to apply it.
+            _owned = wanted;
+            ApplyFilters();
+            return;
+        }
+
+        Nav.NavigateTo(uri);
     }
 
     private void ClearSearch()

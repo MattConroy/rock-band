@@ -475,6 +475,12 @@ public class CatalogueTests : AppPageTest
         await Page.GetByLabel("Ownership").SelectOptionAsync("NotOwned");
         await Expect(Page.GetByText("4951 shown")).ToBeVisibleAsync();
 
+        // All three states live in the address, so none of them is lost when
+        // anything re-reads it.
+        Assert.That(Page.Url, Does.Contain("owned=0"));
+        await Page.ReloadAsync();
+        await Expect(Page.GetByText("4951 shown")).ToBeVisibleAsync(new() { Timeout = 15000 });
+
         // Imagine Dragons have other songs in the catalogue, so the artist is
         // still on screen — it's the owned title that has to be gone.
         await Page.GetByPlaceholder("Search song or artist…").FillAsync("believer");

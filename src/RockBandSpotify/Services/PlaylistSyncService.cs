@@ -31,14 +31,12 @@ public class PlaylistSyncService
             .Distinct()
             .ToList();
 
-        var user = await _api.GetCurrentUserAsync();
-
         var playlist = await _api.FindPlaylistByNameAsync(_config.Name);
         var created = false;
         if (playlist is null)
         {
             playlist = await _api.CreatePlaylistAsync(
-                user.Id, _config.Name, _config.Description, _config.Public);
+                _config.Name, _config.Description, _config.Public);
             created = true;
         }
 
