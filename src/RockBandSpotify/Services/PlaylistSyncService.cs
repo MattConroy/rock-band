@@ -9,8 +9,16 @@ public record SyncResult(
     bool Created);
 
 /// <summary>
-/// Finds-or-creates the target playlist and adds any matched tracks that aren't
-/// already in it (so re-runs are additive, never duplicating).
+/// Finds-or-creates the target playlist and adds any owned song the catalogue
+/// knows a Spotify track for and the playlist doesn't already hold, so re-runs
+/// are additive and never duplicate.
+///
+/// <para>
+/// There is no matching step. The catalogue already records which track a song
+/// is, and a track's URI follows from its id, so resolving an owned song is a
+/// lookup rather than a guess. Songs the catalogue has no id for are simply
+/// left out.
+/// </para>
 /// </summary>
 public class PlaylistSyncService
 {
@@ -23,13 +31,21 @@ public class PlaylistSyncService
         _configuration = configuration;
     }
 
-    public async Task<SyncResult> SyncAsync(IEnumerable<SongMatch> matches)
+    /// <summary>
+    /// The Spotify tracks an owned library resolves to. Songs the catalogue has
+    /// no id for contribute nothing, and a track named by two songs — a disc
+    /// version and its re-recording, say — contributes once.
+    /// </summary>
+    internal static List<string> TrackUris(IEnumerable<CatalogueSong> owned) => owned
+        .Select(song => song.SpotifyId)
+        .Where(id => !string.IsNullOrWhiteSpace(id))
+        .Select(id => $"spotify:track:{id}")
+        .Distinct(StringComparer.Ordinal)
+        .ToList();
+
+    public async Task<SyncResult> SyncAsync(IEnumerable<CatalogueSong> owned)
     {
-        var uris = matches
-            .Where(m => m.IsSyncable)
-            .Select(m => m.Selected!.Uri)
-            .Distinct()
-            .ToList();
+        var uris = TrackUris(owned);
 
         var playlist = await _api.FindPlaylistByNameAsync(_configuration.Name);
         var created = false;

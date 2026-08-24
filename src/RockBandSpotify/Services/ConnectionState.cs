@@ -48,7 +48,6 @@ public class ConnectionState
     private readonly SpotifyAuthenticationService _authentication;
     private readonly SpotifyApiService _api;
     private readonly PlayStationService _playStation;
-    private readonly MatchingService _matcher;
     private readonly PlaylistSyncService _sync;
     private readonly IJSRuntime _javaScript;
     private readonly string _playlistName;
@@ -57,7 +56,6 @@ public class ConnectionState
         SpotifyAuthenticationService authentication,
         SpotifyApiService api,
         PlayStationService playStation,
-        MatchingService matcher,
         PlaylistSyncService sync,
         PlaylistConfig playlist,
         IJSRuntime javaScript)
@@ -66,7 +64,6 @@ public class ConnectionState
         _authentication = authentication;
         _api = api;
         _playStation = playStation;
-        _matcher = matcher;
         _sync = sync;
         _javaScript = javaScript;
     }
@@ -232,7 +229,7 @@ public class ConnectionState
     public async Task SyncSpotifyAsync()
     {
         SpotifyBusy = true;
-        BusyText = "Working out which songs to add…";
+        BusyText = $"Adding songs to {_playlistName}…";
         Notice = null;
         Notify();
         try
@@ -244,11 +241,9 @@ public class ConnectionState
                 return;
             }
 
-            var matches = await _matcher.MatchAllAsync(library.Songs);
-
             BusyText = $"Adding songs to {_playlistName}…";
             Notify();
-            var result = await _sync.SyncAsync(matches);
+            var result = await _sync.SyncAsync(library.Songs);
 
             Playlist = new PlaylistInfo(
                 result.Playlist.WebUrl,

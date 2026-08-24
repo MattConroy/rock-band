@@ -45,11 +45,9 @@ Connecting Spotify or PlayStation needs the setup below.
 3. Put the **Client ID** in `src/RockBandSpotify/wwwroot/appsettings.json`. There
    is no client secret — the app uses PKCE, and the Client ID is safe to commit.
 
-The same section has `SearchForMissingTracks`, off by default. Most songs already
-carry the Spotify track they are, and those are always used. The setting only
-governs the rest: leave it off and they're left out of the playlist; turn it on
-and the app searches Spotify by name for each one, which costs a request per song
-and produces a guess rather than a certainty.
+Songs the catalogue has no Spotify track for are left out of the playlist. The
+app never guesses one by searching — a search match is a guess, and a wrong one
+puts the wrong song in your playlist.
 
 ### Connecting PlayStation
 

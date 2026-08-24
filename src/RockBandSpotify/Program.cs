@@ -30,10 +30,8 @@ builder.Services.AddScoped(sp => new SpotifyAuthenticationService(
     baseAddress));
 
 builder.Services.AddScoped<SpotifyApiService>();
-builder.Services.AddScoped<ITrackLookup>(sp => sp.GetRequiredService<SpotifyApiService>());
 builder.Services.AddScoped<OwnedLibrary>();
 builder.Services.AddScoped<PlayStationService>();
-builder.Services.AddScoped<MatchingService>();
 builder.Services.AddScoped<PlaylistSyncService>();
 builder.Services.AddScoped<CatalogueService>();
 builder.Services.AddScoped<ConnectionState>();
