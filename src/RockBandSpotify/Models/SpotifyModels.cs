@@ -49,45 +49,9 @@ public class StoredToken
 }
 
 
-public class SpotifyTrack
-{
-    [JsonPropertyName("id")]
-    public string Id { get; set; } = "";
 
-    [JsonPropertyName("uri")]
-    public string Uri { get; set; } = "";
-
-    [JsonPropertyName("name")]
-    public string Name { get; set; } = "";
-
-    [JsonPropertyName("artists")]
-    public List<SpotifyArtist> Artists { get; set; } = new();
-
-    [JsonIgnore]
-    public string ArtistNames => string.Join(", ", Artists.Select(a => a.Name));
-}
-
-public class SpotifyArtist
-{
-    [JsonPropertyName("name")]
-    public string Name { get; set; } = "";
-}
-
-
-
-public class SpotifySearchResponse
-{
-    [JsonPropertyName("tracks")]
-    public SpotifyTrackPage? Tracks { get; set; }
-}
 
 /// <summary>GET /v1/tracks — entries are null where an id no longer resolves.</summary>
-
-public class SpotifyTrackPage
-{
-    [JsonPropertyName("items")]
-    public List<SpotifyTrack> Items { get; set; } = new();
-}
 
 public class SpotifyPlaylist
 {

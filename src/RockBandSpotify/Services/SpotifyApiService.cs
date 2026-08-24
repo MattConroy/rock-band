@@ -7,7 +7,7 @@ using RockBandSpotify.Models;
 namespace RockBandSpotify.Services;
 
 /// <summary>Thin wrapper over the Spotify Web API endpoints this app needs.</summary>
-public class SpotifyApiService : ITrackLookup
+public class SpotifyApiService
 {
     private const string ApiBase = "https://api.spotify.com/v1";
 
@@ -99,36 +99,6 @@ public class SpotifyApiService : ITrackLookup
             clone.Content = body;
         return await Task.FromResult(clone);
     }
-
-    /// <summary>Searches tracks by artist + title, returning up to <paramref name="limit"/> candidates.</summary>
-    public async Task<List<SpotifyTrack>> SearchTracksAsync(string title, string artist, int limit = 5)
-    {
-        var q = $"track:{title} artist:{artist}";
-        var url = $"{ApiBase}/search?type=track&limit={Clamp(limit)}&q={Uri.EscapeDataString(q)}";
-        var request = await AuthorizedRequest(HttpMethod.Get, url);
-        var response = await SendAsync(request);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            // Fall back to a looser free-text query if the fielded search finds nothing useful.
-            var loose = $"{ApiBase}/search?type=track&limit={Clamp(limit)}&q={Uri.EscapeDataString($"{title} {artist}")}";
-            var looseReq = await AuthorizedRequest(HttpMethod.Get, loose);
-            response = await SendAsync(looseReq);
-            await EnsureAsync(response, "the track search");
-        }
-
-        var result = await response.Content.ReadFromJsonAsync<SpotifySearchResponse>();
-        return result?.Tracks?.Items ?? new List<SpotifyTrack>();
-    }
-
-    /// <summary>
-    /// Spotify cut search's maximum limit from 50 to 10 in February 2026, and
-    /// asking for more is a 400. Clamped rather than trusted, because the
-    /// caller that eventually wants more candidates shouldn't have to know.
-    /// </summary>
-    internal const int MaxSearchLimit = 10;
-
-    private static int Clamp(int limit) => Math.Clamp(limit, 1, MaxSearchLimit);
 
     /// <summary>Finds a playlist owned by the user by exact (case-insensitive) name.</summary>
     public async Task<SpotifyPlaylist?> FindPlaylistByNameAsync(string name)
